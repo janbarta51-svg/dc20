@@ -588,3 +588,24 @@ html[data-theme="dark"] .details .meta strong,html[data-theme="dark"] .rule-subh
   .spell-print-paragraph.rule-bullet{display:grid!important;grid-template-columns:3mm 1fr!important;gap:0!important}
   .spell-print-paragraph .rule-bullet-mark{font-weight:700!important;color:#2d195f!important}
 }
+
+/* ===== v9 class turn cheat sheet downloads ===== */
+.class-cheat-download{
+  grid-template-columns:58px minmax(0,1fr) 27px;
+  min-height:88px;
+  gap:11px;
+  margin-top:15px;
+  padding:12px;
+  box-shadow:0 6px 15px rgba(47,24,80,.07);
+}
+.class-cheat-download .pdf-download-icon{width:54px;height:54px}
+.class-cheat-download .pdf-download-icon svg{width:39px;height:39px}
+.class-cheat-download .pdf-download-copy strong{font-size:18px}
+.class-cheat-download .pdf-download-copy small{font-size:9px;letter-spacing:.11em}
+.class-cheat-download .pdf-download-arrow{width:25px;height:25px;font-size:14px}
+@media(max-width:1000px){
+  .class-cheat-download{max-width:360px}
+}
+@media(max-width:700px){
+  .class-cheat-download{max-width:none;width:100%}
+}

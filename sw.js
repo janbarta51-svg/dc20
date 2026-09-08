@@ -1,4 +1,4 @@
-const CACHE='gangsterka-dc20-v8';
+const CACHE='gangsterka-dc20-v9';
 const ASSETS=[
   './','./index.html','./manifest.webmanifest',
   './assets/css/styles.css','./assets/js/rules-data.js','./assets/js/app.js',
@@ -7,6 +7,9 @@ const ASSETS=[
   './assets/references/DC20_Cleric_Class_Reference.pdf',
   './assets/references/DC20_Commander_Class_Reference.pdf',
   './assets/references/DC20_Spellblade_Class_Reference.pdf',
+  './assets/references/Cleric_Turn_Cheat_Sheet.pdf',
+  './assets/references/Commander_Turn_Cheat_Sheet.pdf',
+  './assets/references/Spellblade_Turn_Cheat_Sheet.pdf',
   './content/gangcyklopedie.json','./content/postavy.json','./content/kronika.json'
 ];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))));

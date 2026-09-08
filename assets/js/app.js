@@ -523,11 +523,22 @@
   function classAside(cls,c){
     const art = CLASS_ART[cls];
     const buildText = cls==='spellblade' ? t('buildPanelSpellText') : t('buildPanelText');
+    const cheatPaths={
+      cleric:'assets/references/Cleric_Turn_Cheat_Sheet.pdf',
+      commander:'assets/references/Commander_Turn_Cheat_Sheet.pdf',
+      spellblade:'assets/references/Spellblade_Turn_Cheat_Sheet.pdf'
+    };
+    const cheatIcon=`<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M16 5h23l12 12v38a4 4 0 01-4 4H16a4 4 0 01-4-4V9a4 4 0 014-4z"/><path d="M39 5v14h12"/><path d="M22 31h20M22 39h14M22 47h18"/><path d="M18 31h.1M18 39h.1M18 47h.1"/></svg>`;
     return `<aside class="class-aside">
       <section class="aside-art">
         <div class="eyebrow">${esc(t('artLabel'))}</div>
         <img src="${esc(art.img)}" alt="${esc(art.title[lang] || art.title.en)}">
         <div class="aside-copy"><h3>${esc(art.title[lang] || art.title.en)}</h3><p>${esc(art.text[lang] || art.text.en)}</p></div>
+        <a class="pdf-download-card class-cheat-download" href="${esc(cheatPaths[cls])}" download>
+          <span class="pdf-download-icon">${cheatIcon}</span>
+          <span class="pdf-download-copy"><strong>Cheat Sheet</strong><small>${esc(c.name)} · PDF</small></span>
+          <span class="pdf-download-arrow">↓</span>
+        </a>
       </section>
       <section class="side-panel">
         <h4>${esc(t('buildPanelTitle'))}</h4>
