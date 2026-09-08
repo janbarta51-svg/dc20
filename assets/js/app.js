@@ -52,12 +52,12 @@
   // Preserve the rulebook's semantic paragraphs while making its key labels easy to scan.
   const RULE_LABEL_RE = /\b((?:Spell Cast|Check Success|Save Failure|Failure|Success(?:\s*\([^)]+\))?|Critical Success|Critical Failure|Hit|Miss|Trigger|Reaction|Prerequisite|Range|Duration|Damage|Area|Targets?|Distance|Ending [A-Z][A-Za-z’' -]*|[A-Z][A-Za-z0-9’' +/&-]{1,34}(?:\s*\([^)]+\))?):)/g;
   const RULE_START_LABEL_RE = /^(?:Spell Cast|Check Success|Save Failure|Failure|Success(?:\s*\([^)]+\))?|Critical Success|Critical Failure|Hit|Miss|Trigger|Reaction|Prerequisite|Range|Duration|Damage|Area|Targets?|Distance|Ending [A-Z][A-Za-z’' -]*|[A-Z][A-Za-z0-9’' +/&-]{1,34}(?:\s*\([^)]+\))?):/;
-  const RULE_SECTION_RE = /^(?:Spell Enhancements?|Maneuver Enhancements?|Attack Enhancements?)$/i;
+  const RULE_SECTION_RE = /^(?:Spell Enhancements?|Maneuver Enhancements?|Attack Enhancements?|Blessings|Curses|Summoned (?:Celestial|Fiend|Undead)|Base Summon Traits|Managing the Summons|Expanded Summon Traits|Unique Traits)$/i;
   function ruleLabelMarkup(text=''){
     return esc(text).replace(RULE_LABEL_RE,'<strong>$1</strong>');
   }
   function formatRuleBody(body='', mode='web'){
-    const lines=String(body||'').replace(/\r/g,'').split('\n').map(x=>x.trim()).filter(Boolean).filter(x=>! /^(?:THE DUNGEON COACH|EON COACH|DUNGEON COACH)$/i.test(x));
+    const lines=String(body||'').replace(/\r/g,'').split('\n').map(x=>x.trim()).filter(x=>! /^(?:THE DUNGEON COACH|EON COACH|DUNGEON COACH)$/i.test(x));
     const blocks=[];
     let current='', bullet=false;
     const flush=()=>{
@@ -66,13 +66,14 @@
       current='';bullet=false;
     };
     for(const line of lines){
+      if(!line){ flush(); continue; }
       if(RULE_SECTION_RE.test(line)){
         flush();blocks.push({type:'heading',text:line});continue;
       }
       if(line.startsWith('•')){
         flush();bullet=true;current=line.replace(/^•\s*/,'');continue;
       }
-      if(RULE_START_LABEL_RE.test(line) && current){
+      if((RULE_START_LABEL_RE.test(line) || /^\(\d+\)\s+[A-Z].*?:/.test(line)) && current){
         flush();current=line;continue;
       }
       current+=(current?' ':'')+line;
