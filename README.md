@@ -28,3 +28,10 @@ Projekt je připravený pro GitHub Pages a doménu `dc20.honzanacestach.cz` pře
 - Conditions mají vyhledávání a rozbalovací rychlé vysvětlení.
 - Rest Helper připomíná Quick/Short/Long Rest a počítá utracení Rest Points.
 - Interaktivní tučné pojmy a tooltipy se nyní doplňují napříč celým webem, ne jen u class stránek.
+
+
+## v8 — Toolkit + readable rules
+- Conditions and Rest Helper moved from Combat into a separate **Toolkit** tab between Spellblade and Gangcyklopedie.
+- Combat now focuses on resources, **What can I do?**, Held Actions and Reactions.
+- Spell and Maneuver details preserve rulebook-style paragraphs and bold scan labels such as **Cost:**, **Range:**, **School:**, **Duration:**, **Spell Cast:**, **Failure:**, **Success:** and enhancement labels.
+- The same scan-friendly formatting is used in generated spell/maneuver PDFs.

@@ -570,3 +570,21 @@ html[data-theme="dark"] .action-cost,html[data-theme="dark"] .rest-type,html[dat
 .condition-defense-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:18px}.condition-defense-row>div{display:flex;flex-direction:column;gap:4px;padding:11px 12px;border:1px solid var(--line);background:color-mix(in srgb,var(--paper) 78%,transparent)}.condition-defense-row b{color:var(--purple);font-size:15px}.condition-defense-row span{font-size:12px;line-height:1.4;color:var(--muted)}
 html[data-theme="dark"] .condition-defense-row>div{background:rgba(18,26,36,.9)}
 @media(max-width:700px){.condition-defense-row{grid-template-columns:1fr}}
+
+/* v8 — scan-friendly rule text */
+.details .meta strong{color:var(--purple);font-weight:800}
+.details .rules-text{white-space:normal}
+.rule-paragraph{margin:0 0 9px;line-height:1.48}
+.rule-paragraph strong{font-weight:800;color:var(--ink)}
+.rule-subhead{margin:14px 0 7px;color:var(--purple);font-size:14px;font-weight:800;font-variant-caps:small-caps;letter-spacing:.035em;border-bottom:1px solid color-mix(in srgb,var(--gold) 55%,transparent);padding-bottom:3px}
+.rule-bullet{display:grid;grid-template-columns:13px 1fr;gap:3px;margin-left:2px}
+.rule-bullet-mark{font-weight:800;color:var(--purple)}
+.toolkit-reference .hero{margin-bottom:16px}
+.toolkit-reference .condition-grid{margin-bottom:18px}
+html[data-theme="dark"] .details .meta strong,html[data-theme="dark"] .rule-subhead,html[data-theme="dark"] .rule-bullet-mark{color:var(--purple)}
+
+@media print{
+  .spell-print-body strong{font-weight:800!important;color:#211f22!important}
+  .spell-print-paragraph.rule-bullet{display:grid!important;grid-template-columns:3mm 1fr!important;gap:0!important}
+  .spell-print-paragraph .rule-bullet-mark{font-weight:700!important;color:#2d195f!important}
+}

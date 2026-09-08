@@ -48,6 +48,44 @@
   const t = key => UI[lang][key] || UI.en[key] || key;
   const esc = s => String(s ?? '').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
   const prose = s => esc(s).replace(/\n/g,'<br>');
+
+  // Preserve the rulebook's semantic paragraphs while making its key labels easy to scan.
+  const RULE_LABEL_RE = /\b((?:Spell Cast|Check Success|Save Failure|Failure|Success(?:\s*\([^)]+\))?|Critical Success|Critical Failure|Hit|Miss|Trigger|Reaction|Prerequisite|Range|Duration|Damage|Area|Targets?|Distance|Ending [A-Z][A-Za-z’' -]*|[A-Z][A-Za-z0-9’' +/&-]{1,34}(?:\s*\([^)]+\))?):)/g;
+  const RULE_START_LABEL_RE = /^(?:Spell Cast|Check Success|Save Failure|Failure|Success(?:\s*\([^)]+\))?|Critical Success|Critical Failure|Hit|Miss|Trigger|Reaction|Prerequisite|Range|Duration|Damage|Area|Targets?|Distance|Ending [A-Z][A-Za-z’' -]*|[A-Z][A-Za-z0-9’' +/&-]{1,34}(?:\s*\([^)]+\))?):/;
+  const RULE_SECTION_RE = /^(?:Spell Enhancements?|Maneuver Enhancements?|Attack Enhancements?)$/i;
+  function ruleLabelMarkup(text=''){
+    return esc(text).replace(RULE_LABEL_RE,'<strong>$1</strong>');
+  }
+  function formatRuleBody(body='', mode='web'){
+    const lines=String(body||'').replace(/\r/g,'').split('\n').map(x=>x.trim()).filter(Boolean).filter(x=>! /^(?:THE DUNGEON COACH|EON COACH|DUNGEON COACH)$/i.test(x));
+    const blocks=[];
+    let current='', bullet=false;
+    const flush=()=>{
+      if(!current) return;
+      blocks.push({type:bullet?'bullet':'p',text:current.trim()});
+      current='';bullet=false;
+    };
+    for(const line of lines){
+      if(RULE_SECTION_RE.test(line)){
+        flush();blocks.push({type:'heading',text:line});continue;
+      }
+      if(line.startsWith('•')){
+        flush();bullet=true;current=line.replace(/^•\s*/,'');continue;
+      }
+      if(RULE_START_LABEL_RE.test(line) && current){
+        flush();current=line;continue;
+      }
+      current+=(current?' ':'')+line;
+    }
+    flush();
+    const pClass=mode==='print'?'spell-print-paragraph':'rule-paragraph';
+    const hClass=mode==='print'?'spell-print-subhead':'rule-subhead';
+    return blocks.map(b=>{
+      if(b.type==='heading') return `<h4 class="${hClass}">${esc(b.text)}</h4>`;
+      if(b.type==='bullet') return `<p class="${pClass} rule-bullet"><span class="rule-bullet-mark">•</span>${ruleLabelMarkup(b.text)}</p>`;
+      return `<p class="${pClass}">${ruleLabelMarkup(b.text)}</p>`;
+    }).join('');
+  }
   const pick = obj => obj?.[lang] ?? obj?.en ?? obj ?? '';
   const slug = s => String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 
@@ -237,7 +275,7 @@
   function setSelected(key,set){selections[key]=[...set];saveSelections()}
   function classRoute(){
     const h=(location.hash||'#home').slice(1);
-    return ['home','character','combo','combat','cleric','commander','spellblade','gangcyklopedie','postavy','kronika'].includes(h)?h:'home';
+    return ['home','character','combo','combat','cleric','commander','spellblade','toolkit','gangcyklopedie','postavy','kronika'].includes(h)?h:'home';
   }
   function groupBy(arr,keyFn){
     return arr.reduce((acc,item)=>{ const key=keyFn(item); (acc[key] ||= []).push(item); return acc; },{});
@@ -338,10 +376,22 @@
     return `<div class="rest-summary"><div><span class="rest-time">${esc(d.time)}</span><h3>${d.name}</h3></div><p>${esc(lang==='en'?d.en:d.cs)}</p></div>`;
   }
 
-  function bindCombatTools(){
-    $$('.condition-toggle',app).forEach(btn=>btn.addEventListener('click',()=>{const card=btn.closest('.condition-card');const open=card.classList.toggle('open');btn.setAttribute('aria-expanded',open?'true':'false');btn.lastElementChild.textContent=open?'−':'+';}));
-    $('#conditionSearch')?.addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();$$('.condition-card',app).forEach(card=>card.hidden=q&&!card.dataset.condition.includes(q));});
-    $$('.rest-type',app).forEach(btn=>btn.addEventListener('click',()=>{$$('.rest-type',app).forEach(x=>x.classList.toggle('active',x===btn));$('#restSummary').innerHTML=renderRestPanel(btn.dataset.rest);decorateGlossary($('#restSummary'));}));
+  function bindToolkitTools(){
+    $$('.condition-toggle',app).forEach(btn=>btn.addEventListener('click',()=>{
+      const card=btn.closest('.condition-card');
+      const open=card.classList.toggle('open');
+      btn.setAttribute('aria-expanded',open?'true':'false');
+      btn.lastElementChild.textContent=open?'−':'+';
+    }));
+    $('#conditionSearch')?.addEventListener('input',e=>{
+      const q=e.target.value.trim().toLowerCase();
+      $$('.condition-card',app).forEach(card=>card.hidden=q&&!card.dataset.condition.includes(q));
+    });
+    $$('.rest-type',app).forEach(btn=>btn.addEventListener('click',()=>{
+      $$('.rest-type',app).forEach(x=>x.classList.toggle('active',x===btn));
+      $('#restSummary').innerHTML=renderRestPanel(btn.dataset.rest);
+      decorateGlossary($('#restSummary'));
+    }));
     const recalc=()=>{
       const max=Math.max(1,Number($('#restMaxHp')?.value||1));
       const current=Math.min(max,Math.max(0,Number($('#restCurrentHp')?.value||0)));
@@ -350,21 +400,60 @@
       const after=current+spend,left=points-spend;
       if($('#restCalcResult')) $('#restCalcResult').innerHTML=`<strong>${after} / ${max} HP</strong><span>${left} Rest Points ${esc(lang==='en'?'remaining':'zbývá')}</span>`;
     };
-    ['restMaxHp','restCurrentHp','restPoints','restSpend'].forEach(id=>$('#'+id)?.addEventListener('input',recalc));recalc();
+    ['restMaxHp','restCurrentHp','restPoints','restSpend'].forEach(id=>$('#'+id)?.addEventListener('input',recalc));
+    recalc();
+    $$('.toolkit-jumps button',app).forEach(btn=>btn.addEventListener('click',()=>document.getElementById(btn.dataset.jump)?.scrollIntoView({behavior:'smooth',block:'start'})));
   }
 
   function renderCombat(){
-    const d=R.core.combat;
-    const intro=lang==='en'?'A table-focused combat reference: what you can spend, what you can do, what conditions mean, and how resting restores you.':'Bojová reference zaměřená na hraní u stolu: co můžeš utratit, co můžeš udělat, co znamenají Conditions a jak funguje odpočinek.';
-    app.innerHTML=`<article class="standard-reference combat-reference">${hero(lang==='en'?'Combat':'Combat',intro,'COMBAT')}
-      <nav class="combat-jumps"><button data-jump="combat-resources">${esc(lang==='en'?'Resources':'Zdroje')}</button><button data-jump="combat-actions">${esc(lang==='en'?'What can I do?':'Co můžu udělat?')}</button><button data-jump="combat-conditions">Conditions</button><button data-jump="combat-rest">Rest Helper</button></nav>
-      <section id="combat-resources" class="combat-section"><div class="section-head"><h2>${esc(lang==='en'?'Your turn at a glance':'Tah v kostce')}</h2></div><div class="resource-strip"><article><b>4 AP</b><span>${esc(lang==='en'?'Actions + Reactions':'Actions + Reactions')}</span></article><article><b>MP</b><span>${esc(lang==='en'?'Spell resource • Long Rest':'Zdroj pro spelly • Long Rest')}</span></article><article><b>SP</b><span>${esc(lang==='en'?'Martial resource • Combat / Short Rest':'Martial zdroj • Combat / Short Rest')}</span></article><article><b>Grit</b><span>${esc(lang==='en'?'2 + Charisma • defense / Saves':'2 + Charisma • obrana / Saves')}</span></article></div><div class="combat-reminder"><strong>${esc(lang==='en'?'AP reminder':'Připomínka AP')}</strong><p>${esc(lang==='en'?'Reactions spend the same AP pool you use on your turn. If you spend AP before your next turn, you start that turn with fewer AP until they refresh at the end of the turn.':'Reactions utrácí stejný pool AP jako tvůj tah. Když AP utratíš před svým dalším tahem, začneš tento tah s menším počtem AP; obnoví se až na konci tahu.')}</p></div></section>
-      <section id="combat-actions" class="combat-section"><div class="section-head"><h2>${esc(lang==='en'?'What can I do?':'Co můžu udělat?')}</h2><p>${esc(lang==='en'?'Most of these cost 1 AP.':'Většina stojí 1 AP.')}</p></div><div class="minor-action-banner"><strong>Minor Action</strong><span>${esc(lang==='en'?'Up to 2 simple tasks once per turn for free; pay 1 AP for another Minor Action later in the same turn.':'Až 2 jednoduché úkony jednou za tah zdarma; další Minor Action v témže tahu stojí 1 AP.')}</span></div>${actionExplorer()}<section class="advanced-actions"><h3>${esc(lang==='en'?'Advanced timing':'Pokročilé načasování')}</h3><div class="grid two"><article class="card"><h4>Held Action</h4><p>${esc(lang==='en'?'Pay the AP now, declare exactly what Action you are holding and an observable Trigger. If the Trigger happens before your next turn, the Action happens as a Reaction.':'AP zaplať hned, přesně urč Action a pozorovatelný Trigger. Pokud Trigger nastane před dalším tahem, Action proběhne jako Reaction.')}</p></article><article class="card"><h4>Reactions</h4><p>${esc(lang==='en'?'You can react on another creature’s turn if the prerequisite and trigger are met. You may take multiple Reactions if different triggers occur and you can afford the resources.':'Můžeš reagovat v tahu jiné bytosti, pokud splníš prerequisite a trigger. Můžeš provést více Reactions, pokud nastanou různé triggery a máš dost zdrojů.')}</p></article></div></section></section>
-      <section id="combat-conditions" class="combat-section"><div class="section-head"><h2>Conditions</h2><p>${esc(lang==='en'?'Click a condition for a quick table explanation.':'Klikni na Condition pro rychlé vysvětlení.')}</p></div><div class="condition-toolbar"><input id="conditionSearch" type="search" placeholder="${esc(lang==='en'?'Search conditions…':'Hledat Conditions…')}"><span>${CONDITIONS.length}</span></div><div class="condition-grid">${conditionCards()}</div><div class="condition-defense-row"><div><b>${esc(lang==='en'?'Resistance':'Resistance')}</b><span>${esc(lang==='en'?'ADV on Checks and Saves against that Condition.':'ADV na Checks a Saves proti této Condition.')}</span></div><div><b>${esc(lang==='en'?'Immunity':'Immunity')}</b><span>${esc(lang==='en'?'You cannot be subjected to that Condition.':'Této Condition nemůžeš být vystaven.')}</span></div><div><b>${esc(lang==='en'?'Vulnerability':'Vulnerability')}</b><span>${esc(lang==='en'?'DisADV on Checks and Saves against that Condition.':'DisADV na Checks a Saves proti této Condition.')}</span></div></div><div class="condition-stack-note"><strong>${esc(lang==='en'?'Stacking rule':'Pravidlo stackování')}</strong><p>${esc(lang==='en'?'Conditions with an X value stack by adding their X values. Some conditions only overlap instead of becoming stronger, and several conditions do not stack at all.':'Conditions s hodnotou X se stackují sčítáním hodnot X. Některé Conditions se pouze překrývají místo zesilování a některé se nestackují vůbec.')}</p></div></section>
-      <section id="combat-rest" class="combat-section"><div class="section-head"><h2>Rest Helper</h2><p>${esc(lang==='en'?'Quick reminder + Rest Point calculator':'Rychlá připomínka + kalkulačka Rest Points')}</p></div><div class="rest-helper"><div class="rest-tabs"><button class="rest-type active" data-rest="quick">Quick Rest</button><button class="rest-type" data-rest="short">Short Rest</button><button class="rest-type" data-rest="long">Long Rest</button></div><div id="restSummary">${renderRestPanel('quick')}</div><div class="rest-calculator"><label><span>Max HP</span><input id="restMaxHp" type="number" min="1" value="8"></label><label><span>${esc(lang==='en'?'Current HP':'Aktuální HP')}</span><input id="restCurrentHp" type="number" min="0" value="4"></label><label><span>Rest Points</span><input id="restPoints" type="number" min="0" value="8"></label><label><span>${esc(lang==='en'?'Spend':'Utratit')}</span><input id="restSpend" type="number" min="0" value="2"></label><div id="restCalcResult" class="rest-result"></div></div></div></section>
+    const intro=lang==='en'
+      ? 'A fast table reference for your turn: resources, actions, reactions, and the choices that matter most in combat.'
+      : 'Rychlá reference pro tah u stolu: zdroje, actions, reactions a nejdůležitější možnosti v boji.';
+    app.innerHTML=`<article class="standard-reference combat-reference">${hero('Combat',intro,'COMBAT')}
+      <nav class="combat-jumps"><button data-jump="combat-resources">${esc(lang==='en'?'Resources':'Zdroje')}</button><button data-jump="combat-actions">${esc(lang==='en'?'What can I do?':'Co můžu udělat?')}</button></nav>
+      <section id="combat-resources" class="combat-section">
+        <div class="section-head"><h2>${esc(lang==='en'?'Your turn at a glance':'Tah v kostce')}</h2><p>${esc(lang==='en'?'The four things to check before acting.':'Čtyři věci, které zkontroluj před akcí.')}</p></div>
+        <div class="resource-strip">
+          <article><b>4 AP</b><span>${esc(lang==='en'?'Actions + Reactions':'Actions + Reactions')}</span></article>
+          <article><b>MP</b><span>${esc(lang==='en'?'Spell resource • refreshes on Long Rest':'Zdroj pro spelly • obnovuje Long Rest')}</span></article>
+          <article><b>SP</b><span>${esc(lang==='en'?'Martial resource • refreshes after Combat / Short Rest':'Martial zdroj • obnovuje se po Combat / Short Rest')}</span></article>
+          <article><b>Grit</b><span>${esc(lang==='en'?'2 + Charisma • reduce damage / boost Saves':'2 + Charisma • snížení damage / posílení Saves')}</span></article>
+        </div>
+        <div class="combat-reminder"><strong>${esc(lang==='en'?'AP is one shared pool':'AP jsou jeden společný pool')}</strong><p>${esc(lang==='en'?'Actions and Reactions use the same AP. AP spent on somebody else’s turn is AP you will not have on your next turn until your turn ends and the pool refreshes.':'Actions i Reactions používají stejná AP. AP utracené v cizím tahu ti budou v příštím tahu chybět, dokud tah neskončí a pool se neobnoví.')}</p></div>
+      </section>
+      <section id="combat-actions" class="combat-section">
+        <div class="section-head"><h2>${esc(lang==='en'?'What can I do?':'Co můžu udělat?')}</h2><p>${esc(lang==='en'?'Most basic choices cost 1 AP.':'Většina základních možností stojí 1 AP.')}</p></div>
+        <div class="minor-action-banner"><strong>Minor Action</strong><span>${esc(lang==='en'?'Up to 2 simple tasks on your turn for free. Another Minor Action later in the same turn costs 1 AP.':'Až 2 jednoduché úkony v tahu zdarma. Další Minor Action v témže tahu stojí 1 AP.')}</span></div>
+        ${actionExplorer()}
+        <section class="advanced-actions"><h3>${esc(lang==='en'?'Timing that matters':'Načasování, které je dobré znát')}</h3><div class="grid two">
+          <article class="card"><h4>Held Action</h4><p>${esc(lang==='en'?'Pay the AP now, name the exact Action and an observable Trigger. If the Trigger happens before your next turn, the held Action happens as a Reaction.':'AP zaplať hned, urč přesnou Action a pozorovatelný Trigger. Pokud Trigger nastane před dalším tahem, držená Action proběhne jako Reaction.')}</p></article>
+          <article class="card"><h4>Reactions</h4><p>${esc(lang==='en'?'A Reaction happens on another creature’s turn when its Trigger is met. Different Triggers can allow multiple Reactions, but every Reaction still costs its listed resources.':'Reaction probíhá v tahu jiné bytosti, když nastane její Trigger. Různé Triggery mohou umožnit více Reactions, ale každá pořád stojí uvedené zdroje.')}</p></article>
+        </div></section>
+      </section>
     </article>`;
-    bindCombatTools();
     $$('.combat-jumps button',app).forEach(btn=>btn.addEventListener('click',()=>document.getElementById(btn.dataset.jump)?.scrollIntoView({behavior:'smooth',block:'start'})));
+  }
+
+  function renderToolkit(){
+    const title=lang==='en'?'Toolkit':'Toolkit';
+    const intro=lang==='en'
+      ? 'Useful table tools that do not belong to one class: Conditions and a quick Rest helper.'
+      : 'Užitečné pomůcky ke hře, které nepatří k jedné classe: Conditions a rychlý Rest helper.';
+    app.innerHTML=`<article class="standard-reference toolkit-reference">${hero(title,intro,'USEFUL')}
+      <nav class="combat-jumps toolkit-jumps"><button data-jump="toolkit-conditions">Conditions</button><button data-jump="toolkit-rest">Rest Helper</button></nav>
+      <section id="toolkit-conditions" class="combat-section">
+        <div class="section-head"><h2>Conditions</h2><p>${esc(lang==='en'?'Search or click a Condition for a quick table explanation.':'Hledej nebo klikni na Condition pro rychlé vysvětlení.')}</p></div>
+        <div class="condition-toolbar"><input id="conditionSearch" type="search" placeholder="${esc(lang==='en'?'Search conditions…':'Hledat Conditions…')}"><span>${CONDITIONS.length}</span></div>
+        <div class="condition-grid">${conditionCards()}</div>
+        <div class="condition-defense-row"><div><b>Resistance</b><span>${esc(lang==='en'?'ADV on Checks and Saves against that Condition.':'ADV na Checks a Saves proti této Condition.')}</span></div><div><b>Immunity</b><span>${esc(lang==='en'?'You cannot be subjected to that Condition.':'Této Condition nemůžeš být vystaven.')}</span></div><div><b>Vulnerability</b><span>${esc(lang==='en'?'DisADV on Checks and Saves against that Condition.':'DisADV na Checks a Saves proti této Condition.')}</span></div></div>
+        <div class="condition-stack-note"><strong>${esc(lang==='en'?'Stacking rule':'Pravidlo stackování')}</strong><p>${esc(lang==='en'?'Conditions with an X value stack by adding their X values. Some Conditions overlap instead of becoming stronger, and several Conditions do not stack at all.':'Conditions s hodnotou X se stackují sčítáním X. Některé Conditions se pouze překrývají místo zesilování a některé se nestackují vůbec.')}</p></div>
+      </section>
+      <section id="toolkit-rest" class="combat-section">
+        <div class="section-head"><h2>Rest Helper</h2><p>${esc(lang==='en'?'Quick / Short / Long Rest reminder and Rest Point calculator.':'Připomínka Quick / Short / Long Rest a kalkulačka Rest Points.')}</p></div>
+        <div class="rest-helper"><div class="rest-tabs"><button class="rest-type active" data-rest="quick">Quick Rest</button><button class="rest-type" data-rest="short">Short Rest</button><button class="rest-type" data-rest="long">Long Rest</button></div><div id="restSummary">${renderRestPanel('quick')}</div><div class="rest-calculator"><label><span>Max HP</span><input id="restMaxHp" type="number" min="1" value="8"></label><label><span>${esc(lang==='en'?'Current HP':'Aktuální HP')}</span><input id="restCurrentHp" type="number" min="0" value="4"></label><label><span>Rest Points</span><input id="restPoints" type="number" min="0" value="8"></label><label><span>${esc(lang==='en'?'Spend':'Utratit')}</span><input id="restSpend" type="number" min="0" value="2"></label><div id="restCalcResult" class="rest-result"></div></div></div>
+      </section>
+    </article>`;
+    bindToolkitTools();
   }
 
   function statsTable(c){
@@ -494,7 +583,9 @@
   }
   function choiceRow(cls,x,type,checked){
     const csSummary=type==='spell'?spellSummaryCs(x):maneuverSummaryCs(x);
-    return `<div class="choice-wrap" data-name="${esc(x.name.toLowerCase())}" data-school="${esc(type==='spell'?x.school:x.category)}"><div class="choice-row"><input type="checkbox" class="choice-check" data-class="${esc(cls)}" data-id="${esc(x.id)}" ${checked?'checked':''}><span class="name detail-toggle">${esc(x.name)}</span><span class="cost">${esc(x.cost)}</span></div><div class="details"><div class="meta"><span>${t('cost')}: ${esc(x.cost)}</span><span>${t('range')}: ${esc(x.range)}</span>${type==='spell'?`<span>${t('school')}: ${esc(x.school)}</span><span>${t('duration')}: ${esc(x.duration)}</span>`:''}</div>${lang==='cs'?`<p class="cs-summary"><strong>Česky stručně:</strong> ${esc(csSummary)}</p><details><summary>${esc(t('original'))}</summary><div class="rules-text">${prose(x.body_en)}</div></details>`:`<div class="rules-text">${prose(x.body_en)}</div>`}</div></div>`;
+    const meta=`<span><strong>${esc(t('cost'))}:</strong> ${esc(x.cost)}</span><span><strong>${esc(t('range'))}:</strong> ${esc(x.range)}</span>${type==='spell'?`<span><strong>${esc(t('school'))}:</strong> ${esc(x.school)}</span><span><strong>${esc(t('duration'))}:</strong> ${esc(x.duration)}</span>`:''}`;
+    const body=formatRuleBody(x.body_en,'web');
+    return `<div class="choice-wrap" data-name="${esc(x.name.toLowerCase())}" data-school="${esc(type==='spell'?x.school:x.category)}"><div class="choice-row"><input type="checkbox" class="choice-check" data-class="${esc(cls)}" data-id="${esc(x.id)}" ${checked?'checked':''}><span class="name detail-toggle">${esc(x.name)}</span><span class="cost">${esc(x.cost)}</span></div><div class="details"><div class="meta">${meta}</div>${lang==='cs'?`<p class="cs-summary"><strong>Česky stručně:</strong> ${esc(csSummary)}</p><details><summary>${esc(t('original'))}</summary><div class="rules-text">${body}</div></details>`:`<div class="rules-text">${body}</div>`}</div></div>`;
   }
   function selectionFooter(cls,count=selectedSet(cls).size){
     return `<div class="selection-footer"><b><span class="selection-count">${count}</span> ${esc(t('selected'))}</b><div><button class="button secondary clear-selection" data-class="${esc(cls)}">${esc(t('clear'))}</button> <button class="button generate-selector" data-class="${esc(cls)}">${esc(t('generate'))}</button></div></div>`;
@@ -630,24 +721,7 @@
     return selected;
   }
   function formatPrintRules(body=''){
-    let text=String(body||'').replace(/\r/g,'').replace(/\n+/g,' ').replace(/\s+/g,' ').trim();
-    text=text
-      .replace(/\s+(Spell Enhancements?)\s+/g,'\n$1\n')
-      .replace(/\s+•\s*/g,'\n• ')
-      .replace(/\s+(?=(?:DC Tip|Beta Note|Example(?: \d+)?|[A-Z][A-Za-z0-9’' -]{1,34}(?: \([^)]+\))?):\s)/g,'\n');
-    return text.split('\n').map(x=>x.trim()).filter(Boolean).map(part=>{
-      if(/^Spell Enhancements?$/.test(part)) return `<h3 class="spell-print-subhead">${esc(part)}</h3>`;
-      const bullet=part.startsWith('• ');
-      const raw=bullet?part.slice(2):part;
-      const label=raw.match(/^([A-Z][A-Za-z0-9’' -]{1,42}(?: \([^)]+\))?:)\s*/);
-      let html;
-      if(label){
-        html=`<strong><em>${esc(label[1])}</em></strong> ${esc(raw.slice(label[0].length))}`;
-      }else{
-        html=esc(raw);
-      }
-      return `<p class="spell-print-paragraph">${bullet?'<span class="spell-print-bullet">•</span> ':''}${html}</p>`;
-    }).join('');
+    return formatRuleBody(body,'print');
   }
   function printRuleCard(x){
     if(x.school){
@@ -811,6 +885,7 @@
     else if(route==='combo') renderCombo();
     else if(route==='combat') renderCombat();
     else if(['cleric','commander','spellblade'].includes(route)) renderClass(route);
+    else if(route==='toolkit') renderToolkit();
     else if(route==='gangcyklopedie') renderGang();
     else if(route==='postavy') renderCharacters();
     else renderChronicle();
