@@ -1,0 +1,22 @@
+{
+  "name": "Gangsterka — DC20 Field Guide",
+  "short_name": "Gangsterka",
+  "start_url": "./index.html#home",
+  "display": "standalone",
+  "background_color": "#f4f0e9",
+  "theme_color": "#2a1756",
+  "icons": [
+    {
+      "src": "assets/icons/gangsterka-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icons/gangsterka-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

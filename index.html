@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#27124f">
+  <meta name="description" content="Offline DC20 table reference for character creation, combat, classes and campaign notes.">
+  <title>Gangsterka — DC20 Field Guide</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icons/gangsterka-192.png" type="image/png">
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+  <div id="splash" class="splash-screen" aria-hidden="true">
+    <div class="splash-inner">
+      <img src="assets/media/dc20-logo.webp" alt="">
+      <div class="splash-name">Gangsterka</div>
+      <small>FIELD GUIDE</small>
+    </div>
+  </div>
+
+  <header class="site-header" id="siteHeader">
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+
+    <nav class="nav-cluster nav-left" aria-label="Primary navigation left">
+      <a href="#character" data-route="character">Character Creation</a>
+      <a href="#combo" data-route="combo">Combo</a>
+      <a href="#combat" data-route="combat">Combat</a>
+      <a href="#cleric" data-route="cleric">Cleric</a>
+      <a href="#commander" data-route="commander">Commander</a>
+    </nav>
+
+    <a class="brand-center" href="#home" data-route="home" aria-label="Gangsterka home">
+      <img src="assets/media/dc20-logo.webp" alt="DC20">
+      <span>Gangsterka</span>
+    </a>
+
+    <nav class="nav-cluster nav-right" aria-label="Primary navigation right">
+      <a href="#spellblade" data-route="spellblade">Spellblade</a>
+      <a href="#gangcyklopedie" data-route="gangcyklopedie">Gangcyklopedie</a>
+      <a href="#postavy" data-route="postavy">Postavy</a>
+      <a href="#kronika" data-route="kronika">Kronika</a>
+    </nav>
+
+    <div class="header-tools">
+      <button class="tool-button" id="langToggle" type="button" title="Change language">EN</button>
+      <button class="tool-button" id="themeToggle" type="button" title="Change theme">☀</button>
+    </div>
+  </header>
+
+  <main id="app" class="app-shell" tabindex="-1"></main>
+
+  <button id="toTop" class="to-top" type="button" aria-label="Back to top">↑</button>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="printSheet" class="print-sheet" aria-hidden="true"></div>
+
+  <script src="assets/js/rules-data.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
