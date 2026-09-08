@@ -1,4 +1,4 @@
-const CACHE='gangsterka-dc20-final';
+const CACHE='gangsterka-dc20-final-fixed-spells';
 const ASSETS=[
   './','./index.html','./manifest.webmanifest',
   './assets/css/styles.css','./assets/js/rules-data.js','./assets/js/app.js',

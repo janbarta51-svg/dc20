@@ -609,3 +609,62 @@ html[data-theme="dark"] .details .meta strong,html[data-theme="dark"] .rule-subh
 @media(max-width:700px){
   .class-cheat-download{max-width:none;width:100%}
 }
+
+/* Final spell readability fixes: keep rulebook bullets and summon stats intact */
+.rule-bullet{
+  display:grid;
+  grid-template-columns:13px minmax(0,1fr);
+  gap:5px;
+  align-items:start;
+  width:100%;
+}
+.rule-bullet-content{
+  min-width:0;
+  display:block;
+  line-height:1.48;
+  overflow-wrap:normal;
+  word-break:normal;
+}
+.summon-statbar{
+  display:flex;
+  flex-wrap:wrap;
+  gap:4px 13px;
+  margin:3px 0 10px;
+  padding:7px 9px;
+  border-top:1px solid color-mix(in srgb,var(--gold) 55%,var(--line));
+  border-bottom:1px solid color-mix(in srgb,var(--gold) 55%,var(--line));
+  background:color-mix(in srgb,var(--gold) 4%,transparent);
+  font-size:12px;
+  line-height:1.35;
+}
+.summon-statbar > span{white-space:nowrap;min-width:0}
+@media(max-width:700px){
+  .summon-statbar{gap:4px 10px;font-size:11.5px}
+}
+@media print{
+  .spell-print-paragraph.rule-bullet{
+    display:grid!important;
+    grid-template-columns:3mm minmax(0,1fr)!important;
+    gap:1mm!important;
+    width:100%!important;
+  }
+  .spell-print-paragraph.rule-bullet .rule-bullet-content{
+    display:block!important;
+    min-width:0!important;
+    line-height:1.28!important;
+  }
+  .summon-statbar{
+    display:flex!important;
+    flex-wrap:wrap!important;
+    gap:1mm 3mm!important;
+    margin:1mm 0 2mm!important;
+    padding:1.4mm 1.8mm!important;
+    border-top:.5pt solid #b29443!important;
+    border-bottom:.5pt solid #b29443!important;
+    background:#f7f2e7!important;
+    font-size:7.8pt!important;
+    line-height:1.2!important;
+    break-inside:avoid!important;
+  }
+  .summon-statbar > span{white-space:nowrap!important}
+}

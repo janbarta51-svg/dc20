@@ -70,6 +70,9 @@
       if(RULE_SECTION_RE.test(line)){
         flush();blocks.push({type:'heading',text:line});continue;
       }
+      if(/^HP\s+\d+\s*•\s*AP\b/i.test(line)){
+        flush();blocks.push({type:'stat',text:line});continue;
+      }
       if(line.startsWith('•')){
         flush();bullet=true;current=line.replace(/^•\s*/,'');continue;
       }
@@ -83,7 +86,11 @@
     const hClass=mode==='print'?'spell-print-subhead':'rule-subhead';
     return blocks.map(b=>{
       if(b.type==='heading') return `<h4 class="${hClass}">${esc(b.text)}</h4>`;
-      if(b.type==='bullet') return `<p class="${pClass} rule-bullet"><span class="rule-bullet-mark">•</span>${ruleLabelMarkup(b.text)}</p>`;
+      if(b.type==='stat'){
+        const stats=b.text.split(/\s*•\s*/).filter(Boolean);
+        return `<div class="summon-statbar">${stats.map(x=>`<span>${ruleLabelMarkup(x)}</span>`).join('')}</div>`;
+      }
+      if(b.type==='bullet') return `<div class="${pClass} rule-bullet"><span class="rule-bullet-mark">•</span><span class="rule-bullet-content">${ruleLabelMarkup(b.text)}</span></div>`;
       return `<p class="${pClass}">${ruleLabelMarkup(b.text)}</p>`;
     }).join('');
   }
