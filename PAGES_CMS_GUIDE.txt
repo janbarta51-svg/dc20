@@ -11,15 +11,20 @@ GANGY
 - Logo / ikonka (volitelné)
 - Popis
 
+POSTAVY
+- Jméno
+- Popis
+- Obrázek (volitelný)
+
 KRONIKA
 - Název
 - Den
 - Popis co se stalo
 
-TIP PRO POPIS GANGU
--------------------
+TIP PRO DELŠÍ POPISY
+--------------------
 V editoru můžeš psát normálně jako ve Wordu.
-Odstavce děl Enterem a odrážky tlačítkem seznamu.
+Odstavce dělej Enterem a odrážky tlačítkem seznamu.
 Když používáš Source/Markdown mód, funguje například:
 
 ## Jak vydělávají
@@ -30,4 +35,5 @@ Když používáš Source/Markdown mód, funguje například:
 - První tradice
 - Druhá tradice
 
-Logo se automaticky uloží do assets/uploads/.
+Loga gangů a obrázky postav se automaticky ukládají do assets/uploads/.
+Po uložení změn vytvoří Pages CMS commit do GitHubu a GitHub Pages nasadí novou verzi webu.
