@@ -1,4 +1,4 @@
-const CACHE='gangsterka-dc20-final-fixed-spells';
+const CACHE='gangsterka-dc20-final-pagescms';
 const ASSETS=[
   './','./index.html','./manifest.webmanifest',
   './assets/css/styles.css','./assets/js/rules-data.js','./assets/js/app.js',
@@ -15,6 +15,22 @@ const ASSETS=[
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))));
 self.addEventListener('fetch',e=>{
+  const url=new URL(e.request.url);
+  const isCmsJson=url.pathname.endsWith('/content/gangcyklopedie.json') || url.pathname.endsWith('/content/kronika.json') || url.pathname.endsWith('/content/postavy.json');
+
+  // CMS content is network-first so edits made in Pages CMS appear immediately.
+  if(isCmsJson){
+    e.respondWith(
+      fetch(e.request,{cache:'no-store'}).then(res=>{
+        const clone=res.clone();
+        caches.open(CACHE).then(c=>c.put(e.request,clone));
+        return res;
+      }).catch(()=>caches.match(e.request))
+    );
+    return;
+  }
+
+  // Static app files stay cache-first for offline use.
   e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{
     const clone=res.clone();
     caches.open(CACHE).then(c=>c.put(e.request,clone));

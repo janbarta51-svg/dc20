@@ -1,0 +1,81 @@
+media:
+  input: assets/uploads
+  output: /assets/uploads
+  rename: safe
+  categories: [image]
+
+content:
+  - name: gangs
+    label: Gangy
+    type: file
+    path: content/gangcyklopedie.json
+    format: json
+    fields:
+      - name: gangs
+        label: Seznam gangů
+        type: object
+        list:
+          collapsible:
+            collapsed: true
+            summary: "{title}"
+        fields:
+          - name: title
+            label: Název gangu
+            type: string
+            required: true
+            description: Název, který se zobrazí v Gangcyklopedii.
+
+          - name: logo
+            label: Logo / ikonka
+            type: image
+            description: Volitelné. Když logo nenahraješ, zobrazí se pouze text.
+            options:
+              categories: [image]
+              extensions: [png, jpg, jpeg, webp, svg]
+              rename: safe
+
+          - name: description
+            label: Popis
+            type: rich-text
+            required: true
+            description: Piš normálně jako ve Wordu. Enter vytvoří odstavec; odrážky můžeš udělat tlačítkem v editoru nebo řádky začínajícími pomlčkou.
+            options:
+              format: markdown
+              switcher: true
+              media: false
+
+  - name: chronicle
+    label: Kronika
+    type: file
+    path: content/kronika.json
+    format: json
+    fields:
+      - name: sessions
+        label: Sessiony
+        type: object
+        list:
+          collapsible:
+            collapsed: true
+            summary: "{title} — {day}"
+        fields:
+          - name: title
+            label: Název
+            type: string
+            required: true
+            description: Název session / kapitoly kroniky.
+
+          - name: day
+            label: Den
+            type: string
+            required: true
+            description: Např. Den 1, Session 4 nebo 8. 9. 2026.
+
+          - name: description
+            label: Popis co se stalo
+            type: rich-text
+            required: true
+            description: Hlavní zápis session. Editor podporuje odstavce, nadpisy i odrážky.
+            options:
+              format: markdown
+              switcher: true
+              media: false

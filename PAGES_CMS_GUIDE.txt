@@ -1,0 +1,33 @@
+PAGES CMS — RYCHLÉ POUŽITÍ
+===========================
+
+1) Otevři app.pagescms.org a přihlas se přes GitHub.
+2) Povol Pages CMS pro repository dc20.
+3) Vyber branch main.
+4) V menu uvidíš:
+
+GANGY
+- Název gangu
+- Logo / ikonka (volitelné)
+- Popis
+
+KRONIKA
+- Název
+- Den
+- Popis co se stalo
+
+TIP PRO POPIS GANGU
+-------------------
+V editoru můžeš psát normálně jako ve Wordu.
+Odstavce děl Enterem a odrážky tlačítkem seznamu.
+Když používáš Source/Markdown mód, funguje například:
+
+## Jak vydělávají
+- Prémiová medovina
+- Levné víno
+
+## Tradice
+- První tradice
+- Druhá tradice
+
+Logo se automaticky uloží do assets/uploads/.

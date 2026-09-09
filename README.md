@@ -1,37 +1,38 @@
 # Gangsterka
 
-Offline-first herní reference a kampaňový web.
+Offline-first herní reference a kampaňový web pro `dc20.honzanacestach.cz`.
 
 ## Lokální otevření
 Rozbal složku a otevři `index.html` v prohlížeči.
 
-## Obsah přes Pages CMS
-Soubor `.pages.yml` připravuje tři přehledné editory:
+## Pages CMS
+Konfigurace je v `.pages.yml` v kořeni projektu a obsahuje dvě samostatné části:
 
-- **Gangcyklopedie** — Jméno gangu, volitelná ikonka, informace.
-- **Postavy** — Jméno postavy, volitelný obrázek, popis.
-- **Kronika** — Jméno session, datum, text kroniky.
+### Gangy
+- **Název gangu**
+- **Logo / ikonka** — volitelné
+- **Popis** — rich-text/Markdown editor
 
-Nahrané obrázky se ukládají do `assets/uploads/`.
+Každý gang je v CMS sbalený pod svým názvem. Popis může obsahovat normální odstavce, nadpisy a odrážky. Web navíc umí při vykreslení rozpoznat řádky začínající `-`, `*`, `•`, `–`, `—`, `➢` nebo `❖` jako seznam.
+
+### Kronika
+- **Název**
+- **Den**
+- **Popis co se stalo** — rich-text/Markdown editor
+
+Každá session je v CMS sbalená jako `Název — Den`.
+
+### Obrázky
+Nahraná loga gangů se ukládají do `assets/uploads/`.
+
+### Zapnutí Pages CMS
+1. Otevři `https://app.pagescms.org/` a přihlas se přes GitHub.
+2. Nainstaluj / povol Pages CMS GitHub App pro repository s webem.
+3. Vyber repository `dc20` a větev `main`.
+4. Pages CMS načte `.pages.yml` automaticky.
+5. V levém menu uvidíš **Gangy** a **Kronika**.
+
+Po uložení Pages CMS vytvoří commit do GitHubu. CMS JSON soubory web načítá network-first, takže nová verze se při online použití neblokuje starou offline cache.
 
 ## Nasazení
 Projekt je připravený pro GitHub Pages a doménu `dc20.honzanacestach.cz` přes soubor `CNAME`.
-
-## v6 — learning tooltips + PDF library
-- Úvodní stránka obsahuje tři původní class reference PDF soubory ke stažení.
-- Class stránky mají interaktivní vysvětlivky základních pojmů (hover na PC, tap na mobilu).
-- Tlačítko u spellů/maneuverů tiskne pouze vybrané položky ve zjednodušeném rulebook layoutu.
-
-## v7 — Combat learning tools
-- Nová záložka **Combo** mezi Character Creation a Combat vysvětluje Combo Maneuvers, Combo Spellcasting a Spell Duel.
-- Combat stránka je přestavěná na přehled zdrojů, **What can I do?**, Conditions a Rest Helper.
-- Conditions mají vyhledávání a rozbalovací rychlé vysvětlení.
-- Rest Helper připomíná Quick/Short/Long Rest a počítá utracení Rest Points.
-- Interaktivní tučné pojmy a tooltipy se nyní doplňují napříč celým webem, ne jen u class stránek.
-
-
-## v8 — Toolkit + readable rules
-- Conditions and Rest Helper moved from Combat into a separate **Toolkit** tab between Spellblade and Gangcyklopedie.
-- Combat now focuses on resources, **What can I do?**, Held Actions and Reactions.
-- Spell and Maneuver details preserve rulebook-style paragraphs and bold scan labels such as **Cost:**, **Range:**, **School:**, **Duration:**, **Spell Cast:**, **Failure:**, **Success:** and enhancement labels.
-- The same scan-friendly formatting is used in generated spell/maneuver PDFs.
