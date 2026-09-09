@@ -1,7 +1,7 @@
-const CACHE='gangsterka-dc20-final-pagescms';
+const CACHE='gangsterka-dc20-final-pagescms-v2';
 const ASSETS=[
   './','./index.html','./manifest.webmanifest',
-  './assets/css/styles.css','./assets/js/rules-data.js','./assets/js/app.js',
+  './assets/css/styles.css','./assets/js/rules-data.js','./assets/js/cms-fix.js','./assets/js/app.js',
   './assets/icons/d20.svg','./assets/icons/gangsterka-192.png','./assets/icons/gangsterka-512.png',
   './assets/media/dc20-logo.webp','./assets/media/cleric-art.webp','./assets/media/commander-art.webp','./assets/media/spellblade-art.webp',
   './assets/references/DC20_Cleric_Class_Reference.pdf',
@@ -18,7 +18,6 @@ self.addEventListener('fetch',e=>{
   const url=new URL(e.request.url);
   const isCmsJson=url.pathname.endsWith('/content/gangcyklopedie.json') || url.pathname.endsWith('/content/kronika.json') || url.pathname.endsWith('/content/postavy.json');
 
-  // CMS content is network-first so edits made in Pages CMS appear immediately.
   if(isCmsJson){
     e.respondWith(
       fetch(e.request,{cache:'no-store'}).then(res=>{
@@ -30,7 +29,6 @@ self.addEventListener('fetch',e=>{
     return;
   }
 
-  // Static app files stay cache-first for offline use.
   e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{
     const clone=res.clone();
     caches.open(CACHE).then(c=>c.put(e.request,clone));
