@@ -1,8 +1,8 @@
 (() => {
-  // Pages CMS stores Gangy and Kronika in wrapper objects:
-  // { gangs: [...] } and { sessions: [...] }.
-  // The existing app renderer expects plain arrays with the older field names.
-  // Normalize the CMS response here so Pages CMS can keep its clean editing schema.
+  // Pages CMS stores campaign content in wrapper objects:
+  // { gangs: [...] }, { characters: [...] }, { sessions: [...] }.
+  // The app renderer expects plain arrays with its existing field names,
+  // so normalize the CMS response before app.js reads it.
   const nativeFetch = window.fetch.bind(window);
 
   window.fetch = async (...args) => {
@@ -13,8 +13,9 @@
       const pathname = new URL(url, window.location.href).pathname;
 
       const isGangs = pathname.endsWith('/content/gangcyklopedie.json');
+      const isCharacters = pathname.endsWith('/content/postavy.json');
       const isChronicle = pathname.endsWith('/content/kronika.json');
-      if (!isGangs && !isChronicle) return response;
+      if (!isGangs && !isCharacters && !isChronicle) return response;
 
       const data = await response.clone().json();
       let normalized = data;
@@ -26,6 +27,16 @@
           title: g.title || g.name || 'Bez názvu',
           icon: g.icon || g.logo || '',
           information: g.information || g.description || ''
+        }));
+      }
+
+      if (isCharacters) {
+        const items = Array.isArray(data) ? data : (Array.isArray(data?.characters) ? data.characters : []);
+        normalized = items.map(c => ({
+          ...c,
+          name: c.name || c.title || 'Bez jména',
+          image: c.image || c.icon || c.logo || '',
+          description: c.description || c.body || ''
         }));
       }
 
