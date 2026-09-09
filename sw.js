@@ -1,7 +1,7 @@
-const CACHE='gangsterka-dc20-final-pagescms-v3';
+const CACHE='gangsterka-dc20-final-pagescms-v4';
 const ASSETS=[
   './','./index.html','./manifest.webmanifest',
-  './assets/css/styles.css','./assets/js/rules-data.js','./assets/js/cms-fix.js','./assets/js/app.js',
+  './assets/css/styles.css','./assets/js/rules-data.js','./assets/js/cms-fix.js','./assets/js/app.js','./assets/js/lore-toggle-icons.js',
   './assets/icons/d20.svg','./assets/icons/gangsterka-192.png','./assets/icons/gangsterka-512.png',
   './assets/media/dc20-logo.webp','./assets/media/cleric-art.webp','./assets/media/commander-art.webp','./assets/media/spellblade-art.webp',
   './assets/references/DC20_Cleric_Class_Reference.pdf',
