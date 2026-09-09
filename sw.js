@@ -1,4 +1,4 @@
-const CACHE='gangsterka-dc20-stable-v1';
+const CACHE='gangsterka-dc20-stable-v2';
 
 const ASSETS=[
   './',
@@ -56,8 +56,6 @@ self.addEventListener('fetch',event=>{
     url.pathname.endsWith('/content/kronika.json')
   );
 
-  // CMS data: always prefer the newest online version, but keep the last
-  // successful response for offline play.
   if(isCmsJson){
     event.respondWith(
       fetch(request,{cache:'no-store'})
@@ -73,8 +71,6 @@ self.addEventListener('fetch',event=>{
     return;
   }
 
-  // Page navigation: prefer the newest page online and use the cached shell
-  // only when the network is unavailable.
   if(request.mode==='navigate'){
     event.respondWith(
       fetch(request)
@@ -90,7 +86,6 @@ self.addEventListener('fetch',event=>{
     return;
   }
 
-  // Static same-origin files: cache-first for fast and reliable offline use.
   if(isSameOrigin){
     event.respondWith(
       caches.match(request).then(cached=>{
