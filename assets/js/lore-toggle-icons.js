@@ -3,28 +3,24 @@
     root.querySelectorAll('.lore-toggle').forEach(btn=>{
       const icon=btn.querySelector('.lore-chevron');
       if(!icon) return;
-      const expanded=btn.getAttribute('aria-expanded')==='true';
-      icon.textContent=expanded?'−':'+';
-      icon.setAttribute('aria-hidden','true');
+      const desired=btn.getAttribute('aria-expanded')==='true'?'−':'+';
+      if(icon.textContent!==desired) icon.textContent=desired;
+      if(icon.getAttribute('aria-hidden')!=='true') icon.setAttribute('aria-hidden','true');
     });
   }
 
-  document.addEventListener('click',e=>{
-    const btn=e.target.closest?.('.lore-toggle');
-    if(!btn) return;
-    // app.js updates aria-expanded during the same click handler; wait for it.
-    queueMicrotask(()=>syncIcons(btn.closest('.lore-item')||document));
-  });
-
   const app=document.getElementById('app');
   if(app){
-    const observer=new MutationObserver(()=>syncIcons(app));
+    const observer=new MutationObserver(mutations=>{
+      const relevant=mutations.some(m=>
+        (m.type==='attributes' && m.attributeName==='aria-expanded') ||
+        (m.type==='childList' && [...m.addedNodes].some(n=>n.nodeType===1))
+      );
+      if(relevant) syncIcons(app);
+    });
     observer.observe(app,{childList:true,subtree:true,attributes:true,attributeFilter:['aria-expanded']});
   }
 
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',()=>syncIcons());
-  }else{
-    syncIcons();
-  }
+  document.addEventListener('DOMContentLoaded',()=>syncIcons());
+  syncIcons();
 })();
