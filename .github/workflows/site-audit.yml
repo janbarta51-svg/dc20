@@ -1,0 +1,139 @@
+name: Site audit
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check JavaScript syntax
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' file; do
+            echo "Checking $file"
+            node --check "$file"
+          done < <(find assets/js -type f -name '*.js' -print0)
+          node --check sw.js
+
+      - name: Validate JSON and CMS data shapes
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          for path in [
+              Path('manifest.webmanifest'),
+              Path('content/gangcyklopedie.json'),
+              Path('content/postavy.json'),
+              Path('content/kronika.json'),
+          ]:
+              with path.open(encoding='utf-8') as f:
+                  json.load(f)
+              print(f'JSON OK: {path}')
+
+          checks = [
+              ('content/gangcyklopedie.json', 'gangs', 'title'),
+              ('content/postavy.json', 'characters', 'name'),
+              ('content/kronika.json', 'sessions', 'title'),
+          ]
+          for filename, list_key, required_key in checks:
+              data = json.loads(Path(filename).read_text(encoding='utf-8'))
+              if not isinstance(data, dict):
+                  raise SystemExit(f'{filename}: root must be an object')
+              items = data.get(list_key)
+              if not isinstance(items, list):
+                  raise SystemExit(f'{filename}: {list_key} must be a list')
+              for i, item in enumerate(items):
+                  if not isinstance(item, dict):
+                      raise SystemExit(f'{filename}: item {i} must be an object')
+                  if not str(item.get(required_key, '')).strip():
+                      raise SystemExit(f'{filename}: item {i} is missing {required_key}')
+              print(f'CMS shape OK: {filename}')
+          PY
+
+      - name: Validate Pages CMS YAML
+        run: ruby -e "require 'yaml'; YAML.load_file('.pages.yml'); puts 'Pages CMS YAML OK'"
+
+      - name: Check local HTML asset references
+        run: |
+          python3 - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+          from urllib.parse import urlsplit
+
+          class Parser(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.refs=[]
+              def handle_starttag(self, tag, attrs):
+                  attrs=dict(attrs)
+                  for key in ('src','href'):
+                      value=attrs.get(key)
+                      if value:
+                          self.refs.append((tag,key,value))
+
+          parser=Parser()
+          parser.feed(Path('index.html').read_text(encoding='utf-8'))
+          missing=[]
+          for tag,key,value in parser.refs:
+              if value.startswith(('#','http://','https://','mailto:','data:')):
+                  continue
+              clean=urlsplit(value).path.lstrip('/')
+              if not clean:
+                  continue
+              if not Path(clean).exists():
+                  missing.append((tag,key,value))
+          if missing:
+              for ref in missing:
+                  print('Missing HTML asset:', ref)
+              raise SystemExit(1)
+          print('HTML asset references OK')
+          PY
+
+      - name: Check Service Worker precache files
+        run: |
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+
+          text=Path('sw.js').read_text(encoding='utf-8')
+          block=re.search(r'const ASSETS=\[(.*?)\];', text, re.S)
+          if not block:
+              raise SystemExit('sw.js: ASSETS list not found')
+          paths=re.findall(r"['\"](\./[^'\"]*)['\"]", block.group(1))
+          missing=[]
+          for entry in paths:
+              clean=entry[2:]
+              if clean in ('',):
+                  continue
+              if not Path(clean).exists():
+                  missing.append(entry)
+          if missing:
+              print('Missing precache files:')
+              print('\n'.join(missing))
+              raise SystemExit(1)
+          print(f'Service Worker precache OK: {len(paths)} entries')
+          PY
+
+      - name: Basic CSS structure check
+        run: |
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+          for filename in ['assets/css/styles.css','assets/css/lore-fixes.css']:
+              text=Path(filename).read_text(encoding='utf-8')
+              text=re.sub(r'/\*.*?\*/','',text,flags=re.S)
+              if text.count('{') != text.count('}'):
+                  raise SystemExit(f'{filename}: unbalanced braces')
+              print(f'CSS braces OK: {filename}')
+          PY
