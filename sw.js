@@ -1,4 +1,4 @@
-const CACHE='gangsterka-dc20-final-pagescms-v2';
+const CACHE='gangsterka-dc20-final-pagescms-v3';
 const ASSETS=[
   './','./index.html','./manifest.webmanifest',
   './assets/css/styles.css','./assets/js/rules-data.js','./assets/js/cms-fix.js','./assets/js/app.js',
