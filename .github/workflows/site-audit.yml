@@ -114,7 +114,7 @@ jobs:
           missing=[]
           for entry in paths:
               clean=entry[2:]
-              if clean in ('',):
+              if not clean:
                   continue
               if not Path(clean).exists():
                   missing.append(entry)
@@ -137,3 +137,77 @@ jobs:
                   raise SystemExit(f'{filename}: unbalanced braces')
               print(f'CSS braces OK: {filename}')
           PY
+
+      - name: Install browser for runtime smoke test
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Smoke-test every route in Chromium
+        run: |
+          python3 -m http.server 4173 >/tmp/dc20-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID || true' EXIT
+          node <<'NODE'
+          const { chromium } = require('playwright');
+
+          (async () => {
+            const browser = await chromium.launch({headless:true});
+            const page = await browser.newPage();
+            const errors = [];
+            page.on('pageerror', err => errors.push(`pageerror: ${err.message}`));
+            page.on('console', msg => {
+              if (msg.type() === 'error') errors.push(`console: ${msg.text()}`);
+            });
+
+            const routes = [
+              'home','character','combo','combat','cleric','commander',
+              'spellblade','toolkit','gangcyklopedie','postavy','kronika'
+            ];
+
+            await page.goto('http://127.0.0.1:4173/#home', {waitUntil:'networkidle'});
+
+            for (const route of routes) {
+              await page.evaluate(r => { location.hash = `#${r}`; }, route);
+              await page.waitForTimeout(250);
+              const state = await page.evaluate(() => ({
+                hash: location.hash,
+                hasApp: Boolean(document.querySelector('#app')),
+                text: document.querySelector('#app')?.textContent?.trim() || ''
+              }));
+              if (!state.hasApp || !state.text) {
+                throw new Error(`Route #${route} rendered an empty app`);
+              }
+              console.log(`Route OK: #${route}`);
+            }
+
+            for (const route of ['gangcyklopedie','postavy','kronika']) {
+              await page.evaluate(r => { location.hash = `#${r}`; }, route);
+              await page.waitForTimeout(300);
+              const toggle = page.locator('.lore-toggle').first();
+              if (await toggle.count()) {
+                await toggle.click();
+                const expanded = await toggle.getAttribute('aria-expanded');
+                if (expanded !== 'true') throw new Error(`#${route}: accordion did not open`);
+                await toggle.click();
+                const collapsed = await toggle.getAttribute('aria-expanded');
+                if (collapsed !== 'false') throw new Error(`#${route}: accordion did not close`);
+              }
+              console.log(`Accordion OK: #${route}`);
+            }
+
+            await page.locator('#themeToggle').click();
+            await page.locator('#langToggle').click();
+            await page.waitForTimeout(100);
+
+            if (errors.length) {
+              throw new Error(`Browser errors:\n${errors.join('\n')}`);
+            }
+
+            await browser.close();
+            console.log('Runtime smoke test OK');
+          })().catch(err => {
+            console.error(err);
+            process.exit(1);
+          });
+          NODE
