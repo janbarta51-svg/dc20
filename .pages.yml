@@ -44,6 +44,45 @@ content:
               switcher: true
               media: false
 
+  - name: characters
+    label: Postavy
+    type: file
+    path: content/postavy.json
+    format: json
+    fields:
+      - name: characters
+        label: Seznam postav
+        type: object
+        list:
+          collapsible:
+            collapsed: true
+            summary: "{name}"
+        fields:
+          - name: name
+            label: Jméno
+            type: string
+            required: true
+            description: Jméno postavy, které se zobrazí v záložce Postavy.
+
+          - name: description
+            label: Popis
+            type: rich-text
+            required: true
+            description: Popis postavy. Editor podporuje odstavce, nadpisy i odrážky.
+            options:
+              format: markdown
+              switcher: true
+              media: false
+
+          - name: image
+            label: Obrázek
+            type: image
+            description: Volitelné. Pokud obrázek nenahraješ, zobrazí se pouze jméno a popis.
+            options:
+              categories: [image]
+              extensions: [png, jpg, jpeg, webp, svg]
+              rename: safe
+
   - name: chronicle
     label: Kronika
     type: file
