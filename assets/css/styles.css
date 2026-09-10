@@ -446,7 +446,7 @@ html[data-theme="dark"] .choice-wrap:has(.details.open){background:rgba(119,82,1
 .home-download-heading{display:flex;align-items:end;justify-content:space-between;gap:16px;padding:0 2px 9px;border-bottom:1px solid var(--gold)}
 .home-download-heading span{color:var(--purple);font-size:clamp(24px,3vw,34px);font-variant-caps:small-caps;font-weight:500}
 .home-download-heading small{color:var(--muted);font:700 11px var(--sans);letter-spacing:.06em;text-transform:uppercase}
-.pdf-download-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:17px}
+.pdf-download-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:17px}
 .pdf-download-card{
   display:grid;grid-template-columns:72px minmax(0,1fr) 28px;align-items:center;gap:14px;min-height:106px;
   padding:15px 15px 15px 13px;color:var(--ink);text-decoration:none;border:1px solid var(--line);
@@ -668,3 +668,11 @@ html[data-theme="dark"] .details .meta strong,html[data-theme="dark"] .rule-subh
   }
   .summon-statbar > span{white-space:nowrap!important}
 }
+
+
+/* Champion + Sorcerer class reference aside */
+.class-reference-aside{padding:18px 14px}
+.class-reference-aside .aside-copy{padding-top:0;border-top:0}
+.class-reference-aside .aside-copy h3{font-size:28px;margin-top:4px}
+@media(max-width:1100px){.pdf-download-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.pdf-download-grid{grid-template-columns:1fr}}

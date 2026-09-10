@@ -1,4 +1,4 @@
-const CACHE='gangsterka-dc20-stable-v2';
+const CACHE='gangsterka-dc20-stable-v3-classes';
 
 const ASSETS=[
   './',
@@ -7,6 +7,7 @@ const ASSETS=[
   './assets/css/styles.css',
   './assets/css/lore-fixes.css',
   './assets/js/rules-data.js',
+  './assets/js/classes-extra.js',
   './assets/js/cms-fix.js',
   './assets/js/app.js',
   './assets/icons/d20.svg',
@@ -18,10 +19,10 @@ const ASSETS=[
   './assets/media/spellblade-art.webp',
   './assets/media/paper-texture.webp',
   './assets/references/DC20_Cleric_Class_Reference.pdf',
-  './assets/references/DC20_Commander_Class_Reference.pdf',
+  './assets/references/DC20_Champion_Class_Reference.pdf',
+  './assets/references/DC20_Sorcerer_Class_Reference.pdf',
   './assets/references/DC20_Spellblade_Class_Reference.pdf',
   './assets/references/Cleric_Turn_Cheat_Sheet.pdf',
-  './assets/references/Commander_Turn_Cheat_Sheet.pdf',
   './assets/references/Spellblade_Turn_Cheat_Sheet.pdf',
   './content/gangcyklopedie.json',
   './content/postavy.json',
