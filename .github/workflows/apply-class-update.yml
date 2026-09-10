@@ -21,10 +21,12 @@ jobs:
       - name: Apply Champion and Sorcerer site changes
         run: python3 tools/apply_class_update.py
 
-      - name: Assemble class reference PDFs
+      - name: Install PDF dependency
+        run: python3 -m pip install reportlab
+
+      - name: Build class reference PDFs
         run: |
-          cat .classpdf/champion.* | base64 -d > assets/references/DC20_Champion_Class_Reference.pdf
-          cat .classpdf/sorcerer.* | base64 -d > assets/references/DC20_Sorcerer_Class_Reference.pdf
+          python3 tools/build_class_pdfs.py
           test -s assets/references/DC20_Champion_Class_Reference.pdf
           test -s assets/references/DC20_Sorcerer_Class_Reference.pdf
           file assets/references/DC20_Champion_Class_Reference.pdf
@@ -32,7 +34,7 @@ jobs:
 
       - name: Commit changes
         run: |
-          git config user.name "github-actions[bot]"
+          git config user.name "github-actions[bot]]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html assets/js/app.js assets/css/styles.css sw.js assets/references/DC20_Champion_Class_Reference.pdf assets/references/DC20_Sorcerer_Class_Reference.pdf
           if git diff --cached --quiet; then
