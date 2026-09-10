@@ -125,6 +125,19 @@ jobs:
           print(f'Service Worker precache OK: {len(paths)} entries')
           PY
 
+      - name: Check class PDF files
+        run: |
+          set -euo pipefail
+          for file in \
+            assets/references/DC20_Cleric_Class_Reference.pdf \
+            assets/references/DC20_Champion_Class_Reference.pdf \
+            assets/references/DC20_Sorcerer_Class_Reference.pdf \
+            assets/references/DC20_Spellblade_Class_Reference.pdf; do
+            test -s "$file"
+            head -c 5 "$file" | grep -q '%PDF-'
+            echo "PDF OK: $file"
+          done
+
       - name: Basic CSS structure check
         run: |
           python3 - <<'PY'
@@ -161,11 +174,25 @@ jobs:
             });
 
             const routes = [
-              'home','character','combo','combat','cleric','commander',
+              'home','character','combo','combat','cleric','champion','sorcerer',
               'spellblade','toolkit','gangcyklopedie','postavy','kronika'
             ];
 
             await page.goto('http://127.0.0.1:4173/#home', {waitUntil:'networkidle'});
+
+            const navState = await page.evaluate(() => ({
+              commander: Boolean(document.querySelector('a[data-route="commander"]')),
+              champion: Boolean(document.querySelector('a[data-route="champion"]')),
+              sorcerer: Boolean(document.querySelector('a[data-route="sorcerer"]'))
+            }));
+            if (navState.commander || !navState.champion || !navState.sorcerer) {
+              throw new Error(`Class navigation mismatch: ${JSON.stringify(navState)}`);
+            }
+
+            const homeDownloads = await page.locator('.pdf-download-copy strong').allTextContents();
+            if (homeDownloads.includes('Commander') || !homeDownloads.includes('Champion') || !homeDownloads.includes('Sorcerer')) {
+              throw new Error(`Home PDF downloads mismatch: ${homeDownloads.join(', ')}`);
+            }
 
             for (const route of routes) {
               await page.evaluate(r => { location.hash = `#${r}`; }, route);
@@ -180,6 +207,16 @@ jobs:
               }
               console.log(`Route OK: #${route}`);
             }
+
+            await page.evaluate(() => { location.hash = '#champion'; });
+            await page.waitForTimeout(250);
+            if (!(await page.locator('h1', {hasText:'Champion'}).count())) throw new Error('Champion page missing');
+            if (!(await page.locator('[data-selector="champion"]').count())) throw new Error('Champion Maneuver selector missing');
+
+            await page.evaluate(() => { location.hash = '#sorcerer'; });
+            await page.waitForTimeout(250);
+            if (!(await page.locator('h1', {hasText:'Sorcerer'}).count())) throw new Error('Sorcerer page missing');
+            if (!(await page.locator('#sorcererSourcePicker').count())) throw new Error('Sorcerer source picker missing');
 
             for (const route of ['gangcyklopedie','postavy','kronika']) {
               await page.evaluate(r => { location.hash = `#${r}`; }, route);
