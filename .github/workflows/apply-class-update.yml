@@ -4,7 +4,6 @@ on:
   push:
     branches: [main]
     paths:
-      - 'tools/apply_class_update.py'
       - 'tools/class-update.trigger'
 
 permissions:
@@ -19,29 +18,41 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Apply Champion and Sorcerer site changes
+      - name: Apply corrected Champion and Sorcerer pages
         run: python3 tools/apply_class_update.py
 
       - name: Install PDF dependency
         run: python3 -m pip install reportlab
 
-      - name: Build class reference PDFs
+      - name: Build corrected class reference PDFs
+        run: python3 tools/build_class_pdfs.py
+
+      - name: Validate site changes
+        shell: bash
         run: |
-          printf '%s' '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' | base64 -d | gzip -d > /tmp/build_class_pdfs.py
-          python3 /tmp/build_class_pdfs.py
+          grep -q "R.classes.champion" assets/js/classes-extra.js
+          grep -q "R.classes.sorcerer" assets/js/classes-extra.js
+          grep -q "Wild Magic Table" assets/js/classes-extra.js
+          grep -q "DC20_Champion_Class_Reference.pdf" assets/js/app.js
+          grep -q "DC20_Sorcerer_Class_Reference.pdf" assets/js/app.js
+          if grep -q "DC20_Commander_Class_Reference.pdf" assets/js/app.js; then
+            echo "Commander PDF is still exposed in the app" >&2
+            exit 1
+          fi
           test -s assets/references/DC20_Champion_Class_Reference.pdf
           test -s assets/references/DC20_Sorcerer_Class_Reference.pdf
-          file assets/references/DC20_Champion_Class_Reference.pdf
-          file assets/references/DC20_Sorcerer_Class_Reference.pdf
 
-      - name: Commit changes
+      - name: Commit corrected live version
+        shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html assets/js/app.js assets/css/styles.css sw.js assets/references/DC20_Champion_Class_Reference.pdf assets/references/DC20_Sorcerer_Class_Reference.pdf
+          git add index.html assets/js/classes-extra.js assets/js/app.js assets/css/styles.css sw.js \
+            assets/references/DC20_Champion_Class_Reference.pdf \
+            assets/references/DC20_Sorcerer_Class_Reference.pdf
           if git diff --cached --quiet; then
-            echo "No changes to commit"
+            echo "Nothing to commit."
           else
-            git commit -m "Add Champion and Sorcerer pages and remove Commander navigation"
+            git commit -m "Deploy corrected Champion and Sorcerer version"
             git push
           fi
