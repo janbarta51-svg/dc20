@@ -54,7 +54,7 @@
   // Preserve the rulebook's semantic paragraphs while making its key labels easy to scan.
   const RULE_LABEL_RE = /\b((?:Spell Cast|Check Success|Save Failure|Failure|Success(?:\s*\([^)]+\))?|Critical Success|Critical Failure|Hit|Miss|Trigger|Reaction|Prerequisite|Range|Duration|Damage|Area|Targets?|Distance|Ending [A-Z][A-Za-z’' -]*|[A-Z][A-Za-z0-9’' +/&-]{1,34}(?:\s*\([^)]+\))?):)/g;
   const RULE_START_LABEL_RE = /^(?:Spell Cast|Check Success|Save Failure|Failure|Success(?:\s*\([^)]+\))?|Critical Success|Critical Failure|Hit|Miss|Trigger|Reaction|Prerequisite|Range|Duration|Damage|Area|Targets?|Distance|Ending [A-Z][A-Za-z’' -]*|[A-Z][A-Za-z0-9’' +/&-]{1,34}(?:\s*\([^)]+\))?):/;
-  const RULE_SECTION_RE = /^(?:Spell Enhancements?|Maneuver Enhancements?|Attack Enhancements?|Blessings|Curses|Summoned (?:Celestial|Fiend|Undead)|Base Summon Traits|Managing the Summons|Expanded Summon Traits|Unique Traits)$/i;
+  const RULE_SECTION_RE = /^(?:Spell Enhancements?|Maneuver Enhancements?|Attack Enhancements?|Blessings|Curses|Summoned (?:Celestial|Fiend|Undead)|Base Summon Traits|Managing the Summons|Expanded Summon Traits|Unique Traits|Sorcerous Origins|Hero's Resolve|Adventuring Hero \(Flavor Feature\)|Stalwart Protector|Vigilant Watcher \(Flavor Feature\)|Celestial Spark|Celestial Appearance \(Flavor Feature\)|Draconic Spark|Draconic Appearance \(Flavor Feature\)|Novice Paragon|Jack of one Trade \(Flavor Feature\)|DC Tip)$/i;
   function ruleLabelMarkup(text=''){
     return esc(text).replace(RULE_LABEL_RE,'<strong>$1</strong>');
   }
@@ -497,22 +497,58 @@
     return (lang==='en'?en:cs)[level]||[];
   }
 
+  function richClassText(text=''){
+    return `<div class="class-rule-rich">${formatRuleBody(text,'web')}</div>`;
+  }
+
+  function richOptionRows(key,items,help){
+    const set=selectedSet(key);
+    return `<div class="choice-note">${esc(help)}</div><div class="rule-options rich-rule-options" data-option-group="${esc(key)}" data-max-one="0">${items.map(item=>{
+      const name=Array.isArray(item)?item[0]:item.name;
+      const body=Array.isArray(item)?(lang==='en'?item[1]:item[2]):(lang==='en'?item.en:item.cs);
+      return `<label class="rule-option rich-rule-option"><input type="checkbox" class="class-option-check" data-key="${esc(key)}" value="${esc(name)}" ${set.has(name)?'checked':''}><span class="rule-option-copy"><strong>${esc(name)}</strong><div class="rule-option-text">${formatRuleBody(body,'web')}</div></span></label>`;
+    }).join('')}</div>`;
+  }
+
+  function classProgressionTable(c){
+    if(!c.progression?.length) return '';
+    const resource=c.name==='Champion'?'SP':'MP';
+    const known=c.name==='Champion'?'Maneuvers':(lang==='en'?'Spells':'Spelly');
+    const labels=['Lvl','HP','Attr','Skill','Trade',resource,known,'Features'];
+    return `<section class="source-class-block"><div class="source-class-heading">${esc(c.name)} Class Table</div><div class="class-progression-wrap"><table class="class-progression-table"><thead><tr>${labels.map(x=>`<th>${esc(x)}</th>`).join('')}</tr></thead><tbody>${c.progression.map(r=>`<tr><td>${r.level}</td><td>${esc(r.hp)}</td><td>${esc(r.attribute)}</td><td>${esc(r.skill)}</td><td>${esc(r.trade)}</td><td>${esc(r.resource)}</td><td>${esc(r.known)}</td><td>${esc(r.features)}</td></tr>`).join('')}</tbody></table></div></section>`;
+  }
+
+  function sourceClassOverview(c){
+    if(!c.startingEquipment?.length && !c.pathDetails?.length && !c.sourceOfPower) return '';
+    const sourceTitle=lang==='en'?'Source of Power':'Zdroj síly';
+    const equipTitle='Starting Equipment';
+    return `<section class="source-class-reference">${c.sourceOfPower?`<div class="source-power"><h3>${esc(sourceTitle)}</h3>${richClassText(pick(c.sourceOfPower))}</div>`:''}${classProgressionTable(c)}<div class="class-source-grid"><article class="class-source-card"><h3>${esc(equipTitle)}</h3>${(c.startingEquipment||[]).map(x=>`<div class="source-detail-row"><strong>${esc(x.name)}</strong><span>${esc(lang==='en'?x.en:x.cs)}</span></div>`).join('')}</article><article class="class-source-card"><h3>${esc(c.pathName||'Class Path')}</h3>${(c.pathDetails||[]).map(x=>`<div class="source-detail-row"><strong>${esc(x.name)}</strong><span>${esc(lang==='en'?x.en:x.cs)}</span></div>`).join('')}</article></div></section>`;
+  }
+
+  function sorcererWildMagic(c){
+    const rows=(c.wildMagic?.[lang]||c.wildMagic?.en||[]);
+    if(!rows.length) return '';
+    return `<div class="wild-magic-wrap"><h4>Wild Magic Table</h4><p class="choice-note">${esc(lang==='en'?'Roll a d20 when Unstable Magic tells you to use this table.':'Když ti Unstable Magic řekne použít tuto tabulku, hoď d20.')}</p><table class="wild-magic-table"><tbody>${rows.map((text,i)=>`<tr><th>${i+1}</th><td>${esc(text)}</td></tr>`).join('')}</tbody></table></div>`;
+  }
   function levelSection(cls,c,level){
     const feats=coreFeatures(cls,c).filter(f=>f.level===level);
     const generic=genericLevelItems(level);
+    const sourceClass=cls==='champion'||cls==='sorcerer';
     let inside='';
     feats.forEach(f=>{
-      inside += `<section class="rule-block" id="${esc(`${cls}-${slug(f.name)}`)}"><h3>${esc(f.name)}</h3><p>${esc(lang==='en'?f.en:f.cs)}</p>`;
+      const body=lang==='en'?f.en:f.cs;
+      inside += `<section class="rule-block" id="${esc(`${cls}-${slug(f.name)}`)}"><h3>${esc(f.name)}</h3>${sourceClass?richClassText(body):`<p>${esc(body)}</p>`}`;
       if(cls==='cleric' && f.name==='Cleric Order') inside += `<div class="nested-choice"><h4>${esc(t('domains'))}</h4>${optionRows('cleric-domains',c.domains,t('chooseDomains'))}</div>`;
       if(cls==='spellblade' && f.name==='Spellblade Disciplines') inside += `<div class="nested-choice"><h4>${esc(t('disciplines'))}</h4>${optionRows('spellblade-disciplines',disciplineItems(c),t('chooseDisciplines'))}</div>`;
+      if(cls==='sorcerer' && f.name==='Innate Power') inside += `<div class="nested-choice"><h4>Sorcerous Origins</h4>${richOptionRows('sorcerer-origins',c.origins,lang==='en'?'Choose 1 Sorcerous Origin at Level 1. Greater Innate Power can grant another Origin later.':'Na Levelu 1 vyber 1 Sorcerous Origin. Greater Innate Power ti později může dát další Origin.')}</div>${sorcererWildMagic(c)}`;
+      if(cls==='sorcerer' && f.name==='Meta Magic') inside += `<div class="nested-choice"><h4>Meta Magic</h4>${richOptionRows('sorcerer-metamagic',c.metaMagic,lang==='en'?'Choose 2 Meta Magic options when you gain this Feature. Later Features and Talents can add more.':'Když získáš tuto Feature, vyber 2 Meta Magic možnosti. Pozdější Features a Talents mohou přidat další.')}</div>`;
       inside += `</section>`;
     });
     if(level===3 && c.subclasses?.length){
-      inside += `<section class="rule-block" id="${cls}-subclass"><h3>${esc(t('subclasses'))}</h3>${optionRows(`${cls}-subclass`,c.subclasses,t('chooseSubclass'),true)}</section>`;
+      const chooser=sourceClass?richOptionRows(`${cls}-subclass`,c.subclasses,t('chooseSubclass')):optionRows(`${cls}-subclass`,c.subclasses,t('chooseSubclass'),true);
+      inside += `<section class="rule-block" id="${cls}-subclass"><h3>${esc(t('subclasses'))}</h3>${chooser}</section>`;
     }
-    if(generic.length){
-      inside += `<ul class="level-extras">${generic.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
-    }
+    if(generic.length) inside += `<ul class="level-extras">${generic.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
     if(!inside) return '';
     return `<section class="level-section" id="${cls}-level-${level}"><div class="level-heading"><span>Level ${level}</span><h2>${esc(t('features'))}</h2></div><div class="rules-columns">${inside}</div></section>`;
   }
@@ -558,16 +594,17 @@
 
   function renderClass(cls){
     const c=R.classes[cls];
-    let main =
-      `<section class="class-overview"><div><p>${esc(lang==='en'?c.spellRule.en:c.spellRule.cs)}</p><p><strong>${esc(t('levelTraining'))}:</strong> ${esc(c.level1.training)}</p></div>${statsTable(c)}</section>`+
-      levelOutline(cls,c);
+    if(!c){ app.innerHTML=hero('Class unavailable'); return; }
+    const sourceClass=cls==='champion'||cls==='sorcerer';
+    const overviewText=lang==='en'?c.spellRule.en:c.spellRule.cs;
+    let main = `<section class="class-overview"><div>${sourceClass?richClassText(overviewText):`<p>${esc(overviewText)}</p>`}<p><strong>${esc(t('levelTraining'))}:</strong> ${esc(c.level1.training)}</p></div>${statsTable(c)}</section>`;
+    if(sourceClass) main += sourceClassOverview(c);
+    main += levelOutline(cls,c);
     for(let level=1;level<=6;level++) main += levelSection(cls,c,level);
     if(c.talents?.length){
-      main += `<section class="level-section"><div class="level-heading"><span>Talents</span><h2>${esc(t('talents'))}</h2></div><div class="rules-columns">${c.talents.map(x=>`<section class="rule-block"><h3>${esc(x.name)}</h3><p><em>${esc(x.req)}</em></p><p>${esc(lang==='en'?x.en:x.cs)}</p></section>`).join('')}</div></section>`;
+      main += `<section class="level-section"><div class="level-heading"><span>Talents</span><h2>${esc(t('talents'))}</h2></div><div class="rules-columns">${c.talents.map(x=>`<section class="rule-block"><h3>${esc(x.name)}</h3><p><em>${esc(x.req)}</em></p>${sourceClass?richClassText(lang==='en'?x.en:x.cs):`<p>${esc(lang==='en'?x.en:x.cs)}</p>`}</section>`).join('')}</div></section>`;
     }
-
     let html = `<article class="class-reference class-${esc(cls)}"><header class="class-title"><h1>${esc(c.name)}</h1><p>${esc(pick(c.tagline))}</p></header><div class="class-frame"><div class="class-main">${main}</div>${classAside(cls,c)}</div></article>`;
-
     if(cls==='cleric') html += renderSpellSelector(cls,R.spells.filter(s=>s.source.split(',').map(x=>x.trim()).includes('Divine')));
     if(cls==='champion') html += renderManeuverSelector(cls,R.maneuvers);
     if(cls==='sorcerer') html += renderSorcererPicker() + renderSorcererSelectors();
