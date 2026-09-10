@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'tools/apply_class_update.py'
+      - 'tools/class-update.trigger'
 
 permissions:
   contents: write
