@@ -1,4 +1,4 @@
-const CACHE='gangsterka-dc20-source-classes-v4';
+const CACHE='gangsterka-dc20-approved-class-pdfs-v1';
 
 const ASSETS=[
   './',
