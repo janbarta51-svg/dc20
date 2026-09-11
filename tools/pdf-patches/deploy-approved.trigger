@@ -1,1 +1,1 @@
-Deploy approved Champion and Sorcerer PDFs — 2026-09-11
+Deploy approved Champion and Sorcerer PDFs — retry 2026-09-11
