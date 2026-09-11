@@ -1,0 +1,88 @@
+name: Deploy approved class PDFs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/pdf-patches/deploy-approved.trigger'
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Reconstruct approved PDFs
+        shell: bash
+        run: |
+          set -euo pipefail
+          command -v zstd
+
+          cat tools/pdf-patches/champ.part00 \
+              tools/pdf-patches/champ.part01 \
+              tools/pdf-patches/champ.part02 \
+            | base64 -d > /tmp/champion.zst
+
+          cat tools/pdf-patches/sorc.part00 \
+              tools/pdf-patches/sorc.part01 \
+              tools/pdf-patches/sorc.part02.0 \
+              tools/pdf-patches/sorc.part02.1 \
+              tools/pdf-patches/sorc.part03.0 \
+              tools/pdf-patches/sorc.part03.1 \
+              tools/pdf-patches/sorc.part04.0 \
+              tools/pdf-patches/sorc.part04.1 \
+            | base64 -d > /tmp/sorcerer.zst
+
+          zstd -d --patch-from=assets/references/DC20_Cleric_Class_Reference.pdf \
+            /tmp/champion.zst \
+            -o assets/references/DC20_Champion_Class_Reference.pdf -f
+
+          zstd -d --patch-from=assets/references/DC20_Cleric_Class_Reference.pdf \
+            /tmp/sorcerer.zst \
+            -o assets/references/DC20_Sorcerer_Class_Reference.pdf -f
+
+      - name: Verify exact approved PDFs
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '9cb6569ec5bd11435be170f3d935ee1feec1eae36228be92b50c23f41ac9f9c8  assets/references/DC20_Champion_Class_Reference.pdf' | sha256sum -c -
+          echo '2fe7992b5caf5edb8859e58565ae410cd6fad27a8c3d9eaae652868bec8eed31  assets/references/DC20_Sorcerer_Class_Reference.pdf' | sha256sum -c -
+          test "$(stat -c%s assets/references/DC20_Champion_Class_Reference.pdf)" = '557939'
+          test "$(stat -c%s assets/references/DC20_Sorcerer_Class_Reference.pdf)" = '566284'
+
+      - name: Refresh offline cache version
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p = Path('sw.js')
+          text = p.read_text()
+          text, n = re.subn(r"const CACHE='[^']+';", "const CACHE='gangsterka-dc20-approved-class-pdfs-v1';", text, count=1)
+          if n != 1:
+              raise SystemExit('Could not update service worker cache name')
+          p.write_text(text)
+          PY
+
+      - name: Commit approved PDFs
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add \
+            assets/references/DC20_Champion_Class_Reference.pdf \
+            assets/references/DC20_Sorcerer_Class_Reference.pdf \
+            sw.js
+          if git diff --cached --quiet; then
+            echo 'Nothing to commit.'
+          else
+            git commit -m 'Deploy approved Champion and Sorcerer PDFs'
+            git push
+          fi
