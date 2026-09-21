@@ -285,7 +285,7 @@
   function setSelected(key,set){selections[key]=[...set];saveSelections()}
   function classRoute(){
     const h=(location.hash||'#home').slice(1);
-    return ['home','character','combo','combat','cleric','champion','sorcerer','spellblade','toolkit','gangcyklopedie','postavy','kronika'].includes(h)?h:'home';
+    return ['home','character','combo','combat','cleric','champion','bard','summoner','toolkit','gangcyklopedie','postavy','kronika'].includes(h)?h:'home';
   }
   function groupBy(arr,keyFn){
     return arr.reduce((acc,item)=>{ const key=keyFn(item); (acc[key] ||= []).push(item); return acc; },{});
@@ -333,8 +333,8 @@
     const pdfs=[
       ['Cleric','assets/references/DC20_Cleric_Class_Reference.pdf'],
       ['Champion','assets/references/DC20_Champion_Class_Reference.pdf'],
-      ['Sorcerer','assets/references/DC20_Sorcerer_Class_Reference.pdf'],
-      ['Spellblade','assets/references/DC20_Spellblade_Class_Reference.pdf']
+      ['Bard','assets/references/DC20_Bard_Class_Reference.pdf'],
+      ['Summoner','assets/references/DC20_Summoner_Class_Reference.pdf']
     ];
     const pdfIcon=`<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M16 5h23l12 12v38a4 4 0 01-4 4H16a4 4 0 01-4-4V9a4 4 0 014-4z"/><path d="M39 5v14h12"/><path d="M32 28v18m0 0l-8-8m8 8l8-8"/><path d="M22 53h20"/></svg>`;
     app.innerHTML=`<section class="home-landing"><div class="home-content"><img src="assets/media/dc20-logo.webp" alt="DC20"><div class="home-gangsterka">Gangsterka</div><p class="home-coming">${esc(coming)}</p><section class="home-downloads"><div class="home-download-heading"><span>${esc(downloadTitle)}</span><small>${esc(downloadHint)}</small></div><div class="pdf-download-grid">${pdfs.map(([name,path])=>`<a class="pdf-download-card" href="${esc(path)}" download><span class="pdf-download-icon">${pdfIcon}</span><span class="pdf-download-copy"><strong>${esc(name)}</strong><small>PDF</small></span><span class="pdf-download-arrow">↓</span></a>`).join('')}</div></section></div></section>`;
@@ -533,7 +533,7 @@
   function levelSection(cls,c,level){
     const feats=coreFeatures(cls,c).filter(f=>f.level===level);
     const generic=genericLevelItems(level);
-    const sourceClass=cls==='champion'||cls==='sorcerer';
+    const sourceClass=['champion','bard','summoner'].includes(cls);
     let inside='';
     feats.forEach(f=>{
       const body=lang==='en'?f.en:f.cs;
@@ -556,7 +556,7 @@
   function levelOutline(cls,c){
     const feats=coreFeatures(cls,c);
     const rows=[];
-    for(let level=1;level<=6;level++){
+    for(let level=1;level<=(c.maxFeatureLevel||6);level++){
       const names=feats.filter(f=>f.level===level).map(f=>f.name);
       if(level===3 && c.subclasses?.length) names.push(t('subclasses'));
       genericLevelItems(level).forEach(x=>{ if(x!=='Subclass') names.push(x); });
@@ -569,14 +569,14 @@
 
   function classAside(cls,c){
     const art = CLASS_ART[cls];
-    const buildText = (cls==='spellblade' || cls==='sorcerer') ? t('buildPanelSpellText') : t('buildPanelText');
+    const buildText = (cls==='bard' || cls==='summoner') ? t('buildPanelSpellText') : t('buildPanelText');
     const cheatPaths={
-      cleric:'assets/references/Cleric_Turn_Cheat_Sheet.pdf',
-      spellblade:'assets/references/Spellblade_Turn_Cheat_Sheet.pdf'
+      cleric:'assets/references/Cleric_Turn_Cheat_Sheet.pdf'
     };
     const referencePaths={
       champion:'assets/references/DC20_Champion_Class_Reference.pdf',
-      sorcerer:'assets/references/DC20_Sorcerer_Class_Reference.pdf'
+      bard:'assets/references/DC20_Bard_Class_Reference.pdf',
+      summoner:'assets/references/DC20_Summoner_Class_Reference.pdf'
     };
     const cheatIcon=`<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M16 5h23l12 12v38a4 4 0 01-4 4H16a4 4 0 01-4-4V9a4 4 0 014-4z"/><path d="M39 5v14h12"/><path d="M22 31h20M22 39h14M22 47h18"/><path d="M18 31h.1M18 39h.1M18 47h.1"/></svg>`;
     const artBlock = art ? `<section class="aside-art">
@@ -595,23 +595,32 @@
   function renderClass(cls){
     const c=R.classes[cls];
     if(!c){ app.innerHTML=hero('Class unavailable'); return; }
-    const sourceClass=cls==='champion'||cls==='sorcerer';
+    const sourceClass=['champion','bard','summoner'].includes(cls);
     const overviewText=lang==='en'?c.spellRule.en:c.spellRule.cs;
     let main = `<section class="class-overview"><div>${sourceClass?richClassText(overviewText):`<p>${esc(overviewText)}</p>`}<p><strong>${esc(t('levelTraining'))}:</strong> ${esc(c.level1.training)}</p></div>${statsTable(c)}</section>`;
     if(sourceClass) main += sourceClassOverview(c);
     main += levelOutline(cls,c);
-    for(let level=1;level<=6;level++) main += levelSection(cls,c,level);
+    for(let level=1;level<=(c.maxFeatureLevel||6);level++) main += levelSection(cls,c,level);
     if(c.talents?.length){
-      main += `<section class="level-section"><div class="level-heading"><span>Talents</span><h2>${esc(t('talents'))}</h2></div><div class="rules-columns">${c.talents.map(x=>`<section class="rule-block"><h3>${esc(x.name)}</h3><p><em>${esc(x.req)}</em></p>${sourceClass?richClassText(lang==='en'?x.en:x.cs):`<p>${esc(lang==='en'?x.en:x.cs)}</p>`}</section>`).join('')}</div></section>`;
+      main += `<section class="level-section"><div class="level-heading"><span>Talents</span><h2>${esc(c.talentTitle||t('talents'))}</h2></div><div class="rules-columns">${c.talents.map(x=>`<section class="rule-block"><h3>${esc(x.name)}</h3><p><em>${esc(x.req)}</em></p>${sourceClass?richClassText(lang==='en'?x.en:x.cs):`<p>${esc(lang==='en'?x.en:x.cs)}</p>`}</section>`).join('')}</div></section>`;
     }
     let html = `<article class="class-reference class-${esc(cls)}"><header class="class-title"><h1>${esc(c.name)}</h1><p>${esc(pick(c.tagline))}</p></header><div class="class-frame"><div class="class-main">${main}</div>${classAside(cls,c)}</div></article>`;
     if(cls==='cleric') html += renderSpellSelector(cls,R.spells.filter(s=>s.source.split(',').map(x=>x.trim()).includes('Divine')));
     if(cls==='champion') html += renderManeuverSelector(cls,R.maneuvers);
-    if(cls==='sorcerer') html += renderSorcererPicker() + renderSorcererSelectors();
-    if(cls==='spellblade') html += renderSpellbladePicker() + renderSpellbladeSelectors();
+    if(cls==='bard') html += renderSpellSelector('bard',bardAllowed());
+    if(cls==='summoner') html += renderSpellSelector('summoner',summonerAllowed());
     app.innerHTML=html;
     bindClassEvents(cls);
     decorateGlossary(app);
+  }
+
+  function bardAllowed(){
+    const tags=new Set(['Embolden','Enfeeble','Healing','Illusion','Sound']);
+    return R.spells.filter(s=>s.school==='Enchantment'||(s.tags||[]).some(tag=>tags.has(tag)));
+  }
+  function summonerAllowed(){
+    const schools=new Set(['Astromancy','Conjuration','Transmutation']);
+    return R.spells.filter(s=>schools.has(s.school)||(s.tags||[]).includes('Summoning'));
   }
 
   function renderSorcererPicker(){
@@ -788,7 +797,8 @@
     let selected=[];
     if(baseCls==='cleric') selected=[...selectedSet('cleric')].map(id=>findItem(id,'spell')).filter(Boolean);
     if(baseCls==='champion') selected=[...selectedSet('champion')].map(id=>findItem(id,'maneuver')).filter(Boolean);
-    if(baseCls==='sorcerer') selected=[...selectedSet('sorcerer')].map(id=>findItem(id,'spell')).filter(Boolean);
+    if(baseCls==='bard') selected=[...selectedSet('bard')].map(id=>findItem(id,'spell')).filter(Boolean);
+    if(baseCls==='summoner') selected=[...selectedSet('summoner')].map(id=>findItem(id,'spell')).filter(Boolean);
     if(baseCls==='spellblade'){
       selected=[...selectedSet('spellblade')].map(id=>findItem(id,'spell')).filter(Boolean);
       selected=selected.concat([...selectedSet('spellblade-maneuvers')].map(id=>findItem(id,'maneuver')).filter(Boolean));
@@ -936,7 +946,7 @@
 
   function renderGang(){
     const cards=(gangs||[]).map(g=>accordionItem({title:g.title||g.name||'Bez názvu',image:g.icon||'',body:legacyGangInfo(g)})).join('');
-    app.innerHTML=`<article class="standard-reference lore-reference">${hero('Gangcyklopedie','','LORE')}<section class="lore-list">${cards}</section></article>`;
+    app.innerHTML=`<article class="standard-reference lore-reference">${hero('Gangy z Kostelce','','LORE')}<section class="lore-list">${cards}</section></article>`;
     bindLoreAccordions();
   }
   function renderCharacters(){
@@ -959,7 +969,7 @@
     else if(route==='character') renderCharacter();
     else if(route==='combo') renderCombo();
     else if(route==='combat') renderCombat();
-    else if(['cleric','champion','sorcerer','spellblade'].includes(route)) renderClass(route);
+    else if(['cleric','champion','bard','summoner'].includes(route)) renderClass(route);
     else if(route==='toolkit') renderToolkit();
     else if(route==='gangcyklopedie') renderGang();
     else if(route==='postavy') renderCharacters();
