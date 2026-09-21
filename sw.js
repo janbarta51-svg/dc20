@@ -1,4 +1,4 @@
-const CACHE='gangsterka-dc20-bard-summoner-v1';
+const CACHE='gangsterka-dc20-bard-summoner-v2';
 
 const ASSETS=[
   './',
