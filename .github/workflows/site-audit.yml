@@ -131,8 +131,8 @@ jobs:
           for file in \
             assets/references/DC20_Cleric_Class_Reference.pdf \
             assets/references/DC20_Champion_Class_Reference.pdf \
-            assets/references/DC20_Sorcerer_Class_Reference.pdf \
-            assets/references/DC20_Spellblade_Class_Reference.pdf; do
+            assets/references/DC20_Bard_Class_Reference.pdf \
+            assets/references/DC20_Summoner_Class_Reference.pdf; do
             test -s "$file"
             head -c 5 "$file" | grep -q '%PDF-'
             echo "PDF OK: $file"
@@ -174,8 +174,8 @@ jobs:
             });
 
             const routes = [
-              'home','character','combo','combat','cleric','champion','sorcerer',
-              'spellblade','toolkit','gangcyklopedie','postavy','kronika'
+              'home','character','combo','combat','cleric','champion','bard',
+              'summoner','toolkit','gangcyklopedie','postavy','kronika'
             ];
 
             await page.goto('http://127.0.0.1:4173/#home', {waitUntil:'networkidle'});
@@ -183,14 +183,17 @@ jobs:
             const navState = await page.evaluate(() => ({
               commander: Boolean(document.querySelector('a[data-route="commander"]')),
               champion: Boolean(document.querySelector('a[data-route="champion"]')),
-              sorcerer: Boolean(document.querySelector('a[data-route="sorcerer"]'))
+              bard: Boolean(document.querySelector('a[data-route="bard"]')),
+              summoner: Boolean(document.querySelector('a[data-route="summoner"]')),
+              sorcerer: Boolean(document.querySelector('a[data-route="sorcerer"]')),
+              spellblade: Boolean(document.querySelector('a[data-route="spellblade"]'))
             }));
-            if (navState.commander || !navState.champion || !navState.sorcerer) {
+            if (navState.commander || navState.sorcerer || navState.spellblade || !navState.champion || !navState.bard || !navState.summoner) {
               throw new Error(`Class navigation mismatch: ${JSON.stringify(navState)}`);
             }
 
             const homeDownloads = await page.locator('.pdf-download-copy strong').allTextContents();
-            if (homeDownloads.includes('Commander') || !homeDownloads.includes('Champion') || !homeDownloads.includes('Sorcerer')) {
+            if (homeDownloads.includes('Commander') || homeDownloads.includes('Sorcerer') || homeDownloads.includes('Spellblade') || !homeDownloads.includes('Champion') || !homeDownloads.includes('Bard') || !homeDownloads.includes('Summoner')) {
               throw new Error(`Home PDF downloads mismatch: ${homeDownloads.join(', ')}`);
             }
 
@@ -213,10 +216,15 @@ jobs:
             if (!(await page.locator('h1', {hasText:'Champion'}).count())) throw new Error('Champion page missing');
             if (!(await page.locator('[data-selector="champion"]').count())) throw new Error('Champion Maneuver selector missing');
 
-            await page.evaluate(() => { location.hash = '#sorcerer'; });
+            await page.evaluate(() => { location.hash = '#bard'; });
             await page.waitForTimeout(250);
-            if (!(await page.locator('h1', {hasText:'Sorcerer'}).count())) throw new Error('Sorcerer page missing');
-            if (!(await page.locator('#sorcererSourcePicker').count())) throw new Error('Sorcerer source picker missing');
+            if (!(await page.locator('h1', {hasText:'Bard'}).count())) throw new Error('Bard page missing');
+            if (!(await page.locator('[data-selector="bard"]').count())) throw new Error('Bard Spell selector missing');
+
+            await page.evaluate(() => { location.hash = '#summoner'; });
+            await page.waitForTimeout(250);
+            if (!(await page.locator('h1', {hasText:'Summoner'}).count())) throw new Error('Summoner page missing');
+            if (!(await page.locator('[data-selector="summoner"]').count())) throw new Error('Summoner Spell selector missing');
 
             for (const route of ['gangcyklopedie','postavy','kronika']) {
               await page.evaluate(r => { location.hash = `#${r}`; }, route);
