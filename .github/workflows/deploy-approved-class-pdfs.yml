@@ -18,19 +18,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Reconstruct approved PDFs
+      - name: Reconstruct approved Bard and Summoner PDFs
         shell: bash
         run: |
           set -euo pipefail
-          command -v zstd
+          cat tools/pdf-patches/bard-new.part00               tools/pdf-patches/bard-new.part01               tools/pdf-patches/bard-new.part02               tools/pdf-patches/bard-new.part03               tools/pdf-patches/bard-new.part04             | base64 -d | zstd -d -o assets/references/DC20_Bard_Class_Reference.pdf -f
 
-          cat tools/pdf-patches/bard-deploy.part00               tools/pdf-patches/bard-deploy.part01               tools/pdf-patches/bard-deploy.part02               tools/pdf-patches/bard-deploy.part03               tools/pdf-patches/bard-deploy.part04               tools/pdf-patches/bard-deploy.part05               tools/pdf-patches/bard-deploy.part06             | base64 -d > /tmp/bard.zst
-
-          cat tools/pdf-patches/summoner-deploy.part00               tools/pdf-patches/summoner-deploy.part01               tools/pdf-patches/summoner-deploy.part02               tools/pdf-patches/summoner-deploy.part03               tools/pdf-patches/summoner-deploy.part04               tools/pdf-patches/summoner-deploy.part05               tools/pdf-patches/summoner-deploy.part06               tools/pdf-patches/summoner-deploy.part07               tools/pdf-patches/summoner-deploy.part08               tools/pdf-patches/summoner-deploy.part09               tools/pdf-patches/summoner-deploy.part10               tools/pdf-patches/summoner-deploy.part11               tools/pdf-patches/summoner-deploy.part12               tools/pdf-patches/summoner-deploy.part13               tools/pdf-patches/summoner-deploy.part14               tools/pdf-patches/summoner-deploy.part15               tools/pdf-patches/summoner-deploy.part16               tools/pdf-patches/summoner-deploy.part17               tools/pdf-patches/summoner-deploy.part18               tools/pdf-patches/summoner-deploy.part19               tools/pdf-patches/summoner-deploy.part20               tools/pdf-patches/summoner-deploy.part21             | base64 -d > /tmp/summoner.zst
-
-          zstd -d --patch-from=assets/references/DC20_Cleric_Class_Reference.pdf             /tmp/bard.zst             -o assets/references/DC20_Bard_Class_Reference.pdf -f
-
-          zstd -d --patch-from=assets/references/DC20_Cleric_Class_Reference.pdf             /tmp/summoner.zst             -o assets/references/DC20_Summoner_Class_Reference.pdf -f
+          cat tools/pdf-patches/summoner-new.part00               tools/pdf-patches/summoner-new.part01               tools/pdf-patches/summoner-new.part02             | base64 -d | zstd -d -o assets/references/DC20_Summoner_Class_Reference.pdf -f
 
       - name: Verify exact approved PDFs
         shell: bash
@@ -41,22 +35,54 @@ jobs:
           test "$(stat -c%s assets/references/DC20_Bard_Class_Reference.pdf)" = '852318'
           test "$(stat -c%s assets/references/DC20_Summoner_Class_Reference.pdf)" = '528307'
 
-      - name: Replace old class PDFs
+      - name: Remove obsolete class PDFs
+        shell: bash
+        run: |
+          rm -f             assets/references/DC20_Sorcerer_Class_Reference.pdf             assets/references/DC20_Spellblade_Class_Reference.pdf             assets/references/Spellblade_Turn_Cheat_Sheet.pdf
+
+      - name: Refresh offline cache
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('sw.js')
+          s=p.read_text(encoding='utf-8')
+          s,n=re.subn(r"const CACHE='[^']+';", "const CACHE='gangsterka-dc20-bard-summoner-v2';", s, count=1)
+          if n != 1:
+              raise SystemExit('Could not update cache name')
+          p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Validate live class setup
         shell: bash
         run: |
           set -euo pipefail
-          rm -f             assets/references/DC20_Sorcerer_Class_Reference.pdf             assets/references/DC20_Spellblade_Class_Reference.pdf             assets/references/Spellblade_Turn_Cheat_Sheet.pdf
+          grep -q 'data-route="bard"' index.html
+          grep -q 'data-route="summoner"' index.html
+          ! grep -q 'data-route="sorcerer"' index.html
+          ! grep -q 'data-route="spellblade"' index.html
+          grep -q 'Gangy z Kostelce' index.html
+          grep -q "R.classes.bard" assets/js/classes-current.js
+          grep -q "R.classes.summoner" assets/js/classes-current.js
+          grep -q "DC20_Bard_Class_Reference.pdf" assets/js/app.js
+          grep -q "DC20_Summoner_Class_Reference.pdf" assets/js/app.js
+          ! grep -q "\['Sorcerer','assets/references/DC20_Sorcerer_Class_Reference.pdf'\]" assets/js/app.js
+          ! grep -q "\['Spellblade','assets/references/DC20_Spellblade_Class_Reference.pdf'\]" assets/js/app.js
+          node --check assets/js/classes-current.js
+          node --check assets/js/app.js
+          node --check sw.js
 
-      - name: Commit Bard and Summoner PDFs
+      - name: Commit final Bard and Summoner version
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -A assets/references
+          git add             assets/references/DC20_Bard_Class_Reference.pdf             assets/references/DC20_Summoner_Class_Reference.pdf             assets/references/DC20_Sorcerer_Class_Reference.pdf             assets/references/DC20_Spellblade_Class_Reference.pdf             assets/references/Spellblade_Turn_Cheat_Sheet.pdf             sw.js
           if git diff --cached --quiet; then
             echo 'Nothing to commit.'
-            exit 0
+          else
+            git commit -m 'Deploy approved Bard and Summoner references'
+            git push
           fi
-          git commit -m 'Deploy Bard and Summoner class references'
-          git push
