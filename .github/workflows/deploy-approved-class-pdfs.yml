@@ -79,7 +79,7 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add             assets/references/DC20_Bard_Class_Reference.pdf             assets/references/DC20_Summoner_Class_Reference.pdf             assets/references/DC20_Sorcerer_Class_Reference.pdf             assets/references/DC20_Spellblade_Class_Reference.pdf             assets/references/Spellblade_Turn_Cheat_Sheet.pdf             sw.js
+          git add -A assets/references sw.js
           if git diff --cached --quiet; then
             echo 'Nothing to commit.'
           else
