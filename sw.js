@@ -1,4 +1,4 @@
-const CACHE='gangsterka-dc20-approved-class-pdfs-v1';
+const CACHE='gangsterka-dc20-bard-summoner-v1';
 
 const ASSETS=[
   './',
@@ -8,6 +8,7 @@ const ASSETS=[
   './assets/css/lore-fixes.css',
   './assets/js/rules-data.js',
   './assets/js/classes-extra.js',
+  './assets/js/classes-current.js',
   './assets/js/cms-fix.js',
   './assets/js/app.js',
   './assets/icons/d20.svg',
@@ -20,10 +21,9 @@ const ASSETS=[
   './assets/media/paper-texture.webp',
   './assets/references/DC20_Cleric_Class_Reference.pdf',
   './assets/references/DC20_Champion_Class_Reference.pdf',
-  './assets/references/DC20_Sorcerer_Class_Reference.pdf',
-  './assets/references/DC20_Spellblade_Class_Reference.pdf',
+  './assets/references/DC20_Bard_Class_Reference.pdf',
+  './assets/references/DC20_Summoner_Class_Reference.pdf',
   './assets/references/Cleric_Turn_Cheat_Sheet.pdf',
-  './assets/references/Spellblade_Turn_Cheat_Sheet.pdf',
   './content/gangcyklopedie.json',
   './content/postavy.json',
   './content/kronika.json'
