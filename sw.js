@@ -1,4 +1,4 @@
-const CACHE='gangsterka-dc20-v8';
+const CACHE='gangsterka-dc20-v9';
 
 const CMS_PATHS=[
   './content/gangcyklopedie.json',
@@ -21,6 +21,7 @@ const ASSETS=[
   './assets/js/supabase-client.js',
   './assets/js/account.js',
   './assets/js/chat.js',
+  './assets/js/notifications.js',
   './assets/icons/d20.svg',
   './assets/icons/gangsterka-192.png',
   './assets/icons/gangsterka-512.png',
@@ -172,6 +173,43 @@ self.addEventListener('fetch',event=>{
     caches.match(request).then(cached=>{
       if(cached) return cached;
       return fetch(request).then(response=>remember(request,response));
+    })
+  );
+});
+
+
+self.addEventListener('push',event=>{
+  event.waitUntil((async()=>{
+    let data={title:'Gangsterka',body:'Nová zpráva v Družině',url:'https://dc20.honzanacestach.cz/?chat=1#home',tag:'dc20-chat'};
+    try{if(event.data) data={...data,...event.data.json()};}catch(e){}
+    const windows=await self.clients.matchAll({type:'window',includeUncontrolled:true});
+    const visible=windows.find(client=>client.visibilityState==='visible');
+    if(visible){
+      visible.postMessage({type:'PUSH_NOTIFICATION',data});
+      return;
+    }
+    await self.registration.showNotification(data.title,{
+      body:data.body,
+      icon:'assets/icons/gangsterka-192.png',
+      badge:'assets/icons/gangsterka-192.png',
+      tag:data.tag||'dc20-chat',
+      renotify:true,
+      data:{url:data.url}
+    });
+  })());
+});
+
+self.addEventListener('notificationclick',event=>{
+  event.notification.close();
+  const target=new URL(event.notification.data?.url||'./?chat=1#home',self.location.origin).href;
+  event.waitUntil(
+    self.clients.matchAll({type:'window',includeUncontrolled:true}).then(async windows=>{
+      const existing=windows.find(client=>new URL(client.url).origin===self.location.origin);
+      if(existing){
+        if('navigate' in existing) await existing.navigate(target);
+        return existing.focus();
+      }
+      return self.clients.openWindow(target);
     })
   );
 });
