@@ -1578,3 +1578,277 @@ html[data-theme="dark"] .details .meta strong,html[data-theme="dark"] .rule-subh
   .chat-share-filters{grid-template-columns:1fr}
   .chat-shared-card{width:min(320px,74vw)}
 }
+
+
+/* ===== Mobile / installed-app polish ===== */
+:root{
+  --visual-viewport-height:100dvh;
+  --visual-viewport-top:0px;
+}
+@media (display-mode:standalone){
+  body{
+    min-height:100dvh;
+    overscroll-behavior-y:none;
+  }
+  .site-header{
+    padding-top:max(8px,env(safe-area-inset-top));
+  }
+  .app-shell{
+    padding-bottom:max(0px,env(safe-area-inset-bottom));
+  }
+}
+@media(pointer:coarse){
+  .tool-button,
+  .nav-toggle,
+  .to-top,
+  .button,
+  .level-jump,
+  .lore-toggle,
+  .choice-row,
+  .chat-close,
+  .chat-notification-toggle,
+  .chat-share-button,
+  .chat-attach-button,
+  .chat-compose button,
+  .account-close{
+    min-height:44px;
+  }
+  .tool-button,.nav-toggle,.to-top{
+    min-width:44px;
+    height:44px;
+  }
+  .nav-cluster a{
+    min-height:44px;
+  }
+  .chat-reaction-chip{
+    min-height:30px;
+    padding-inline:9px;
+  }
+  .chat-message-actions>button,
+  .chat-reaction-picker-wrap>button{
+    min-width:34px;
+    min-height:32px;
+  }
+}
+@media(max-width:720px){
+  html,body{max-width:100%;overflow-x:hidden}
+  body{
+    -webkit-text-size-adjust:100%;
+    text-size-adjust:100%;
+  }
+  .site-header{
+    min-height:72px;
+    grid-template-columns:44px minmax(52px,1fr) auto;
+    gap:6px;
+    padding:7px max(8px,env(safe-area-inset-right)) 7px max(8px,env(safe-area-inset-left));
+  }
+  .brand-center{width:64px}
+  .brand-center img{width:45px;height:49px}
+  .brand-center span{font-size:10px}
+  .header-tools{gap:4px}
+  .header-tools .tool-button{padding-inline:7px}
+  .site-header.mobile-open{
+    max-height:var(--visual-viewport-height,100dvh);
+    overflow-y:auto;
+    overscroll-behavior:contain;
+  }
+  .nav-cluster{
+    width:100%;
+    padding:6px 0 0;
+    gap:7px;
+  }
+  .site-header.mobile-open .nav-cluster{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .nav-cluster a{
+    justify-content:center;
+    white-space:normal;
+    text-align:center;
+    line-height:1.2;
+    padding:9px 8px;
+    border-radius:9px;
+  }
+  .nav-left{grid-row:2}
+  .nav-right{grid-row:3;padding-bottom:max(8px,env(safe-area-inset-bottom))}
+  .app-shell{
+    width:calc(100% - 16px);
+    margin:12px auto max(86px,calc(70px + env(safe-area-inset-bottom)));
+  }
+  .standard-reference,
+  .class-reference{
+    padding:20px 16px 30px;
+  }
+  .hero{
+    padding:12px 2px 18px;
+    margin-bottom:18px;
+  }
+  .hero h1,
+  .lore-reference .hero h1{
+    font-size:clamp(34px,12vw,52px);
+  }
+  .section-head{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:5px;
+  }
+  input,
+  select,
+  textarea,
+  .account-form input,
+  .chat-compose textarea,
+  .chat-share-filters input,
+  .chat-share-filters select{
+    font-size:16px!important;
+  }
+  .chat-panel{
+    top:var(--visual-viewport-top,0px);
+    right:0;
+    bottom:auto;
+    left:0;
+    width:100%;
+    height:var(--visual-viewport-height,100dvh);
+    max-width:none;
+    max-height:none;
+    border:0;
+    border-radius:0;
+  }
+  .chat-header{
+    padding-top:max(12px,env(safe-area-inset-top));
+    min-height:58px;
+  }
+  .chat-body{
+    padding-bottom:18px;
+    scroll-padding-bottom:90px;
+  }
+  .chat-compose{
+    padding-left:max(8px,env(safe-area-inset-left));
+    padding-right:max(8px,env(safe-area-inset-right));
+    padding-bottom:max(8px,env(safe-area-inset-bottom));
+    gap:6px;
+  }
+  .chat-share-button,
+  .chat-attach-button,
+  .chat-compose button{
+    flex-basis:44px;
+    width:44px;
+    height:44px;
+  }
+  .chat-compose textarea{
+    min-height:44px;
+    padding:10px 11px;
+  }
+  .soft-keyboard-open .chat-header{
+    padding-top:8px;
+  }
+  .soft-keyboard-open .chat-compose{
+    padding-bottom:7px;
+  }
+  .account-modal{
+    padding:max(8px,env(safe-area-inset-top)) 8px max(8px,env(safe-area-inset-bottom));
+  }
+  .account-dialog{
+    max-height:var(--visual-viewport-height,100dvh);
+  }
+}
+@media(max-width:390px){
+  .brand-center span{display:none}
+  .site-header{grid-template-columns:44px minmax(40px,1fr) auto}
+  .header-tools .tool-button{min-width:42px;width:42px;padding:0}
+  .account-toggle{min-width:42px!important;width:42px!important}
+  .chat-shared-card{width:min(300px,76vw)}
+}
+
+/* install suggestion */
+.install-app-chip{
+  position:fixed;
+  left:max(14px,env(safe-area-inset-left));
+  bottom:max(14px,env(safe-area-inset-bottom));
+  z-index:10004;
+  display:flex;
+  align-items:center;
+  overflow:hidden;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:var(--paper);
+  color:var(--ink);
+  box-shadow:0 12px 34px rgba(0,0,0,.2);
+}
+.install-app-action,
+.install-app-dismiss{
+  border:0;
+  background:transparent;
+  color:inherit;
+  cursor:pointer;
+}
+.install-app-action{
+  min-height:42px;
+  padding:0 5px 0 13px;
+  font:800 11px var(--sans);
+}
+.install-app-dismiss{
+  width:38px;
+  min-height:42px;
+  font-size:17px;
+  opacity:.6;
+}
+.install-app-action:hover,
+.install-app-dismiss:hover{background:var(--soft)}
+.offline-status-bar~.install-app-chip{bottom:82px}
+.install-help-modal{
+  position:fixed;
+  inset:0;
+  z-index:10040;
+  display:grid;
+  place-items:center;
+  padding:18px;
+  background:rgba(16,10,28,.58);
+  backdrop-filter:blur(5px);
+}
+.install-help-card{
+  position:relative;
+  width:min(430px,100%);
+  padding:26px 22px 20px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:var(--paper);
+  color:var(--ink);
+  box-shadow:0 24px 70px rgba(0,0,0,.3);
+  text-align:center;
+}
+.install-help-icon{display:block;font-size:36px;margin-bottom:7px}
+.install-help-card h2{margin:0 28px 8px;color:var(--purple);font-size:22px}
+.install-help-card p{margin:0;line-height:1.55;font:500 13px var(--sans)}
+.install-help-close{
+  position:absolute;
+  top:8px;
+  right:8px;
+  width:36px;
+  height:36px;
+  border:0;
+  border-radius:50%;
+  background:transparent;
+  color:var(--ink);
+  font-size:23px;
+  cursor:pointer;
+}
+.install-help-ok{
+  margin-top:18px;
+  min-height:44px;
+  border:0;
+  border-radius:10px;
+  padding:0 18px;
+  background:var(--purple);
+  color:#fff;
+  font:800 12px var(--sans);
+  cursor:pointer;
+}
+@media(max-width:720px){
+  .install-app-chip{
+    bottom:max(12px,env(safe-area-inset-bottom));
+  }
+  .chat-fab:not(.open)~.install-app-chip{
+    max-width:calc(100vw - 92px);
+  }
+  body.chat-open .install-app-chip{display:none}
+}
