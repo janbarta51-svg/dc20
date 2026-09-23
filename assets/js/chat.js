@@ -13,6 +13,9 @@
     members:[],
     onlineUsers:new Set(),
     replyTo:null,
+    selectedShare:null,
+    shareCatalog:[],
+    shareCatalogLoaded:false,
     presenceTimer:null,
     selectedFile:null,
     previewUrl:'',
@@ -44,10 +47,13 @@
       <button class="chat-close" type="button" aria-label="Zavřít chat">×</button>
     </header>
     <div class="chat-body" id="chatBody"></div>
+    <div class="chat-share-picker" id="chatSharePicker" hidden></div>
     <div class="chat-mention-menu" id="chatMentionMenu" hidden></div>
     <div class="chat-reply-preview" id="chatReplyPreview" hidden></div>
+    <div class="chat-share-preview" id="chatSharePreview" hidden></div>
     <div class="chat-attachment-preview" id="chatAttachmentPreview" hidden></div>
     <form class="chat-compose" id="chatForm">
+      <button class="chat-share-button" type="button" title="Sdílet obsah z Gangsterky" aria-label="Sdílet obsah z Gangsterky">📚</button>
       <label class="chat-attach-button" title="Přidat obrázek nebo GIF" aria-label="Přidat obrázek nebo GIF">
         <input id="chatFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
         <span aria-hidden="true">＋</span>
@@ -65,6 +71,9 @@
   const attachmentPreview=panel.querySelector('#chatAttachmentPreview');
   const sendButton=form.querySelector('.chat-send-button');
   const mentionMenu=panel.querySelector('#chatMentionMenu');
+  const sharePicker=panel.querySelector('#chatSharePicker');
+  const sharePreview=panel.querySelector('#chatSharePreview');
+  const shareButton=panel.querySelector('.chat-share-button');
   const replyPreview=panel.querySelector('#chatReplyPreview');
   const connection=panel.querySelector('#chatConnection');
   const onlineStatus=panel.querySelector('#chatOnline');
