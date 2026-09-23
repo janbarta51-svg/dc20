@@ -22,6 +22,7 @@ end;
 $$;
 
 revoke all on function private.validate_message_reply_channel() from public, anon;
+grant execute on function private.validate_message_reply_channel() to authenticated, service_role;
 
 drop trigger if exists validate_message_reply_channel on public.messages;
 create trigger validate_message_reply_channel
