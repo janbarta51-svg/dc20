@@ -133,7 +133,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 declare
   party_channel uuid;
 begin
@@ -159,7 +159,7 @@ begin
 
   return new;
 end;
-$;
+$$;
 
 revoke all on function private.handle_new_user() from public, anon, authenticated;
 revoke all on function private.add_channel_owner() from public, anon, authenticated;
