@@ -64,6 +64,52 @@ jobs:
       - name: Validate Pages CMS YAML
         run: ruby -e "require 'yaml'; YAML.load_file('.pages.yml'); puts 'Pages CMS YAML OK'"
 
+      - name: Verify Pages CMS integration contract
+        run: |
+          ruby <<'RUBY'
+          require 'yaml'
+          require 'json'
+
+          cfg = YAML.load_file('.pages.yml')
+          media = cfg.fetch('media')
+          raise 'Pages CMS media input changed' unless media['input'] == 'assets/uploads'
+          raise 'Pages CMS media output changed' unless media['output'] == '/assets/uploads'
+
+          expected = {
+            'gangs' => ['content/gangcyklopedie.json', 'gangs'],
+            'characters' => ['content/postavy.json', 'characters'],
+            'chronicle' => ['content/kronika.json', 'sessions']
+          }
+
+          entries = cfg.fetch('content').to_h { |entry| [entry.fetch('name'), entry] }
+          expected.each do |name, (path, wrapper_key)|
+            entry = entries.fetch(name)
+            raise "#{name}: wrong path" unless entry['path'] == path
+            raise "#{name}: must stay JSON" unless entry['format'] == 'json'
+
+            list_field = Array(entry['fields']).find { |field| field['name'] == wrapper_key }
+            raise "#{name}: wrapper field #{wrapper_key} missing" unless list_field
+            raise "#{name}: wrapper must stay a list/object editor" unless list_field['type'] == 'object' && list_field.key?('list')
+
+            data = JSON.parse(File.read(path, encoding: 'UTF-8'))
+            raise "#{path}: root wrapper #{wrapper_key} missing" unless data[wrapper_key].is_a?(Array)
+          end
+
+          cms_fix = File.read('assets/js/cms-fix.js', encoding: 'UTF-8')
+          expected.values.each do |path, wrapper_key|
+            raise "cms-fix.js no longer references #{path}" unless cms_fix.include?(File.basename(path))
+            raise "cms-fix.js no longer normalizes #{wrapper_key}" unless cms_fix.include?(wrapper_key)
+          end
+
+          sw = File.read('sw.js', encoding: 'UTF-8')
+          expected.values.each do |path, _|
+            raise "sw.js no longer knows #{path}" unless sw.include?(path)
+          end
+          raise 'CMS JSON must remain network-first' unless sw.include?('cmsNetworkFirst(request,event)')
+
+          puts 'Pages CMS integration contract OK'
+          RUBY
+
       - name: Check local HTML asset references
         run: |
           python3 - <<'PY'
@@ -173,6 +219,13 @@ jobs:
               if (msg.type() === 'error') errors.push(`console: ${msg.text()}`);
             });
 
+            const fs = require('fs');
+            const cmsExpected = {
+              gangcyklopedie: JSON.parse(fs.readFileSync('content/gangcyklopedie.json','utf8')).gangs?.[0]?.title || '',
+              postavy: JSON.parse(fs.readFileSync('content/postavy.json','utf8')).characters?.[0]?.name || '',
+              kronika: JSON.parse(fs.readFileSync('content/kronika.json','utf8')).sessions?.[0]?.title || ''
+            };
+
             const routes = [
               'home','character','combo','combat','cleric','champion','bard',
               'summoner','toolkit','gangcyklopedie','postavy','kronika'
@@ -229,6 +282,13 @@ jobs:
             for (const route of ['gangcyklopedie','postavy','kronika']) {
               await page.evaluate(r => { location.hash = `#${r}`; }, route);
               await page.waitForTimeout(300);
+
+              const expectedCmsText = cmsExpected[route];
+              if (expectedCmsText && !(await page.locator('#app').textContent()).includes(expectedCmsText)) {
+                throw new Error(`#${route}: Pages CMS content was not normalized/rendered: ${expectedCmsText}`);
+              }
+              console.log(`Pages CMS runtime OK: #${route} -> ${expectedCmsText || 'empty list'}`);
+
               const toggle = page.locator('.lore-toggle').first();
               if (await toggle.count()) {
                 await toggle.click();
