@@ -697,3 +697,43 @@ html[data-theme="dark"] .details .meta strong,html[data-theme="dark"] .rule-subh
 .rich-rule-option{align-items:start}.rule-option-copy{min-width:0}.rich-rule-option .rule-option-text{display:block;margin-top:5px}.rich-rule-option .rule-option-text p{margin:4px 0 7px;font-size:13px;line-height:1.45}.rich-rule-option .rule-bullet{display:grid;grid-template-columns:13px 1fr;gap:3px;margin:5px 0;font-size:13px;line-height:1.43}.rich-rule-option .rule-subhead{font-size:14px;margin:10px 0 5px}
 .wild-magic-wrap{margin-top:16px;border-top:1px solid var(--gold);padding-top:13px}.wild-magic-table{width:100%;border-collapse:collapse;font-size:13px;line-height:1.42}.wild-magic-table th{width:34px;text-align:center;color:var(--purple);font:800 12px var(--sans);border-bottom:1px solid var(--soft);padding:7px 5px}.wild-magic-table td{border-bottom:1px solid var(--soft);padding:7px 5px}.wild-magic-table tr:nth-child(even){background:color-mix(in srgb,var(--panel) 55%,transparent)}
 @media(max-width:800px){.class-source-grid{grid-template-columns:1fr}.source-detail-row{grid-template-columns:1fr;gap:2px}.wild-magic-table{font-size:12px}}
+
+
+/* ===== PWA update prompt ===== */
+.app-update-bar{
+  position:fixed;
+  left:50%;
+  bottom:max(18px,env(safe-area-inset-bottom));
+  transform:translateX(-50%);
+  z-index:9999;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  max-width:min(92vw,680px);
+  padding:10px 12px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:var(--panel);
+  color:var(--ink);
+  box-shadow:0 14px 40px rgba(0,0,0,.18);
+  font:600 13px var(--sans);
+}
+.app-update-bar button{
+  border:0;
+  border-radius:10px;
+  padding:8px 12px;
+  background:var(--purple);
+  color:#fff;
+  font:700 12px var(--sans);
+  cursor:pointer;
+}
+.app-update-bar button:disabled{opacity:.65;cursor:default}
+@media(max-width:560px){
+  .app-update-bar{
+    width:calc(100vw - 24px);
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+  }
+  .app-update-bar span{min-width:0}
+}
