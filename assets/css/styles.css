@@ -737,3 +737,32 @@ html[data-theme="dark"] .details .meta strong,html[data-theme="dark"] .rule-subh
   }
   .app-update-bar span{min-width:0}
 }
+
+
+/* ===== Offline status ===== */
+.offline-status-bar{
+  position:fixed;
+  left:max(14px,env(safe-area-inset-left));
+  bottom:max(14px,env(safe-area-inset-bottom));
+  z-index:9998;
+  display:grid;
+  gap:2px;
+  padding:9px 11px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--panel);
+  color:var(--ink);
+  box-shadow:0 10px 30px rgba(0,0,0,.16);
+  font:700 12px var(--sans);
+}
+.offline-status-bar small{
+  font:500 11px var(--sans);
+  opacity:.72;
+}
+@media(max-width:560px){
+  .offline-status-bar{
+    left:12px;
+    right:12px;
+    bottom:max(12px,env(safe-area-inset-bottom));
+  }
+}
