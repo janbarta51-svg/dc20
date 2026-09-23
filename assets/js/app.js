@@ -1025,7 +1025,60 @@
   const splashDelay=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches?120:1150;
   setTimeout(()=>splash?.classList.add('hide'),splashDelay);
   setTimeout(()=>splash?.remove(),splashDelay+650);
-  if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(console.warn);
+
+  const APP_VERSION='2026.09.23.1';
+  let updatePromptShown=false;
+
+  function showUpdatePrompt(){
+    if(updatePromptShown) return;
+    updatePromptShown=true;
+    const bar=document.createElement('div');
+    bar.className='app-update-bar';
+    bar.innerHTML=`<span>🆕 Je dostupná nová verze Gangsterky.</span><button type="button">Aktualizovat</button>`;
+    bar.querySelector('button').addEventListener('click',async()=>{
+      bar.querySelector('button').disabled=true;
+      bar.querySelector('button').textContent='Aktualizuji…';
+      try{
+        const reg=await navigator.serviceWorker?.getRegistration();
+        await reg?.update();
+      }catch(e){}
+      location.reload();
+    });
+    document.body.appendChild(bar);
+  }
+
+  async function checkForAppUpdate(){
+    if(!navigator.onLine) return;
+    try{
+      const response=await fetch(`version.json?t=${Date.now()}`,{cache:'no-store'});
+      if(!response.ok) return;
+      const data=await response.json();
+      if(data?.version && data.version!==APP_VERSION) showUpdatePrompt();
+    }catch(e){}
+  }
+
+  if('serviceWorker' in navigator && location.protocol.startsWith('http')){
+    navigator.serviceWorker.register('sw.js',{updateViaCache:'none'})
+      .then(reg=>{
+        reg.update().catch(()=>{});
+        navigator.serviceWorker.addEventListener('controllerchange',()=>{
+          if(sessionStorage.getItem('dc20-sw-reloading')==='1') return;
+          sessionStorage.setItem('dc20-sw-reloading','1');
+          location.reload();
+        });
+        navigator.serviceWorker.addEventListener('message',event=>{
+          if(event.data?.type==='SW_UPDATED') checkForAppUpdate();
+        });
+      })
+      .catch(console.warn);
+  }
+
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='visible') checkForAppUpdate();
+  });
+  window.addEventListener('online',checkForAppUpdate);
+
   render();
   loadCmsContent();
+  checkForAppUpdate();
 })();
