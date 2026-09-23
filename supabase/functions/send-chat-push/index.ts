@@ -10,6 +10,8 @@ const cors=(req:Request)=>({
 
 Deno.serve(async(req:Request)=>{
   const headers=cors(req)
+  let admin:any=null
+  let claimedMessageId:string|null=null
   if(req.method==='OPTIONS') return new Response('ok',{headers})
   if(req.method!=='POST') return new Response(JSON.stringify({error:'Method not allowed'}),{status:405,headers})
   try{
@@ -22,7 +24,7 @@ Deno.serve(async(req:Request)=>{
     const sec=secs.default||Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
     if(!pub||!sec) throw new Error('Supabase keys unavailable')
     const userClient=createClient(url,pub,{global:{headers:{Authorization:authHeader}},auth:{persistSession:false,autoRefreshToken:false}})
-    const admin=createClient(url,sec,{auth:{persistSession:false,autoRefreshToken:false}})
+    admin=createClient(url,sec,{auth:{persistSession:false,autoRefreshToken:false}})
     const {data:userData,error:userError}=await userClient.auth.getUser()
     const user=userData?.user
     if(userError||!user) return new Response(JSON.stringify({error:'Unauthorized'}),{status:401,headers})
@@ -30,6 +32,12 @@ Deno.serve(async(req:Request)=>{
     const {data:message}=await userClient.from('messages').select('id,channel_id,user_id,body,share_title').eq('id',message_id).maybeSingle()
     if(!message) return new Response(JSON.stringify({error:'Message not found'}),{status:404,headers})
     if(message.user_id!==user.id) return new Response(JSON.stringify({error:'Forbidden'}),{status:403,headers})
+    const {error:claimError}=await admin.from('push_dispatches').insert({message_id:message.id,claimed_by:user.id})
+    if(claimError){
+      if(claimError.code==='23505') return Response.json({delivered:0,gone:0,failed:0,already_dispatched:true},{headers})
+      throw claimError
+    }
+    claimedMessageId=message.id
     const [{data:profile},{data:members},{data:vapid}]=await Promise.all([
       admin.from('profiles').select('display_name').eq('id',user.id).maybeSingle(),
       admin.from('channel_members').select('user_id').eq('channel_id',message.channel_id).neq('user_id',user.id),
@@ -49,6 +57,9 @@ Deno.serve(async(req:Request)=>{
     if(result.gone?.length) await admin.from('push_subscriptions').delete().in('endpoint',result.gone)
     return Response.json({delivered:result.delivered,gone:result.gone?.length||0,failed:result.failed?.length||0},{headers})
   }catch(error){
+    if(admin&&claimedMessageId){
+      try{await admin.from('push_dispatches').delete().eq('message_id',claimedMessageId)}catch(_e){}
+    }
     console.error(error)
     return new Response(JSON.stringify({error:error instanceof Error?error.message:'Unknown error'}),{status:500,headers})
   }
