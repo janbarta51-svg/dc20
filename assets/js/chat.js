@@ -380,7 +380,7 @@
     const route=String(message.share_route||'');
     const safeRoute=/^\?focus=[^#]{1,140}#(?:home|cleric|champion|bard|summoner|postavy|gangcyklopedie)$/.test(route)?route:'';
     const image=String(message.share_image||'');
-    const safeImage=/^(?:assets\/|https:\/\/)/.test(image)?image:'';
+    const safeImage=/^(?:\/?assets\/|https:\/\/)/.test(image)?image:'';
     const icon=({spell:'✨',maneuver:'⚔️',character:'🧙',gang:'☠️',item:'🎒'})[message.share_type]||'📚';
     const media=safeImage?'<img src="'+esc(safeImage)+'" alt="">':'<b>'+icon+'</b>';
     let copy='<span class="chat-shared-card-copy"><small>'+esc(shareTypeLabel(message.share_type))+'</small><strong>'+esc(message.share_title)+'</strong>';
