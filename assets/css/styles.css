@@ -1586,9 +1586,19 @@ html[data-theme="dark"] .details .meta strong,html[data-theme="dark"] .rule-subh
   --visual-viewport-top:0px;
 }
 @media (display-mode:standalone){
+  html,
+  body{
+    min-height:100%;
+    height:auto;
+    overflow-x:hidden;
+    overflow-y:auto!important;
+    overscroll-behavior-y:auto;
+    touch-action:pan-y pinch-zoom;
+    -webkit-overflow-scrolling:touch;
+  }
   body{
     min-height:100dvh;
-    overscroll-behavior-y:none;
+    background-attachment:scroll;
   }
   .site-header{
     padding-top:max(8px,env(safe-area-inset-top));
@@ -1596,6 +1606,21 @@ html[data-theme="dark"] .details .meta strong,html[data-theme="dark"] .rule-subh
   .app-shell{
     padding-bottom:max(0px,env(safe-area-inset-bottom));
   }
+}
+
+html.pwa-standalone,
+html.pwa-standalone body{
+  min-height:100%;
+  height:auto;
+  overflow-x:hidden;
+  overflow-y:auto!important;
+  overscroll-behavior-y:auto;
+  touch-action:pan-y pinch-zoom;
+  -webkit-overflow-scrolling:touch;
+}
+html.pwa-standalone body{
+  min-height:100dvh;
+  background-attachment:scroll;
 }
 @media(pointer:coarse){
   .tool-button,
