@@ -422,6 +422,57 @@
     },45000);
   }
 
+  function reactionMarkup(messageId){
+    const list=state.reactions.get(messageId)||[];
+    if(!list.length) return '';
+    const grouped=new Map();
+    list.forEach(reaction=>{
+      const group=grouped.get(reaction.emoji)||{count:0,mine:false};
+      group.count+=1;
+      if(reaction.user_id===state.session?.user?.id) group.mine=true;
+      grouped.set(reaction.emoji,group);
+    });
+    return `<div class="chat-reactions">${[...grouped.entries()].map(([emoji,group])=>`
+      <button type="button" class="chat-reaction-chip ${group.mine?'mine':''}" data-reaction-emoji="${esc(emoji)}" data-message-id="${esc(messageId)}">
+        <span>${esc(emoji)}</span><small>${group.count}</small>
+      </button>
+    `).join('')}</div>`;
+  }
+
+  function replyMarkup(message){
+    if(!message.reply_to) return '';
+    const parent=messageById(message.reply_to);
+    if(!parent) return '<div class="chat-reply-quote"><strong>Odpověď</strong><span>Starší zpráva</span></div>';
+    const profile=state.profiles.get(parent.user_id);
+    const name=profile?.display_name || (parent.user_id===state.session?.user?.id?'Ty':'Hráč');
+    const snippet=(parent.body||'Příloha').replace(/\s+/g,' ').slice(0,100);
+    return `<button type="button" class="chat-reply-quote" data-scroll-message="${esc(parent.id)}">
+      <strong>${esc(name)}</strong><span>${esc(snippet)}</span>
+    </button>`;
+  }
+
+  async function toggleReaction(messageId,emoji){
+    if(!state.session?.user || !state.channel || !messageId || !emoji) return;
+    const list=state.reactions.get(messageId)||[];
+    const mine=list.find(reaction=>reaction.user_id===state.session.user.id && reaction.emoji===emoji);
+    if(mine){
+      const {error}=await state.client.from('reactions')
+        .delete()
+        .eq('message_id',messageId)
+        .eq('user_id',state.session.user.id)
+        .eq('emoji',emoji);
+      if(error) setConnection('Reakci se nepodařilo odebrat','error');
+    }else{
+      const {error}=await state.client.from('reactions').insert({
+        message_id:messageId,
+        channel_id:state.channel.id,
+        user_id:state.session.user.id,
+        emoji
+      });
+      if(error) setConnection('Reakci se nepodařilo přidat','error');
+    }
+  }
+
   function emptyState(titleText,copy,buttonText=''){
     body.innerHTML=`
       <div class="chat-empty">
@@ -442,17 +493,34 @@
     const avatar=profile?.signed_avatar
       ? `<img src="${esc(profile.signed_avatar)}" alt="">`
       : `<span>${esc(initials(name))}</span>`;
-    const bodyHtml=esc(message.body).replace(/\n/g,'<br>');
+    const bodyHtml=richMessageText(message.body);
     const mediaHtml=attachmentMarkup(message.id);
+    const online=state.onlineUsers.has(message.user_id);
+    const reactions=reactionMarkup(message.id);
+    const reply=replyMarkup(message);
     return `
       <article class="chat-message ${mine?'mine':''}" data-message-id="${esc(message.id)}">
-        <div class="chat-message-avatar">${avatar}</div>
+        <div class="chat-message-avatar">${avatar}<i class="chat-presence-dot ${online?'online':''}"></i></div>
         <div class="chat-message-main">
-          <div class="chat-message-meta"><strong>${esc(name)}</strong><time datetime="${esc(message.created_at)}">${esc(formatTime(message.created_at))}</time></div>
+          <div class="chat-message-meta">
+            <strong>${esc(name)}</strong>
+            <time datetime="${esc(message.created_at)}" title="${esc(formatFullTime(message.created_at))}">${esc(formatTime(message.created_at))}</time>
+          </div>
           <div class="chat-bubble ${!bodyHtml&&mediaHtml?'media-only':''}">
+            ${reply}
             ${bodyHtml?`<div class="chat-message-text">${bodyHtml}</div>`:''}
             ${mediaHtml}
           </div>
+          <div class="chat-message-actions">
+            <button type="button" data-reply-message="${esc(message.id)}" title="Odpovědět">↩</button>
+            <div class="chat-reaction-picker-wrap">
+              <button type="button" data-open-reactions="${esc(message.id)}" title="Přidat reakci">☺</button>
+              <div class="chat-reaction-picker" data-picker-for="${esc(message.id)}" hidden>
+                ${['👍','❤️','😂','🔥','🎲','💀'].map(emoji=>`<button type="button" data-pick-reaction="${esc(emoji)}" data-message-id="${esc(message.id)}">${emoji}</button>`).join('')}
+              </div>
+            </div>
+          </div>
+          ${reactions}
         </div>
       </article>
     `;
@@ -474,7 +542,17 @@
       emptyState('Ticho před hodem kostkou','V Družině zatím není žádná zpráva.');
       return;
     }
-    body.innerHTML=state.messages.map(messageMarkup).join('');
+    let lastDay='';
+    const parts=[];
+    state.messages.forEach(message=>{
+      const day=dayKey(message.created_at);
+      if(day!==lastDay){
+        parts.push(`<div class="chat-day-separator"><span>${esc(formatDay(message.created_at))}</span></div>`);
+        lastDay=day;
+      }
+      parts.push(messageMarkup(message));
+    });
+    body.innerHTML=parts.join('');
     if(stickBottom) requestAnimationFrame(()=>{body.scrollTop=body.scrollHeight;});
   }
 
@@ -537,9 +615,12 @@
       return;
     }
     state.messages=(data||[]).reverse();
+    await loadMembers();
     await Promise.all([
       loadProfiles(state.messages.map(m=>m.user_id)),
-      loadAttachments(state.messages.map(m=>m.id))
+      loadAttachments(state.messages.map(m=>m.id)),
+      loadReactions(state.messages.map(m=>m.id)),
+      loadPresence()
     ]);
     renderMessages();
     calculateUnread();
@@ -548,6 +629,7 @@
   function stopRealtime(){
     if(state.realtime && state.client) state.client.removeChannel(state.realtime);
     state.realtime=null;
+    stopPresence();
   }
 
   function startRealtime(){
@@ -598,8 +680,32 @@
           renderMessages({stickBottom:nearBottom});
         }
       )
-      .subscribe(status=>{
-        if(status==='SUBSCRIBED') setConnection('Online · zprávy živě','ok');
+      .on(
+        'postgres_changes',
+        {event:'*',schema:'public',table:'reactions'},
+        async ()=>{
+          await loadReactions(state.messages.map(message=>message.id));
+          renderMessages({stickBottom:false});
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event:'*',
+          schema:'public',
+          table:'member_presence',
+          filter:'channel_id=eq.'+state.channel.id
+        },
+        async ()=>{
+          await loadPresence();
+          renderMessages({stickBottom:false});
+        }
+      )
+      .subscribe(async status=>{
+        if(status==='SUBSCRIBED'){
+          setConnection('Online · zprávy živě','ok');
+          await startPresence();
+        }
         else if(status==='CHANNEL_ERROR') setConnection('Realtime chyba','error');
         else if(status==='TIMED_OUT') setConnection('Připojení vypršelo','error');
         else if(status==='CLOSED') setConnection('Odpojeno','');
@@ -613,7 +719,12 @@
     state.messages=[];
     state.profiles.clear();
     state.attachments.clear();
+    state.reactions.clear();
+    state.members=[];
+    state.onlineUsers.clear();
     clearSelectedFile();
+    clearReply();
+    hideMentionMenu();
     stopRealtime();
 
     if(!state.session){
@@ -660,7 +771,8 @@
         id:messageId,
         channel_id:state.channel.id,
         user_id:state.session.user.id,
-        body:text
+        body:text,
+        reply_to:state.replyTo?.id||null
       })
       .select('id,channel_id,user_id,body,reply_to,created_at,edited_at')
       .single();
@@ -731,6 +843,8 @@
     textarea.value='';
     textarea.style.height='';
     clearSelectedFile();
+    clearReply();
+    hideMentionMenu();
     textarea.disabled=false;
     fileInput.disabled=false;
     sendButton.disabled=false;
@@ -759,6 +873,40 @@
 
   fab.addEventListener('click',()=>state.open?closeChat():openChat());
   panel.querySelector('.chat-close').addEventListener('click',closeChat);
+  body.addEventListener('click',async event=>{
+    const replyButton=event.target.closest('[data-reply-message]');
+    if(replyButton){
+      setReply(replyButton.dataset.replyMessage);
+      return;
+    }
+    const openPicker=event.target.closest('[data-open-reactions]');
+    if(openPicker){
+      const id=openPicker.dataset.openReactions;
+      body.querySelectorAll('.chat-reaction-picker').forEach(picker=>{
+        picker.hidden=picker.dataset.pickerFor!==id ? true : !picker.hidden;
+      });
+      return;
+    }
+    const pick=event.target.closest('[data-pick-reaction]');
+    if(pick){
+      await toggleReaction(pick.dataset.messageId,pick.dataset.pickReaction);
+      return;
+    }
+    const chip=event.target.closest('[data-reaction-emoji]');
+    if(chip){
+      await toggleReaction(chip.dataset.messageId,chip.dataset.reactionEmoji);
+      return;
+    }
+    const scroll=event.target.closest('[data-scroll-message]');
+    if(scroll){
+      const target=body.querySelector(`[data-message-id="${CSS.escape(scroll.dataset.scrollMessage)}"]`);
+      if(target){
+        target.scrollIntoView({behavior:'smooth',block:'center'});
+        target.classList.add('chat-message-highlight');
+        setTimeout(()=>target.classList.remove('chat-message-highlight'),1200);
+      }
+    }
+  });
   form.addEventListener('submit',sendMessage);
   fileInput.addEventListener('change',()=>{
     const file=fileInput.files?.[0];
@@ -786,9 +934,16 @@
   textarea.addEventListener('input',()=>{
     textarea.style.height='auto';
     textarea.style.height=Math.min(textarea.scrollHeight,120)+'px';
+    updateMentionMenu();
   });
-  document.addEventListener('visibilitychange',()=>{
-    if(document.visibilityState==='visible' && state.open) markRead();
+  document.addEventListener('visibilitychange',async()=>{
+    if(document.visibilityState==='visible'){
+      if(state.open) markRead();
+      if(state.session?.user && state.channel){
+        await touchPresence();
+        await loadPresence();
+      }
+    }
   });
 
   window.dc20SupabaseReady
