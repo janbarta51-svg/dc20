@@ -285,7 +285,7 @@
   function setSelected(key,set){selections[key]=[...set];saveSelections()}
   function classRoute(){
     const h=(location.hash||'#home').slice(1);
-    return ['home','character','combo','combat','cleric','champion','bard','summoner','toolkit','gangcyklopedie','postavy','kronika'].includes(h)?h:'home';
+    return ['home','character','combo','combat','cleric','champion','bard','summoner','toolkit','gangcyklopedie','postavy','calendar','kronika'].includes(h)?h:'home';
   }
   function groupBy(arr,keyFn){
     return arr.reduce((acc,item)=>{ const key=keyFn(item); (acc[key] ||= []).push(item); return acc; },{});
@@ -995,6 +995,10 @@
     else if(route==='toolkit') renderToolkit();
     else if(route==='gangcyklopedie') renderGang();
     else if(route==='postavy') renderCharacters();
+    else if(route==='calendar'){
+      if(window.renderDC20Calendar) window.renderDC20Calendar();
+      else app.innerHTML=`<article class="standard-reference calendar-reference"><section class="hero"><div class="eyebrow">DRUŽINA</div><h1>Kalendář</h1><p>Načítám termíny Družiny…</p></section></article>`;
+    }
     else renderChronicle();
     decorateGlossary(app);
     focusSharedContent();
@@ -1049,7 +1053,7 @@
   setTimeout(()=>splash?.classList.add('hide'),splashDelay);
   setTimeout(()=>splash?.remove(),splashDelay+650);
 
-  const APP_VERSION='2026.09.23.11';
+  const APP_VERSION='2026.09.23.12';
   let updatePromptShown=false;
 
   function showUpdatePrompt(){
