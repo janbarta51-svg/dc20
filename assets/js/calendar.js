@@ -140,7 +140,7 @@
   }
 
   window.renderDC20Calendar=init;
-  window.addEventListener('hashchange',()=>{if(isRoute())init();else stopRealtime();});
+  window.addEventListener('hashchange',()=>{if(!isRoute())stopRealtime();});
   window.dc20SupabaseReady?.then(client=>client.auth.onAuthStateChange(()=>setTimeout(()=>{if(isRoute())init();},0)));
   if(isRoute()) init();
 })();
