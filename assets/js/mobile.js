@@ -1,5 +1,6 @@
 (() => {
   const standalone=window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone===true;
+  document.documentElement.classList.toggle('pwa-standalone',standalone);
   const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
   let deferredInstall=null;
 
