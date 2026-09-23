@@ -639,6 +639,7 @@
       : `<span>${esc(initials(name))}</span>`;
     const bodyHtml=richMessageText(message.body);
     const mediaHtml=attachmentMarkup(message.id);
+    const shareHtml=shareCardMarkup(message);
     const online=state.onlineUsers.has(message.user_id);
     const reactions=reactionMarkup(message.id);
     const reply=replyMarkup(message);
@@ -650,9 +651,10 @@
             <strong>${esc(name)}</strong>
             <time datetime="${esc(message.created_at)}" title="${esc(formatFullTime(message.created_at))}">${esc(formatTime(message.created_at))}</time>
           </div>
-          <div class="chat-bubble ${!bodyHtml&&mediaHtml?'media-only':''}">
+          <div class="chat-bubble ${!bodyHtml&&(mediaHtml||shareHtml)?'media-only':''}">
             ${reply}
             ${bodyHtml?`<div class="chat-message-text">${bodyHtml}</div>`:''}
+            ${shareHtml}
             ${mediaHtml}
           </div>
           <div class="chat-message-actions">
@@ -749,7 +751,7 @@
 
     const {data,error}=await state.client
       .from('messages')
-      .select('id,channel_id,user_id,body,reply_to,created_at,edited_at')
+      .select('id,channel_id,user_id,body,reply_to,share_type,share_key,share_title,share_subtitle,share_body,share_route,share_image,created_at,edited_at')
       .eq('channel_id',state.channel.id)
       .order('created_at',{ascending:false})
       .limit(100);
@@ -871,6 +873,8 @@
     state.members=[];
     state.onlineUsers.clear();
     clearSelectedFile();
+    clearShare();
+    sharePicker.hidden=true;
     clearReply();
     hideMentionMenu();
     stopRealtime();
@@ -909,7 +913,8 @@
     if(!state.session?.user || !state.channel) return;
     const text=textarea.value.trim();
     const file=state.selectedFile;
-    if(!text && !file) return;
+    const share=state.selectedShare;
+    if(!text && !file && !share) return;
 
     textarea.disabled=true;
     fileInput.disabled=true;
@@ -924,9 +929,16 @@
         channel_id:state.channel.id,
         user_id:state.session.user.id,
         body:text,
-        reply_to:state.replyTo?.id||null
+        reply_to:state.replyTo?.id||null,
+        share_type:share?.type||null,
+        share_key:share?.key||null,
+        share_title:share?.title||null,
+        share_subtitle:share?.subtitle||null,
+        share_body:share?.body||null,
+        share_route:share?.route||null,
+        share_image:share?.image||null
       })
-      .select('id,channel_id,user_id,body,reply_to,created_at,edited_at')
+      .select('id,channel_id,user_id,body,reply_to,share_type,share_key,share_title,share_subtitle,share_body,share_route,share_image,created_at,edited_at')
       .single();
 
     if(messageError){
@@ -1000,6 +1012,7 @@
     textarea.value='';
     textarea.style.height='';
     clearSelectedFile();
+    clearShare();
     clearReply();
     hideMentionMenu();
     textarea.disabled=false;
@@ -1030,6 +1043,7 @@
 
   fab.addEventListener('click',()=>state.open?closeChat():openChat());
   panel.querySelector('.chat-close').addEventListener('click',closeChat);
+  shareButton.addEventListener('click',()=>sharePicker.hidden?openSharePicker():(sharePicker.hidden=true));
   body.addEventListener('click',async event=>{
     const replyButton=event.target.closest('[data-reply-message]');
     if(replyButton){
