@@ -1026,7 +1026,7 @@
   setTimeout(()=>splash?.classList.add('hide'),splashDelay);
   setTimeout(()=>splash?.remove(),splashDelay+650);
 
-  const APP_VERSION='2026.09.23.1';
+  const APP_VERSION='2026.09.23.2';
   let updatePromptShown=false;
 
   function showUpdatePrompt(){
@@ -1057,6 +1057,20 @@
     }catch(e){}
   }
 
+  function syncConnectionStatus(){
+    let bar=document.querySelector('.offline-status-bar');
+    if(navigator.onLine){
+      bar?.remove();
+      return;
+    }
+    if(bar) return;
+    bar=document.createElement('div');
+    bar.className='offline-status-bar';
+    bar.setAttribute('role','status');
+    bar.innerHTML='<span>📴 Offline režim</span><small>Používám poslední uloženou verzi.</small>';
+    document.body.appendChild(bar);
+  }
+
   if('serviceWorker' in navigator && location.protocol.startsWith('http')){
     navigator.serviceWorker.register('sw.js',{updateViaCache:'none'})
       .then(reg=>{
@@ -1074,11 +1088,19 @@
   }
 
   document.addEventListener('visibilitychange',()=>{
-    if(document.visibilityState==='visible') checkForAppUpdate();
+    if(document.visibilityState==='visible'){
+      syncConnectionStatus();
+      checkForAppUpdate();
+    }
   });
-  window.addEventListener('online',checkForAppUpdate);
+  window.addEventListener('online',()=>{
+    syncConnectionStatus();
+    checkForAppUpdate();
+  });
+  window.addEventListener('offline',syncConnectionStatus);
 
   render();
   loadCmsContent();
+  syncConnectionStatus();
   checkForAppUpdate();
 })();
