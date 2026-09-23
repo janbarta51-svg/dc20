@@ -37,3 +37,13 @@ Když používáš Source/Markdown mód, funguje například:
 
 Loga gangů a obrázky postav se automaticky ukládají do assets/uploads/.
 Po uložení změn vytvoří Pages CMS commit do GitHubu a GitHub Pages nasadí novou verzi webu.
+
+
+AKTUALIZACE WEBU / PWA
+----------------------
+Běžná změna obsahu v Pages CMS nepotřebuje měnit version.json ani Service Worker.
+Postup zůstává:
+Pages CMS -> Save -> commit do main -> GitHub Pages deploy -> aplikace při dalším online načtení vezme nový obsah.
+
+Gangy, Postavy a Kronika používají network-first načítání. Když internet není dostupný,
+PWA zobrazí poslední uloženou verzi obsahu. Po návratu online se znovu načte aktuální JSON.
