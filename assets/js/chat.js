@@ -461,7 +461,10 @@
         .eq('message_id',messageId)
         .eq('user_id',state.session.user.id)
         .eq('emoji',emoji);
-      if(error) setConnection('Reakci se nepodařilo odebrat','error');
+      if(error){
+        setConnection('Reakci se nepodařilo odebrat','error');
+        return;
+      }
     }else{
       const {error}=await state.client.from('reactions').insert({
         message_id:messageId,
@@ -469,8 +472,13 @@
         user_id:state.session.user.id,
         emoji
       });
-      if(error) setConnection('Reakci se nepodařilo přidat','error');
+      if(error){
+        setConnection('Reakci se nepodařilo přidat','error');
+        return;
+      }
     }
+    await loadReactions(state.messages.map(message=>message.id));
+    renderMessages({stickBottom:false});
   }
 
   function emptyState(titleText,copy,buttonText=''){
