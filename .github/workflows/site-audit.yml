@@ -305,6 +305,44 @@ jobs:
             await page.locator('#langToggle').click();
             await page.waitForTimeout(100);
 
+            await page.setViewportSize({width:390,height:844});
+            await page.goto('http://127.0.0.1:4173/#home', {waitUntil:'networkidle'});
+            await page.waitForTimeout(150);
+
+            const mobileWidth = await page.evaluate(() => ({
+              viewport: innerWidth,
+              documentWidth: document.documentElement.scrollWidth,
+              bodyWidth: document.body.scrollWidth
+            }));
+            if (mobileWidth.documentWidth > mobileWidth.viewport + 1 || mobileWidth.bodyWidth > mobileWidth.viewport + 1) {
+              throw new Error(`Mobile layout overflows horizontally: ${JSON.stringify(mobileWidth)}`);
+            }
+
+            await page.locator('#navToggle').click();
+            const mobileNav = await page.evaluate(() => ({
+              expanded: document.querySelector('#navToggle')?.getAttribute('aria-expanded'),
+              open: document.querySelector('#siteHeader')?.classList.contains('mobile-open'),
+              visibleLinks: [...document.querySelectorAll('.nav-cluster a')].filter(a => getComputedStyle(a).display !== 'none' && a.getBoundingClientRect().height > 0).length,
+              minLinkHeight: Math.min(...[...document.querySelectorAll('.nav-cluster a')].filter(a => a.getBoundingClientRect().height > 0).map(a => a.getBoundingClientRect().height))
+            }));
+            if (mobileNav.expanded !== 'true' || !mobileNav.open || mobileNav.visibleLinks < 8 || mobileNav.minLinkHeight < 43) {
+              throw new Error(`Mobile navigation mismatch: ${JSON.stringify(mobileNav)}`);
+            }
+
+            await page.locator('a[data-route="postavy"]').click();
+            await page.waitForTimeout(100);
+            const menuClosed = await page.evaluate(() => !document.querySelector('#siteHeader')?.classList.contains('mobile-open'));
+            if (!menuClosed) throw new Error('Mobile menu did not close after navigation');
+
+            await page.locator('.chat-fab').click();
+            await page.waitForTimeout(80);
+            const chatBox = await page.locator('.chat-panel').boundingBox();
+            if (!chatBox || chatBox.width < 385 || chatBox.height < 800) {
+              throw new Error(`Mobile chat does not fill viewport: ${JSON.stringify(chatBox)}`);
+            }
+            await page.locator('.chat-close').click();
+            console.log('Mobile layout OK: 390x844');
+
             if (errors.length) {
               throw new Error(`Browser errors:\n${errors.join('\n')}`);
             }
