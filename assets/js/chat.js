@@ -658,6 +658,10 @@
           const message=payload.new;
           if(state.messages.some(m=>m.id===message.id)) return;
           await loadProfile(message.user_id);
+          if(message.user_id!==state.session?.user?.id){
+            const sender=state.profiles.get(message.user_id)?.display_name||'Družina';
+            window.dispatchEvent(new CustomEvent('dc20:new-chat-message',{detail:{sender,body:message.body||'📷 Nová příloha'}}));
+          }
           const nearBottom=body.scrollHeight-body.scrollTop-body.clientHeight<120;
           state.messages.push(message);
           renderMessages({stickBottom:nearBottom || message.user_id===state.session?.user?.id});
@@ -760,6 +764,10 @@
     startRealtime();
   }
 
+  function notifyPush(messageId){
+    state.client?.functions?.invoke('send-chat-push',{body:{message_id:messageId}}).catch(()=>{});
+  }
+
   async function sendMessage(event){
     event.preventDefault();
     if(!state.session?.user || !state.channel) return;
@@ -799,6 +807,8 @@
       renderMessages();
     }
 
+    if(!file) notifyPush(messageId);
+
     if(file){
       const extByType={'image/jpeg':'jpg','image/png':'png','image/webp':'webp','image/gif':'gif'};
       const ext=extByType[file.type];
@@ -812,6 +822,7 @@
         textarea.disabled=false;
         fileInput.disabled=false;
         sendButton.disabled=false;
+        if(text) notifyPush(messageId);
         setConnection(text?'Text odeslán, obrázek selhal':'Obrázek se nepodařilo odeslat','error');
         return;
       }
@@ -837,6 +848,7 @@
         textarea.disabled=false;
         fileInput.disabled=false;
         sendButton.disabled=false;
+        if(text) notifyPush(messageId);
         setConnection(text?'Text odeslán, obrázek selhal':'Obrázek se nepodařilo uložit','error');
         return;
       }
@@ -845,6 +857,7 @@
         const item={...attachment,signed_url:await signedChatMedia(storagePath)};
         state.attachments.set(messageId,[item]);
         renderMessages();
+        notifyPush(messageId);
       }
     }
 
