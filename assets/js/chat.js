@@ -9,6 +9,11 @@
     messages:[],
     profiles:new Map(),
     attachments:new Map(),
+    reactions:new Map(),
+    members:[],
+    onlineUsers:new Set(),
+    replyTo:null,
+    presenceTimer:null,
     selectedFile:null,
     previewUrl:'',
     open:false,
@@ -31,11 +36,16 @@
       <div>
         <span class="chat-kicker">GANGSTERKA</span>
         <strong id="chatTitle">Družina</strong>
-        <small id="chatConnection">Připojuji…</small>
+        <div class="chat-status-line">
+          <small id="chatConnection">Připojuji…</small>
+          <small id="chatOnline" class="chat-online-status">0 online</small>
+        </div>
       </div>
       <button class="chat-close" type="button" aria-label="Zavřít chat">×</button>
     </header>
     <div class="chat-body" id="chatBody"></div>
+    <div class="chat-mention-menu" id="chatMentionMenu" hidden></div>
+    <div class="chat-reply-preview" id="chatReplyPreview" hidden></div>
     <div class="chat-attachment-preview" id="chatAttachmentPreview" hidden></div>
     <form class="chat-compose" id="chatForm">
       <label class="chat-attach-button" title="Přidat obrázek nebo GIF" aria-label="Přidat obrázek nebo GIF">
@@ -54,7 +64,10 @@
   const fileInput=panel.querySelector('#chatFile');
   const attachmentPreview=panel.querySelector('#chatAttachmentPreview');
   const sendButton=form.querySelector('.chat-send-button');
+  const mentionMenu=panel.querySelector('#chatMentionMenu');
+  const replyPreview=panel.querySelector('#chatReplyPreview');
   const connection=panel.querySelector('#chatConnection');
+  const onlineStatus=panel.querySelector('#chatOnline');
   const title=panel.querySelector('#chatTitle');
   const badge=fab.querySelector('.chat-badge');
 
@@ -102,6 +115,144 @@
     }catch(e){
       return '';
     }
+  }
+
+  function formatFullTime(value){
+    try{
+      return new Intl.DateTimeFormat('cs-CZ',{
+        day:'numeric',month:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'
+      }).format(new Date(value));
+    }catch(e){
+      return '';
+    }
+  }
+
+  function dayKey(value){
+    try{
+      const d=new Date(value);
+      return [d.getFullYear(),d.getMonth(),d.getDate()].join('-');
+    }catch(e){
+      return '';
+    }
+  }
+
+  function formatDay(value){
+    try{
+      const d=new Date(value);
+      const today=new Date();
+      const yesterday=new Date();
+      yesterday.setDate(today.getDate()-1);
+      if(dayKey(d)===dayKey(today)) return 'Dnes';
+      if(dayKey(d)===dayKey(yesterday)) return 'Včera';
+      return new Intl.DateTimeFormat('cs-CZ',{weekday:'short',day:'numeric',month:'numeric',year:'numeric'}).format(d);
+    }catch(e){
+      return '';
+    }
+  }
+
+  function mentionHandle(name=''){
+    return name.trim()
+      .replace(/\s+/g,'_')
+      .replace(/[^\p{L}\p{N}_-]/gu,'')
+      .slice(0,40);
+  }
+
+  function richMessageText(text=''){
+    const known=new Set(
+      [...state.profiles.values()]
+        .map(profile=>mentionHandle(profile.display_name).toLocaleLowerCase('cs-CZ'))
+        .filter(Boolean)
+    );
+    return esc(text)
+      .replace(/(@[\p{L}\p{N}_-]+)/gu,token=>{
+        const handle=token.slice(1).toLocaleLowerCase('cs-CZ');
+        return known.has(handle)?`<mark class="chat-mention">${token}</mark>`:token;
+      })
+      .replace(/\n/g,'<br>');
+  }
+
+  function messageById(id){
+    return state.messages.find(message=>message.id===id)||null;
+  }
+
+  function updateOnlineStatus(){
+    const count=state.onlineUsers.size;
+    onlineStatus.textContent=`${count} online`;
+    const names=[...state.onlineUsers]
+      .map(id=>state.profiles.get(id)?.display_name)
+      .filter(Boolean);
+    onlineStatus.title=names.length?names.join(', '):'Nikdo další není online';
+  }
+
+  function clearReply(){
+    state.replyTo=null;
+    replyPreview.hidden=true;
+    replyPreview.innerHTML='';
+  }
+
+  function setReply(messageId){
+    const message=messageById(messageId);
+    if(!message) return;
+    state.replyTo=message;
+    const profile=state.profiles.get(message.user_id);
+    const name=profile?.display_name || (message.user_id===state.session?.user?.id?'Ty':'Hráč');
+    const snippet=(message.body||'Příloha').replace(/\s+/g,' ').slice(0,90);
+    replyPreview.hidden=false;
+    replyPreview.innerHTML=`
+      <div>
+        <span>Odpovídáš na <strong>${esc(name)}</strong></span>
+        <small>${esc(snippet)}</small>
+      </div>
+      <button type="button" aria-label="Zrušit odpověď">×</button>
+    `;
+    replyPreview.querySelector('button').addEventListener('click',clearReply);
+    textarea.focus();
+  }
+
+  function hideMentionMenu(){
+    mentionMenu.hidden=true;
+    mentionMenu.innerHTML='';
+  }
+
+  function updateMentionMenu(){
+    if(!state.members.length){
+      hideMentionMenu();
+      return;
+    }
+    const caret=textarea.selectionStart??textarea.value.length;
+    const before=textarea.value.slice(0,caret);
+    const match=before.match(/(?:^|\s)@([\p{L}\p{N}_-]*)$/u);
+    if(!match){
+      hideMentionMenu();
+      return;
+    }
+    const query=(match[1]||'').toLocaleLowerCase('cs-CZ');
+    const choices=state.members
+      .map(member=>state.profiles.get(member.user_id))
+      .filter(Boolean)
+      .map(profile=>({...profile,handle:mentionHandle(profile.display_name)}))
+      .filter(profile=>profile.handle && profile.handle.toLocaleLowerCase('cs-CZ').includes(query))
+      .slice(0,6);
+    if(!choices.length){
+      hideMentionMenu();
+      return;
+    }
+    mentionMenu.hidden=false;
+    mentionMenu.innerHTML=choices.map(profile=>`
+      <button type="button" data-mention-handle="${esc(profile.handle)}">
+        <span class="chat-mention-avatar">${profile.signed_avatar?`<img src="${esc(profile.signed_avatar)}" alt="">`:esc(initials(profile.display_name))}</span>
+        <span><strong>${esc(profile.display_name)}</strong><small>@${esc(profile.handle)}</small></span>
+      </button>
+    `).join('');
+    mentionMenu.querySelectorAll('[data-mention-handle]').forEach(button=>button.addEventListener('click',()=>{
+      const handle=button.dataset.mentionHandle||'';
+      const start=caret-match[1].length-1;
+      textarea.value=textarea.value.slice(0,start)+'@'+handle+' '+textarea.value.slice(caret);
+      const pos=start+handle.length+2;
+      textarea.setSelectionRange(pos,pos);
+      hideMentionMenu();
+      textarea.focus();
+    }));
   }
 
   async function signedAvatar(path){
@@ -196,6 +347,79 @@
     await Promise.all((data||[]).map(async profile=>{
       state.profiles.set(profile.id,{...profile,signed_avatar:await signedAvatar(profile.avatar_url)});
     }));
+  }
+
+  async function loadMembers(){
+    state.members=[];
+    if(!state.channel) return;
+    const {data,error}=await state.client
+      .from('channel_members')
+      .select('user_id,role,joined_at')
+      .eq('channel_id',state.channel.id);
+    if(error) return;
+    state.members=data||[];
+    await loadProfiles(state.members.map(member=>member.user_id));
+  }
+
+  async function loadReactions(messageIds){
+    state.reactions.clear();
+    const ids=[...new Set(messageIds.filter(Boolean))];
+    if(!ids.length || !state.channel) return;
+    const {data,error}=await state.client
+      .from('reactions')
+      .select('message_id,channel_id,user_id,emoji,created_at')
+      .eq('channel_id',state.channel.id)
+      .in('message_id',ids);
+    if(error) return;
+    (data||[]).forEach(reaction=>{
+      const list=state.reactions.get(reaction.message_id)||[];
+      list.push(reaction);
+      state.reactions.set(reaction.message_id,list);
+    });
+  }
+
+  async function loadPresence(){
+    state.onlineUsers.clear();
+    if(!state.channel) return;
+    const cutoff=new Date(Date.now()-90000).toISOString();
+    const {data,error}=await state.client
+      .from('member_presence')
+      .select('user_id,last_seen')
+      .eq('channel_id',state.channel.id)
+      .gte('last_seen',cutoff);
+    if(!error){
+      (data||[]).forEach(row=>state.onlineUsers.add(row.user_id));
+    }
+    updateOnlineStatus();
+  }
+
+  async function touchPresence(){
+    if(!state.session?.user || !state.channel) return;
+    await state.client
+      .from('member_presence')
+      .upsert({
+        channel_id:state.channel.id,
+        user_id:state.session.user.id,
+        last_seen:new Date().toISOString()
+      },{onConflict:'channel_id,user_id'});
+  }
+
+  function stopPresence(){
+    if(state.presenceTimer) clearInterval(state.presenceTimer);
+    state.presenceTimer=null;
+    state.onlineUsers.clear();
+    updateOnlineStatus();
+  }
+
+  async function startPresence(){
+    stopPresence();
+    if(!state.session?.user || !state.channel) return;
+    await touchPresence();
+    await loadPresence();
+    state.presenceTimer=setInterval(async()=>{
+      await touchPresence();
+      await loadPresence();
+    },45000);
   }
 
   function emptyState(titleText,copy,buttonText=''){
