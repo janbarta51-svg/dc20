@@ -798,7 +798,7 @@
           await loadProfile(message.user_id);
           if(message.user_id!==state.session?.user?.id){
             const sender=state.profiles.get(message.user_id)?.display_name||'Družina';
-            window.dispatchEvent(new CustomEvent('dc20:new-chat-message',{detail:{sender,body:message.body||'📷 Nová příloha'}}));
+            window.dispatchEvent(new CustomEvent('dc20:new-chat-message',{detail:{sender,body:message.body||(message.share_title?'📚 Sdílí: '+message.share_title:'📷 Nová příloha')}}));
           }
           const nearBottom=body.scrollHeight-body.scrollTop-body.clientHeight<120;
           state.messages.push(message);
