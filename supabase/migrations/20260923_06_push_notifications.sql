@@ -53,3 +53,8 @@ grant select on public.push_server_secrets to service_role;
 
 -- VAPID private keys are intentionally NOT stored in this migration.
 -- Generate/store them directly in the production database or secret manager.
+
+drop policy if exists "clients cannot read push server secrets" on public.push_server_secrets;
+create policy "clients cannot read push server secrets"
+on public.push_server_secrets for select to authenticated
+using (false);
