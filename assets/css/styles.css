@@ -1037,3 +1037,104 @@ html[data-theme="dark"] .details .meta strong,html[data-theme="dark"] .rule-subh
   }
   .chat-message-main{max-width:84%}
 }
+
+
+/* ===== Chat media attachments ===== */
+.chat-attachment-preview{
+  flex:0 0 auto;
+  padding:8px 10px 0;
+  border-top:1px solid var(--line);
+  background:var(--panel);
+}
+.chat-attachment-preview[hidden]{display:none!important}
+.chat-preview-card{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:7px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--paper);
+}
+.chat-preview-card img{
+  width:48px;
+  height:48px;
+  flex:0 0 48px;
+  border-radius:9px;
+  object-fit:cover;
+}
+.chat-preview-card>div{min-width:0;display:grid;gap:2px}
+.chat-preview-card strong{font:800 11px var(--sans);color:var(--purple)}
+.chat-preview-card small{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font:500 10px var(--sans);
+  opacity:.68;
+}
+.chat-preview-remove{
+  margin-left:auto;
+  width:30px;
+  height:30px;
+  flex:0 0 30px;
+  border:0;
+  border-radius:50%;
+  background:var(--soft);
+  color:var(--ink);
+  font-size:20px;
+  cursor:pointer;
+}
+.chat-attach-button{
+  flex:0 0 42px;
+  width:42px;
+  height:42px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  display:grid;
+  place-items:center;
+  background:var(--paper);
+  color:var(--purple);
+  font:500 24px/1 var(--sans);
+  cursor:pointer;
+}
+.chat-attach-button:hover{background:var(--soft)}
+.chat-attach-button:has(input:disabled){opacity:.6;cursor:default}
+.chat-message-text+.chat-media-link{margin-top:7px}
+.chat-bubble.media-only{
+  padding:0;
+  border:0;
+  background:transparent;
+  overflow:visible;
+}
+.chat-media-link{
+  position:relative;
+  display:block;
+  width:min(250px,62vw);
+  overflow:hidden;
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:var(--panel);
+  text-decoration:none;
+}
+.chat-media-image{
+  display:block;
+  width:100%;
+  max-height:320px;
+  object-fit:contain;
+  background:rgba(0,0,0,.04);
+}
+.chat-gif-badge{
+  position:absolute;
+  right:7px;
+  bottom:7px;
+  padding:3px 6px;
+  border-radius:6px;
+  background:rgba(0,0,0,.72);
+  color:#fff;
+  font:800 9px var(--sans);
+  letter-spacing:.05em;
+}
+@media(max-width:720px){
+  .chat-media-link{width:min(290px,72vw)}
+  .chat-media-image{max-height:42vh}
+}
