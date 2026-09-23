@@ -53,6 +53,9 @@ create table if not exists public.member_presence (
 create index if not exists member_presence_last_seen_idx
 on public.member_presence(channel_id,last_seen desc);
 
+create index if not exists member_presence_user_idx
+on public.member_presence(user_id);
+
 alter table public.member_presence enable row level security;
 
 grant select, insert, update, delete on public.member_presence to authenticated;
