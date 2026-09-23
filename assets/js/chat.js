@@ -1022,11 +1022,16 @@
     textarea.focus();
   }
 
-  function openChat(){
+  async function openChat(){
     state.open=true;
     panel.hidden=false;
     fab.classList.add('open');
     document.body.classList.add('chat-open');
+
+    if(state.session && !state.channel){
+      await refreshSession();
+    }
+
     if(state.session && state.channel) markRead();
     requestAnimationFrame(()=>{
       body.scrollTop=body.scrollHeight;
@@ -1041,7 +1046,7 @@
     document.body.classList.remove('chat-open');
   }
 
-  fab.addEventListener('click',()=>state.open?closeChat():openChat());
+  fab.addEventListener('click',()=>{if(state.open) closeChat(); else openChat();});
   panel.querySelector('.chat-close').addEventListener('click',closeChat);
   shareButton.addEventListener('click',()=>sharePicker.hidden?openSharePicker():(sharePicker.hidden=true));
   body.addEventListener('click',async event=>{
