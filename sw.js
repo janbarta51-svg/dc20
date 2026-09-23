@@ -1,9 +1,10 @@
-const CACHE='gangsterka-dc20-bard-summoner-v2';
+const CACHE='gangsterka-dc20-v3';
 
 const ASSETS=[
   './',
   './index.html',
   './manifest.webmanifest',
+  './version.json',
   './assets/css/styles.css',
   './assets/css/lore-fixes.css',
   './assets/js/rules-data.js',
@@ -42,8 +43,29 @@ self.addEventListener('activate',event=>{
     caches.keys()
       .then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key))))
       .then(()=>self.clients.claim())
+      .then(()=>self.clients.matchAll({type:'window'}))
+      .then(clients=>clients.forEach(client=>client.postMessage({type:'SW_UPDATED'})))
   );
 });
+
+function remember(request,response){
+  if(response?.ok){
+    const copy=response.clone();
+    caches.open(CACHE).then(cache=>cache.put(request,copy));
+  }
+  return response;
+}
+
+function networkFirst(request,fallback){
+  return fetch(request,{cache:'no-store'})
+    .then(response=>remember(request,response))
+    .catch(async()=>{
+      const cached=await caches.match(request);
+      if(cached) return cached;
+      if(fallback) return caches.match(fallback);
+      throw new Error('Offline and no cached response');
+    });
+}
 
 self.addEventListener('fetch',event=>{
   const request=event.request;
@@ -51,54 +73,40 @@ self.addEventListener('fetch',event=>{
 
   const url=new URL(request.url);
   const isSameOrigin=url.origin===self.location.origin;
-  const isCmsJson=isSameOrigin && (
+  if(!isSameOrigin) return;
+
+  const isCmsJson=
     url.pathname.endsWith('/content/gangcyklopedie.json') ||
     url.pathname.endsWith('/content/postavy.json') ||
-    url.pathname.endsWith('/content/kronika.json')
-  );
+    url.pathname.endsWith('/content/kronika.json');
+
+  const isFreshAppFile=
+    request.mode==='navigate' ||
+    url.pathname.endsWith('/index.html') ||
+    url.pathname.endsWith('/manifest.webmanifest') ||
+    url.pathname.endsWith('/version.json') ||
+    url.pathname.endsWith('.js') ||
+    url.pathname.endsWith('.css');
 
   if(isCmsJson){
-    event.respondWith(
-      fetch(request,{cache:'no-store'})
-        .then(response=>{
-          if(response.ok){
-            const copy=response.clone();
-            caches.open(CACHE).then(cache=>cache.put(request,copy));
-          }
-          return response;
-        })
-        .catch(()=>caches.match(request))
-    );
+    event.respondWith(networkFirst(request));
     return;
   }
 
   if(request.mode==='navigate'){
-    event.respondWith(
-      fetch(request)
-        .then(response=>{
-          if(response.ok){
-            const copy=response.clone();
-            caches.open(CACHE).then(cache=>cache.put('./index.html',copy));
-          }
-          return response;
-        })
-        .catch(()=>caches.match('./index.html'))
-    );
+    event.respondWith(networkFirst(request,'./index.html'));
     return;
   }
 
-  if(isSameOrigin){
-    event.respondWith(
-      caches.match(request).then(cached=>{
-        if(cached) return cached;
-        return fetch(request).then(response=>{
-          if(response.ok){
-            const copy=response.clone();
-            caches.open(CACHE).then(cache=>cache.put(request,copy));
-          }
-          return response;
-        });
-      })
-    );
+  if(isFreshAppFile){
+    event.respondWith(networkFirst(request));
+    return;
   }
+
+  event.respondWith(
+    caches.match(request).then(cached=>{
+      if(cached) return cached;
+      return fetch(request).then(response=>remember(request,response));
+    })
+  );
 });
