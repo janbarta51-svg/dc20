@@ -228,7 +228,7 @@ jobs:
 
             const routes = [
               'home','character','combo','combat','cleric','champion','bard',
-              'summoner','toolkit','gangcyklopedie','postavy','kronika'
+              'summoner','toolkit','gangcyklopedie','postavy','calendar','kronika'
             ];
 
             await page.goto('http://127.0.0.1:4173/#home', {waitUntil:'networkidle'});
