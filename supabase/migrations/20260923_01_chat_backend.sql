@@ -4,6 +4,10 @@
 
 create extension if not exists pgcrypto;
 
+create schema if not exists private;
+revoke all on schema private from public, anon;
+grant usage on schema private to authenticated, service_role;
+
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   display_name text not null check (char_length(display_name) between 1 and 40),
@@ -69,7 +73,7 @@ create index if not exists reactions_message_idx
 create index if not exists channel_members_user_idx
   on public.channel_members(user_id);
 
-create or replace function public.is_channel_member(target_channel uuid)
+create or replace function private.is_channel_member(target_channel uuid)
 returns boolean
 language sql
 stable
@@ -84,7 +88,7 @@ as $$
   );
 $$;
 
-create or replace function public.is_channel_admin(target_channel uuid)
+create or replace function private.is_channel_admin(target_channel uuid)
 returns boolean
 language sql
 stable
@@ -100,12 +104,12 @@ as $$
   );
 $$;
 
-revoke all on function public.is_channel_member(uuid) from public;
-revoke all on function public.is_channel_admin(uuid) from public;
-grant execute on function public.is_channel_member(uuid) to authenticated, service_role;
-grant execute on function public.is_channel_admin(uuid) to authenticated, service_role;
+revoke all on function private.is_channel_member(uuid) from public, anon;
+revoke all on function private.is_channel_admin(uuid) from public, anon;
+grant execute on function private.is_channel_member(uuid) to authenticated, service_role;
+grant execute on function private.is_channel_admin(uuid) to authenticated, service_role;
 
-create or replace function public.add_channel_owner()
+create or replace function private.add_channel_owner()
 returns trigger
 language plpgsql
 security definer
@@ -122,14 +126,14 @@ $$;
 drop trigger if exists channel_owner_after_insert on public.channels;
 create trigger channel_owner_after_insert
 after insert on public.channels
-for each row execute function public.add_channel_owner();
+for each row execute function private.add_channel_owner();
 
-create or replace function public.handle_new_user()
+create or replace function private.handle_new_user()
 returns trigger
 language plpgsql
 security definer
 set search_path = ''
-as $$
+as $
 declare
   party_channel uuid;
 begin
@@ -141,37 +145,29 @@ begin
   )
   on conflict (id) do nothing;
 
-  insert into public.channels(slug,name,created_by)
-  values ('druzina','Družina',new.id)
-  on conflict (slug) do nothing
-  returning id into party_channel;
+  select id into party_channel
+  from public.channels
+  where slug='druzina'
+  limit 1;
 
   if party_channel is null then
-    select id into party_channel from public.channels where slug='druzina';
+    insert into public.channels(slug,name,created_by)
+    values ('druzina','Družina',new.id)
+    returning id into party_channel;
+    -- channel_owner_after_insert adds the creator as owner.
   end if;
-
-  insert into public.channel_members(channel_id,user_id,role)
-  values (
-    party_channel,
-    new.id,
-    case
-      when exists (
-        select 1 from public.channels c
-        where c.id=party_channel and c.created_by=new.id
-      ) then 'owner'
-      else 'member'
-    end
-  )
-  on conflict (channel_id,user_id) do nothing;
 
   return new;
 end;
-$$;
+$;
+
+revoke all on function private.handle_new_user() from public, anon, authenticated;
+revoke all on function private.add_channel_owner() from public, anon, authenticated;
 
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
 after insert on auth.users
-for each row execute function public.handle_new_user();
+for each row execute function private.handle_new_user();
 
 alter table public.profiles enable row level security;
 alter table public.channels enable row level security;
@@ -196,9 +192,19 @@ grant all on public.profiles, public.channels, public.channel_members,
 to service_role;
 
 drop policy if exists "profiles readable by signed-in users" on public.profiles;
-create policy "profiles readable by signed-in users"
+create policy "profiles readable by party peers"
 on public.profiles for select to authenticated
-using (true);
+using (
+  id=(select auth.uid())
+  or exists (
+    select 1
+    from public.channel_members mine
+    join public.channel_members theirs
+      on theirs.channel_id=mine.channel_id
+    where mine.user_id=(select auth.uid())
+      and theirs.user_id=profiles.id
+  )
+);
 
 drop policy if exists "users update own profile" on public.profiles;
 create policy "users update own profile"
@@ -209,7 +215,7 @@ with check (id=auth.uid());
 drop policy if exists "members read channels" on public.channels;
 create policy "members read channels"
 on public.channels for select to authenticated
-using (public.is_channel_member(id));
+using (private.is_channel_member(id));
 
 drop policy if exists "signed-in users create channels" on public.channels;
 create policy "signed-in users create channels"
@@ -219,86 +225,86 @@ with check (created_by=auth.uid());
 drop policy if exists "admins update channels" on public.channels;
 create policy "admins update channels"
 on public.channels for update to authenticated
-using (public.is_channel_admin(id))
-with check (public.is_channel_admin(id));
+using (private.is_channel_admin(id))
+with check (private.is_channel_admin(id));
 
 drop policy if exists "admins delete channels" on public.channels;
 create policy "admins delete channels"
 on public.channels for delete to authenticated
-using (public.is_channel_admin(id));
+using (private.is_channel_admin(id));
 
 drop policy if exists "members read memberships" on public.channel_members;
 create policy "members read memberships"
 on public.channel_members for select to authenticated
-using (public.is_channel_member(channel_id));
+using (private.is_channel_member(channel_id));
 
 drop policy if exists "admins add members" on public.channel_members;
 create policy "admins add members"
 on public.channel_members for insert to authenticated
-with check (public.is_channel_admin(channel_id));
+with check (private.is_channel_admin(channel_id));
 
 drop policy if exists "admins update members" on public.channel_members;
 create policy "admins update members"
 on public.channel_members for update to authenticated
-using (public.is_channel_admin(channel_id))
-with check (public.is_channel_admin(channel_id));
+using (private.is_channel_admin(channel_id))
+with check (private.is_channel_admin(channel_id));
 
 drop policy if exists "admins remove members or user leaves" on public.channel_members;
 create policy "admins remove members or user leaves"
 on public.channel_members for delete to authenticated
-using (public.is_channel_admin(channel_id) or user_id=auth.uid());
+using (private.is_channel_admin(channel_id) or user_id=auth.uid());
 
 drop policy if exists "members read messages" on public.messages;
 create policy "members read messages"
 on public.messages for select to authenticated
-using (public.is_channel_member(channel_id));
+using (private.is_channel_member(channel_id));
 
 drop policy if exists "members send messages" on public.messages;
 create policy "members send messages"
 on public.messages for insert to authenticated
-with check (user_id=auth.uid() and public.is_channel_member(channel_id));
+with check (user_id=auth.uid() and private.is_channel_member(channel_id));
 
 drop policy if exists "authors edit messages" on public.messages;
 create policy "authors edit messages"
 on public.messages for update to authenticated
-using (user_id=auth.uid() and public.is_channel_member(channel_id))
-with check (user_id=auth.uid() and public.is_channel_member(channel_id));
+using (user_id=auth.uid() and private.is_channel_member(channel_id))
+with check (user_id=auth.uid() and private.is_channel_member(channel_id));
 
 drop policy if exists "authors or admins delete messages" on public.messages;
 create policy "authors or admins delete messages"
 on public.messages for delete to authenticated
-using (user_id=auth.uid() or public.is_channel_admin(channel_id));
+using (user_id=auth.uid() or private.is_channel_admin(channel_id));
 
 drop policy if exists "members read attachments" on public.attachments;
 create policy "members read attachments"
 on public.attachments for select to authenticated
-using (public.is_channel_member(channel_id));
+using (private.is_channel_member(channel_id));
 
 drop policy if exists "members add own attachments" on public.attachments;
 create policy "members add own attachments"
 on public.attachments for insert to authenticated
-with check (user_id=auth.uid() and public.is_channel_member(channel_id));
+with check (user_id=auth.uid() and private.is_channel_member(channel_id));
 
 drop policy if exists "authors edit attachments" on public.attachments;
 create policy "authors edit attachments"
 on public.attachments for update to authenticated
 using (user_id=auth.uid())
-with check (user_id=auth.uid() and public.is_channel_member(channel_id));
+with check (user_id=auth.uid() and private.is_channel_member(channel_id));
 
 drop policy if exists "authors or admins delete attachments" on public.attachments;
 create policy "authors or admins delete attachments"
 on public.attachments for delete to authenticated
-using (user_id=auth.uid() or public.is_channel_admin(channel_id));
+using (user_id=auth.uid() or private.is_channel_admin(channel_id));
 
 drop policy if exists "members read reactions" on public.reactions;
 create policy "members read reactions"
 on public.reactions for select to authenticated
-using (public.is_channel_member(channel_id));
+using (private.is_channel_member(channel_id));
 
 drop policy if exists "members add own reactions" on public.reactions;
 create policy "members add own reactions"
 on public.reactions for insert to authenticated
-with check (user_id=auth.uid() and public.is_channel_member(channel_id));
+with check (user_id=auth.uid() and private.is_channel_member(channel_id));
 
 drop policy if exists "users remove own reactions" on public.reactions;
 create policy "users remove own reactions"
@@ -323,7 +329,7 @@ create policy "party members read chat media"
 on storage.objects for select to authenticated
 using (
   bucket_id='chat-media'
-  and public.is_channel_member((storage.foldername(name))[1]::uuid)
+  and private.is_channel_member((storage.foldername(name))[1]::uuid)
 );
 
 drop policy if exists "members upload own chat media" on storage.objects;
@@ -331,7 +337,7 @@ create policy "members upload own chat media"
 on storage.objects for insert to authenticated
 with check (
   bucket_id='chat-media'
-  and public.is_channel_member((storage.foldername(name))[1]::uuid)
+  and private.is_channel_member((storage.foldername(name))[1]::uuid)
   and (storage.foldername(name))[2]=auth.uid()::text
 );
 
@@ -344,7 +350,7 @@ using (
 )
 with check (
   bucket_id='chat-media'
-  and public.is_channel_member((storage.foldername(name))[1]::uuid)
+  and private.is_channel_member((storage.foldername(name))[1]::uuid)
   and (storage.foldername(name))[2]=auth.uid()::text
 );
 
@@ -355,7 +361,7 @@ using (
   bucket_id='chat-media'
   and (
     (storage.foldername(name))[2]=auth.uid()::text
-    or public.is_channel_admin((storage.foldername(name))[1]::uuid)
+    or private.is_channel_admin((storage.foldername(name))[1]::uuid)
   )
 );
 
