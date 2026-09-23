@@ -1,4 +1,4 @@
-const CACHE='gangsterka-dc20-v13';
+const CACHE='gangsterka-dc20-v14';
 
 const CMS_PATHS=[
   './content/gangcyklopedie.json',
@@ -22,6 +22,7 @@ const ASSETS=[
   './assets/js/account.js',
   './assets/js/chat.js',
   './assets/js/notifications.js',
+  './assets/js/calendar.js',
   './assets/js/mobile.js',
   './assets/icons/d20.svg',
   './assets/icons/gangsterka-192.png',
