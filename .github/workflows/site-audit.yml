@@ -343,6 +343,29 @@ jobs:
             await page.locator('.chat-close').click();
             console.log('Mobile layout OK: 390x844');
 
+            await page.goto('http://127.0.0.1:4173/#cleric', {waitUntil:'networkidle'});
+            await page.waitForTimeout(180);
+            await page.evaluate(() => document.documentElement.classList.add('pwa-standalone'));
+            const standaloneBefore = await page.evaluate(() => ({
+              y: window.scrollY,
+              height: document.documentElement.scrollHeight,
+              viewport: window.innerHeight,
+              htmlOverflow: getComputedStyle(document.documentElement).overflowY,
+              bodyOverflow: getComputedStyle(document.body).overflowY
+            }));
+            await page.evaluate(() => window.scrollTo(0, Math.min(900, document.documentElement.scrollHeight - innerHeight)));
+            await page.waitForTimeout(120);
+            const standaloneAfter = await page.evaluate(() => window.scrollY);
+            if (
+              standaloneBefore.height <= standaloneBefore.viewport ||
+              standaloneBefore.htmlOverflow === 'hidden' ||
+              standaloneBefore.bodyOverflow === 'hidden' ||
+              standaloneAfter < 100
+            ) {
+              throw new Error(`Standalone PWA scroll failed: before=${JSON.stringify(standaloneBefore)} after=${standaloneAfter}`);
+            }
+            console.log(`Standalone PWA scroll OK: ${standaloneBefore.y} -> ${standaloneAfter}`);
+
             await page.locator('#accountToggle').click();
             await page.locator('[data-auth-tab="register"]').click();
             if (!(await page.locator('#registerForm [name="owner_code"]').count())) {
