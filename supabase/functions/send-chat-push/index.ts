@@ -27,7 +27,7 @@ Deno.serve(async(req:Request)=>{
     const user=userData?.user
     if(userError||!user) return new Response(JSON.stringify({error:'Unauthorized'}),{status:401,headers})
     const {message_id}=await req.json()
-    const {data:message}=await userClient.from('messages').select('id,channel_id,user_id,body').eq('id',message_id).maybeSingle()
+    const {data:message}=await userClient.from('messages').select('id,channel_id,user_id,body,share_title').eq('id',message_id).maybeSingle()
     if(!message) return new Response(JSON.stringify({error:'Message not found'}),{status:404,headers})
     if(message.user_id!==user.id) return new Response(JSON.stringify({error:'Forbidden'}),{status:403,headers})
     const [{data:profile},{data:members},{data:vapid}]=await Promise.all([
@@ -42,7 +42,7 @@ Deno.serve(async(req:Request)=>{
     if(!subs?.length) return Response.json({delivered:0,gone:0,failed:0},{headers})
     const result=await sendPushBatch(
       subs.map((x:any)=>({endpoint:x.endpoint,expirationTime:null,keys:{p256dh:x.p256dh,auth:x.auth}})),
-      {title:(profile?.display_name||'Hráč')+' · Družina',body:(message.body||'').trim().slice(0,180)||'📷 Poslal obrázek nebo GIF',url:'https://dc20.honzanacestach.cz/?chat=1#home',tag:'dc20-chat-'+message.channel_id},
+      {title:(profile?.display_name||'Hráč')+' · Družina',body:(message.body||'').trim().slice(0,180)||(message.share_title?'📚 Sdílí: '+message.share_title:'📷 Poslal obrázek nebo GIF'),url:'https://dc20.honzanacestach.cz/?chat=1#home',tag:'dc20-chat-'+message.channel_id},
       {publicKey:vapid.vapid_public_key,privateKey:vapid.vapid_private_key,subject:vapid.vapid_subject},
       {ttl:86400,urgency:'normal',concurrency:20}
     )
