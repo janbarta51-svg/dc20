@@ -48,8 +48,23 @@ Deno.serve(async(req:Request)=>{
     if(!ids.length) return Response.json({delivered:0,gone:0,failed:0},{headers})
     const {data:subs}=await admin.from('push_subscriptions').select('endpoint,p256dh,auth').in('user_id',ids)
     if(!subs?.length) return Response.json({delivered:0,gone:0,failed:0},{headers})
+
+    const allowedPushHost=(endpoint:string)=>{
+      try{
+        const host=new URL(endpoint).hostname.toLowerCase()
+        return host==='fcm.googleapis.com'
+          || host.endsWith('.push.services.mozilla.com')
+          || host==='web.push.apple.com'
+          || host.endsWith('.notify.windows.com')
+      }catch(_e){ return false }
+    }
+    const safeSubs=subs.filter((x:any)=>allowedPushHost(x.endpoint))
+    const rejected=subs.filter((x:any)=>!allowedPushHost(x.endpoint)).map((x:any)=>x.endpoint)
+    if(rejected.length) await admin.from('push_subscriptions').delete().in('endpoint',rejected)
+    if(!safeSubs.length) return Response.json({delivered:0,gone:0,failed:0,rejected:rejected.length},{headers})
+
     const result=await sendPushBatch(
-      subs.map((x:any)=>({endpoint:x.endpoint,expirationTime:null,keys:{p256dh:x.p256dh,auth:x.auth}})),
+      safeSubs.map((x:any)=>({endpoint:x.endpoint,expirationTime:null,keys:{p256dh:x.p256dh,auth:x.auth}})),
       {title:(profile?.display_name||'Hráč')+' · Družina',body:(message.body||'').trim().slice(0,180)||(message.share_title?'📚 Sdílí: '+message.share_title:'📷 Poslal obrázek nebo GIF'),url:'https://dc20.honzanacestach.cz/?chat=1#home',tag:'dc20-chat-'+message.channel_id},
       {publicKey:vapid.vapid_public_key,privateKey:vapid.vapid_private_key,subject:vapid.vapid_subject},
       {ttl:86400,urgency:'normal',concurrency:20}
