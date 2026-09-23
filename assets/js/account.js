@@ -104,6 +104,8 @@
           <label>Jméno ve hře<input type="text" name="display_name" maxlength="40" autocomplete="nickname" required></label>
           <label>E-mail<input type="email" name="email" autocomplete="email" required></label>
           <label>Heslo<input type="password" name="password" minlength="8" autocomplete="new-password" required></label>
+          <label>Kód správce <span class="account-optional">(jen úplně první účet)</span><input type="password" name="owner_code" autocomplete="off" maxlength="40" placeholder="Ostatní nechají prázdné"></label>
+          <small class="account-hint">Jednorázový kód vytvoří prvního ownera Družiny. Běžní hráči ho nepotřebují.</small>
           <label>Heslo znovu<input type="password" name="password2" minlength="8" autocomplete="new-password" required></label>
           <button class="account-primary" type="submit">Vytvořit účet</button>
           <small class="account-hint">Po registraci může Supabase požadovat potvrzení e-mailu.</small>
@@ -186,6 +188,7 @@
     const email=String(form.get('email')||'').trim();
     const password=String(form.get('password')||'');
     const password2=String(form.get('password2')||'');
+    const ownerCode=String(form.get('owner_code')||'').trim();
     if(password!==password2){ status('Hesla se neshodují.','error'); return; }
     if(password.length<8){ status('Heslo musí mít alespoň 8 znaků.','error'); return; }
 
@@ -195,7 +198,7 @@
       email,
       password,
       options:{
-        data:{display_name:displayName},
+        data:{display_name:displayName,...(ownerCode?{owner_code:ownerCode}:{})},
         emailRedirectTo:location.origin+location.pathname+'#home'
       }
     });
