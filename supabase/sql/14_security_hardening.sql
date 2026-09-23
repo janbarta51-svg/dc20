@@ -136,3 +136,16 @@ end;
 $$;
 
 revoke all on function private.handle_new_user() from public, anon, authenticated;
+
+
+create index if not exists push_dispatches_claimed_by_idx
+on public.push_dispatches(claimed_by);
+
+create index if not exists party_bootstrap_claimed_by_idx
+on private.party_bootstrap(claimed_by);
+
+drop policy if exists "clients cannot access push dispatches" on public.push_dispatches;
+create policy "clients cannot access push dispatches"
+on public.push_dispatches for all to authenticated
+using (false)
+with check (false);
