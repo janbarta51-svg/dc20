@@ -264,6 +264,133 @@
     }));
   }
 
+  function slugify(value=''){
+    return String(value).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  }
+
+  function plainText(value=''){
+    const box=document.createElement('div');
+    box.innerHTML=String(value||'');
+    return (box.textContent||'').replace(/\s+/g,' ').trim();
+  }
+
+  function spellRoute(spell){
+    const sources=String(spell.source||'').split(',').map(x=>x.trim());
+    if(sources.includes('Divine')) return '#cleric';
+    const bardTags=new Set(['Embolden','Enfeeble','Healing','Illusion','Sound']);
+    if(spell.school==='Enchantment'||(spell.tags||[]).some(tag=>bardTags.has(tag))) return '#bard';
+    if(['Astromancy','Conjuration','Transmutation'].includes(spell.school)||(spell.tags||[]).includes('Summoning')) return '#summoner';
+    return '#home';
+  }
+
+  function shareRoute(type,key,baseHash){
+    return '?focus='+encodeURIComponent(type+':'+key)+baseHash;
+  }
+
+  async function loadShareCatalog(){
+    if(state.shareCatalogLoaded) return state.shareCatalog;
+    const rules=window.DC20_RULES||{};
+    const spells=(rules.spells||[]).map(spell=>({
+      type:'spell',key:spell.id,title:spell.name,
+      subtitle:[spell.school,spell.cost,spell.range].filter(Boolean).join(' · '),
+      body:plainText(spell.body_en).slice(0,360),image:'',
+      route:shareRoute('spell',spell.id,spellRoute(spell)),icon:'✨'
+    }));
+    const maneuvers=(rules.maneuvers||[]).map(item=>({
+      type:'maneuver',key:item.id,title:item.name,
+      subtitle:[item.category,item.cost,item.range].filter(Boolean).join(' · '),
+      body:plainText(item.body_en).slice(0,360),image:'',
+      route:shareRoute('maneuver',item.id,'#champion'),icon:'⚔️'
+    }));
+    let characters=[],gangs=[];
+    try{
+      const responses=await Promise.all([
+        fetch('content/postavy.json',{cache:'no-store'}),
+        fetch('content/gangcyklopedie.json',{cache:'no-store'})
+      ]);
+      const pdata=responses[0].ok?await responses[0].json():[];
+      const gdata=responses[1].ok?await responses[1].json():[];
+      characters=(Array.isArray(pdata)?pdata:[]).map(item=>{
+        const title=item.name||item.title||'Postava';
+        const key=slugify(title);
+        return {type:'character',key,title,subtitle:'Postava z Kostelce',body:plainText(item.description||item.body||'').slice(0,360),image:item.image||'',route:shareRoute('character',key,'#postavy'),icon:'🧙'};
+      });
+      gangs=(Array.isArray(gdata)?gdata:[]).map(item=>{
+        const title=item.title||item.name||'Gang';
+        const key=slugify(title);
+        return {type:'gang',key,title,subtitle:'Gang z Kostelce',body:plainText(item.description||item.body||'').slice(0,360),image:item.icon||item.image||'',route:shareRoute('gang',key,'#gangcyklopedie'),icon:'☠️'};
+      });
+    }catch(e){}
+    state.shareCatalog=[...spells,...maneuvers,...characters,...gangs];
+    state.shareCatalogLoaded=true;
+    return state.shareCatalog;
+  }
+
+  function shareTypeLabel(type){
+    return ({spell:'Spell',maneuver:'Maneuver',character:'Postava',gang:'Gang',item:'Item'})[type]||'Obsah';
+  }
+
+  function clearShare(){
+    state.selectedShare=null;
+    sharePreview.hidden=true;
+    sharePreview.innerHTML='';
+  }
+
+  function showSharePreview(item){
+    state.selectedShare=item;
+    sharePreview.hidden=false;
+    const media=item.image?'<img src="'+esc(item.image)+'" alt="">':'<span class="chat-share-preview-icon">'+esc(item.icon||'📚')+'</span>';
+    sharePreview.innerHTML='<div class="chat-share-preview-card">'+media+'<div><small>'+esc(shareTypeLabel(item.type))+'</small><strong>'+esc(item.title)+'</strong><span>'+esc(item.subtitle||'')+'</span></div><button type="button" aria-label="Odebrat sdílenou kartu">×</button></div>';
+    sharePreview.querySelector('button').addEventListener('click',clearShare);
+    sharePicker.hidden=true;
+  }
+
+  async function openSharePicker(){
+    if(!state.session){ setConnection('Pro sdílení se nejdřív přihlas','error'); return; }
+    const catalog=await loadShareCatalog();
+    sharePicker.hidden=false;
+    sharePicker.innerHTML='<div class="chat-share-picker-head"><strong>Sdílet z Gangsterky</strong><button type="button" class="chat-share-picker-close" aria-label="Zavřít">×</button></div><div class="chat-share-filters"><input type="search" placeholder="Hledat spell, postavu, gang…" aria-label="Hledat obsah"><select aria-label="Typ obsahu"><option value="">Vše</option><option value="spell">Spelly</option><option value="maneuver">Maneuvers</option><option value="character">Postavy</option><option value="gang">Gangy</option></select></div><div class="chat-share-results"></div>';
+    const input=sharePicker.querySelector('input');
+    const select=sharePicker.querySelector('select');
+    const results=sharePicker.querySelector('.chat-share-results');
+    const render=()=>{
+      const q=(input.value||'').toLocaleLowerCase('cs-CZ').trim();
+      const type=select.value;
+      const filtered=catalog.filter(item=>(!type||item.type===type)&&(!q||[item.title,item.subtitle,item.body].join(' ').toLocaleLowerCase('cs-CZ').includes(q))).slice(0,80);
+      if(!filtered.length){ results.innerHTML='<p class="chat-share-empty">Nic jsem nenašel.</p>'; return; }
+      results.innerHTML=filtered.map((item,index)=>{
+        const media=item.image?'<img src="'+esc(item.image)+'" alt="">':esc(item.icon||'📚');
+        const meta=shareTypeLabel(item.type)+(item.subtitle?' · '+item.subtitle:'');
+        return '<button type="button" data-share-index="'+index+'"><span class="chat-share-result-icon">'+media+'</span><span><strong>'+esc(item.title)+'</strong><small>'+esc(meta)+'</small></span></button>';
+      }).join('');
+      results.querySelectorAll('[data-share-index]').forEach(button=>button.addEventListener('click',()=>{
+        const item=filtered[Number(button.dataset.shareIndex)];
+        if(item) showSharePreview(item);
+      }));
+    };
+    input.addEventListener('input',render);
+    select.addEventListener('change',render);
+    sharePicker.querySelector('.chat-share-picker-close').addEventListener('click',()=>{sharePicker.hidden=true;});
+    render();
+    input.focus();
+  }
+
+  function shareCardMarkup(message){
+    if(!message.share_type||!message.share_title) return '';
+    const route=String(message.share_route||'');
+    const safeRoute=/^\?focus=[^#]{1,140}#(?:home|cleric|champion|bard|summoner|postavy|gangcyklopedie)$/.test(route)?route:'';
+    const image=String(message.share_image||'');
+    const safeImage=/^(?:assets\/|https:\/\/)/.test(image)?image:'';
+    const icon=({spell:'✨',maneuver:'⚔️',character:'🧙',gang:'☠️',item:'🎒'})[message.share_type]||'📚';
+    const media=safeImage?'<img src="'+esc(safeImage)+'" alt="">':'<b>'+icon+'</b>';
+    let copy='<span class="chat-shared-card-copy"><small>'+esc(shareTypeLabel(message.share_type))+'</small><strong>'+esc(message.share_title)+'</strong>';
+    if(message.share_subtitle) copy+='<em>'+esc(message.share_subtitle)+'</em>';
+    if(message.share_body) copy+='<span>'+esc(message.share_body)+'</span>';
+    copy+='</span>';
+    const open=safeRoute?'<span class="chat-shared-card-open">Otevřít ›</span>':'';
+    const inner='<span class="chat-shared-card-media">'+media+'</span>'+copy+open;
+    return safeRoute?'<a class="chat-shared-card" href="'+esc(safeRoute)+'">'+inner+'</a>':'<div class="chat-shared-card">'+inner+'</div>';
+  }
   async function signedAvatar(path){
     if(!path || !state.client) return '';
     const {data,error}=await state.client.storage.from('avatars').createSignedUrl(path,3600);
