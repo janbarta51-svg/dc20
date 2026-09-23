@@ -659,7 +659,7 @@
     const csSummary=type==='spell'?spellSummaryCs(x):maneuverSummaryCs(x);
     const meta=`<span><strong>${esc(t('cost'))}:</strong> ${esc(x.cost)}</span><span><strong>${esc(t('range'))}:</strong> ${esc(x.range)}</span>${type==='spell'?`<span><strong>${esc(t('school'))}:</strong> ${esc(x.school)}</span><span><strong>${esc(t('duration'))}:</strong> ${esc(x.duration)}</span>`:''}`;
     const body=formatRuleBody(x.body_en,'web');
-    return `<div class="choice-wrap" data-name="${esc(x.name.toLowerCase())}" data-school="${esc(type==='spell'?x.school:x.category)}"><div class="choice-row"><input type="checkbox" class="choice-check" data-class="${esc(cls)}" data-id="${esc(x.id)}" ${checked?'checked':''}><span class="name detail-toggle">${esc(x.name)}</span><span class="cost">${esc(x.cost)}</span></div><div class="details"><div class="meta">${meta}</div>${lang==='cs'?`<p class="cs-summary"><strong>Česky stručně:</strong> ${esc(csSummary)}</p><details><summary>${esc(t('original'))}</summary><div class="rules-text">${body}</div></details>`:`<div class="rules-text">${body}</div>`}</div></div>`;
+    return `<div class="choice-wrap" data-name="${esc(x.name.toLowerCase())}" data-school="${esc(type==='spell'?x.school:x.category)}" data-share-type="${esc(type)}" data-share-key="${esc(x.id)}"><div class="choice-row"><input type="checkbox" class="choice-check" data-class="${esc(cls)}" data-id="${esc(x.id)}" ${checked?'checked':''}><span class="name detail-toggle">${esc(x.name)}</span><span class="cost">${esc(x.cost)}</span></div><div class="details"><div class="meta">${meta}</div>${lang==='cs'?`<p class="cs-summary"><strong>Česky stručně:</strong> ${esc(csSummary)}</p><details><summary>${esc(t('original'))}</summary><div class="rules-text">${body}</div></details>`:`<div class="rules-text">${body}</div>`}</div></div>`;
   }
   function selectionFooter(cls,count=selectedSet(cls).size){
     return `<div class="selection-footer"><b><span class="selection-count">${count}</span> ${esc(t('selected'))}</b><div><button class="button secondary clear-selection" data-class="${esc(cls)}">${esc(t('clear'))}</button> <button class="button generate-selector" data-class="${esc(cls)}">${esc(t('generate'))}</button></div></div>`;
@@ -935,8 +935,8 @@
     if(g.hierarchy?.length){ lines.push('## Hierarchie'); g.hierarchy.forEach(x=>lines.push(`- **${x.title}:** ${x.body}`)); }
     return lines.join('\n');
   }
-  function accordionItem({title,meta='',image='',body='',kind='lore'}){
-    return `<article class="lore-item"><button class="lore-toggle" type="button" aria-expanded="false"><span><strong>${esc(title)}</strong>${meta?`<small>${esc(meta)}</small>`:''}</span><span class="lore-chevron" aria-hidden="true">⌄</span></button><div class="lore-detail"><div class="lore-detail-inner">${image?`<img class="lore-image" src="${esc(image)}" alt="">`:''}<div class="lore-prose">${richText(body)}</div></div></div></article>`;
+  function accordionItem({title,meta='',image='',body='',kind='lore',shareType='',shareKey=''}){
+    return `<article class="lore-item" ${shareType&&shareKey?`data-share-type="${esc(shareType)}" data-share-key="${esc(shareKey)}"`:''}><button class="lore-toggle" type="button" aria-expanded="false"><span><strong>${esc(title)}</strong>${meta?`<small>${esc(meta)}</small>`:''}</span><span class="lore-chevron" aria-hidden="true">⌄</span></button><div class="lore-detail"><div class="lore-detail-inner">${image?`<img class="lore-image" src="${esc(image)}" alt="">`:''}<div class="lore-prose">${richText(body)}</div></div></div></article>`;
   }
   function bindLoreAccordions(){
     $$('.lore-toggle',app).forEach(btn=>btn.addEventListener('click',()=>{
@@ -945,12 +945,12 @@
   }
 
   function renderGang(){
-    const cards=(gangs||[]).map(g=>accordionItem({title:g.title||g.name||'Bez názvu',image:g.icon||'',body:legacyGangInfo(g)})).join('');
+    const cards=(gangs||[]).map(g=>{const title=g.title||g.name||'Bez názvu';return accordionItem({title,image:g.icon||'',body:legacyGangInfo(g),shareType:'gang',shareKey:slug(title)});}).join('');
     app.innerHTML=`<article class="standard-reference lore-reference">${hero('Gangy z Kostelce','','LORE')}<section class="lore-list">${cards}</section></article>`;
     bindLoreAccordions();
   }
   function renderCharacters(){
-    const cards=(postavy||[]).map(p=>accordionItem({title:p.name||p.title||'Bez jména',image:p.image||'',body:p.description||p.body||''})).join('');
+    const cards=(postavy||[]).map(p=>{const title=p.name||p.title||'Bez jména';return accordionItem({title,image:p.image||'',body:p.description||p.body||'',shareType:'character',shareKey:slug(title)});}).join('');
     app.innerHTML=`<article class="standard-reference lore-reference">${hero('Postavy')}<section class="lore-list">${cards}</section></article>`;
     bindLoreAccordions();
   }
@@ -960,6 +960,28 @@
     bindLoreAccordions();
   }
 
+  function focusSharedContent(){
+    const raw=new URLSearchParams(location.search).get('focus');
+    if(!raw) return;
+    const split=raw.indexOf(':');
+    if(split<1) return;
+    const type=raw.slice(0,split);
+    const key=raw.slice(split+1);
+    const target=app.querySelector('[data-share-type="'+CSS.escape(type)+'"][data-share-key="'+CSS.escape(key)+'"]');
+    if(!target) return;
+    if(target.classList.contains('lore-item')){
+      target.classList.add('open');
+      target.querySelector('.lore-toggle')?.setAttribute('aria-expanded','true');
+    }
+    if(target.classList.contains('choice-wrap')){
+      target.classList.add('open');
+      target.querySelector('.details')?.classList.add('open');
+    }
+    target.classList.add('shared-content-focus');
+    setTimeout(()=>target.scrollIntoView({behavior:'smooth',block:'center'}),80);
+    setTimeout(()=>target.classList.remove('shared-content-focus'),2600);
+    history.replaceState(null,'',location.pathname+location.hash);
+  }
   function render(){
     const route=classRoute();
     $$('.nav-cluster a, .brand-center').forEach(a=>a.classList.toggle('active',a.dataset.route===route));
@@ -975,6 +997,7 @@
     else if(route==='postavy') renderCharacters();
     else renderChronicle();
     decorateGlossary(app);
+    focusSharedContent();
     app.focus({preventScroll:true});
     window.scrollTo({top:0,behavior:'auto'});
   }
@@ -1026,7 +1049,7 @@
   setTimeout(()=>splash?.classList.add('hide'),splashDelay);
   setTimeout(()=>splash?.remove(),splashDelay+650);
 
-  const APP_VERSION='2026.09.23.7';
+  const APP_VERSION='2026.09.23.8';
   let updatePromptShown=false;
 
   function showUpdatePrompt(){
