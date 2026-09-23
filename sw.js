@@ -1,4 +1,10 @@
-const CACHE='gangsterka-dc20-v3';
+const CACHE='gangsterka-dc20-v4';
+
+const CMS_PATHS=[
+  './content/gangcyklopedie.json',
+  './content/postavy.json',
+  './content/kronika.json'
+];
 
 const ASSETS=[
   './',
@@ -25,15 +31,56 @@ const ASSETS=[
   './assets/references/DC20_Bard_Class_Reference.pdf',
   './assets/references/DC20_Summoner_Class_Reference.pdf',
   './assets/references/Cleric_Turn_Cheat_Sheet.pdf',
-  './content/gangcyklopedie.json',
-  './content/postavy.json',
-  './content/kronika.json'
+  ...CMS_PATHS
 ];
+
+function collectAssetUrls(value,found=new Set()){
+  if(typeof value==='string'){
+    try{
+      const url=new URL(value,self.location.href);
+      if(url.origin===self.location.origin && url.pathname.includes('/assets/')) found.add(url.href);
+    }catch(e){}
+    return found;
+  }
+  if(Array.isArray(value)){
+    value.forEach(item=>collectAssetUrls(item,found));
+    return found;
+  }
+  if(value && typeof value==='object'){
+    Object.values(value).forEach(item=>collectAssetUrls(item,found));
+  }
+  return found;
+}
+
+async function cacheCmsMedia(response){
+  try{
+    const data=await response.clone().json();
+    const urls=[...collectAssetUrls(data)];
+    if(!urls.length) return;
+    const cache=await caches.open(CACHE);
+    await Promise.all(urls.map(async url=>{
+      try{
+        const res=await fetch(url,{cache:'no-store'});
+        if(res.ok) await cache.put(url,res);
+      }catch(e){}
+    }));
+  }catch(e){}
+}
+
+async function refreshCmsMedia(){
+  await Promise.all(CMS_PATHS.map(async path=>{
+    try{
+      const response=await fetch(path,{cache:'no-store'});
+      if(response.ok) await cacheCmsMedia(response);
+    }catch(e){}
+  }));
+}
 
 self.addEventListener('install',event=>{
   event.waitUntil(
     caches.open(CACHE)
       .then(cache=>cache.addAll(ASSETS))
+      .then(()=>refreshCmsMedia())
       .then(()=>self.skipWaiting())
   );
 });
@@ -67,6 +114,21 @@ function networkFirst(request,fallback){
     });
 }
 
+async function cmsNetworkFirst(request,event){
+  try{
+    const response=await fetch(request,{cache:'no-store'});
+    if(response.ok){
+      remember(request,response);
+      event.waitUntil(cacheCmsMedia(response.clone()));
+    }
+    return response;
+  }catch(e){
+    const cached=await caches.match(request);
+    if(cached) return cached;
+    throw e;
+  }
+}
+
 self.addEventListener('fetch',event=>{
   const request=event.request;
   if(request.method!=='GET') return;
@@ -89,7 +151,7 @@ self.addEventListener('fetch',event=>{
     url.pathname.endsWith('.css');
 
   if(isCmsJson){
-    event.respondWith(networkFirst(request));
+    event.respondWith(cmsNetworkFirst(request,event));
     return;
   }
 
