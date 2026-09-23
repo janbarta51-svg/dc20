@@ -1,4 +1,4 @@
-const CACHE='gangsterka-dc20-v4';
+const CACHE='gangsterka-dc20-v5';
 
 const CMS_PATHS=[
   './content/gangcyklopedie.json',
@@ -18,6 +18,8 @@ const ASSETS=[
   './assets/js/classes-current.js',
   './assets/js/cms-fix.js',
   './assets/js/app.js',
+  './assets/js/supabase-client.js',
+  './assets/js/account.js',
   './assets/icons/d20.svg',
   './assets/icons/gangsterka-192.png',
   './assets/icons/gangsterka-512.png',
