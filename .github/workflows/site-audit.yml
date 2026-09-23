@@ -343,6 +343,32 @@ jobs:
             await page.locator('.chat-close').click();
             console.log('Mobile layout OK: 390x844');
 
+            await page.locator('#accountToggle').click();
+            await page.locator('[data-auth-tab="register"]').click();
+            if (!(await page.locator('#registerForm [name="owner_code"]').count())) {
+              throw new Error('Secure first-owner code field is missing');
+            }
+            await page.locator('.account-close').click();
+            console.log('Owner bootstrap UI OK');
+
+            await page.goto('http://127.0.0.1:4173/#home', {waitUntil:'networkidle'});
+            await page.evaluate(async () => { await navigator.serviceWorker.ready; });
+            await page.reload({waitUntil:'networkidle'});
+            await page.waitForFunction(() => Boolean(navigator.serviceWorker.controller), null, {timeout:10000});
+            await page.context().setOffline(true);
+            await page.reload({waitUntil:'domcontentloaded', timeout:10000});
+            await page.waitForTimeout(350);
+            const offlineState = await page.evaluate(() => ({
+              appText: document.querySelector('#app')?.textContent?.trim() || '',
+              offlineBar: Boolean(document.querySelector('.offline-status-bar')),
+              route: location.hash
+            }));
+            if (!offlineState.appText || !offlineState.offlineBar || offlineState.route !== '#home') {
+              throw new Error('Offline PWA reload failed: ' + JSON.stringify(offlineState));
+            }
+            await page.context().setOffline(false);
+            console.log('Offline PWA reload OK');
+
             if (errors.length) {
               throw new Error(`Browser errors:\n${errors.join('\n')}`);
             }
