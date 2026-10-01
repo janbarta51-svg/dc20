@@ -46,7 +46,7 @@
     for(let day=1;day<=days;day++){
       const k=`${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
       const events=state.sessions.filter(e=>key(e.starts_at)===k);
-      cells.push(`<div class='calendar-day ${k===today?'today':''} ${events.length?'has-session':''}'><span class='calendar-day-number'>${day}</span><div class='calendar-day-events'>${events.map(e=>`<button type='button' data-calendar-jump='${esc(e.id)}'><span>${esc(fmtTime(e.starts_at))}</span><strong>${esc(e.title)}</strong></button>`).join('')}</div></div>`);
+      cells.push(`<div class='calendar-day ${k===today?'today':''} ${events.length?'has-session':''}'><span class='calendar-day-number'>${day}</span><div class='calendar-day-events'>${events.map(e=>`<button type='button' data-open-session='${esc(e.id)}'><span>${esc(fmtTime(e.starts_at))}</span><strong>${esc(e.title)}</strong></button>`).join('')}</div></div>`);
     }
     return `<section class='calendar-month'><div class='calendar-month-head'><button type='button' data-month='-1' aria-label='Předchozí měsíc'>‹</button><h2>${esc(fmtMonth(first))}</h2><button type='button' data-month='1' aria-label='Další měsíc'>›</button></div><div class='calendar-weekdays'>${['Po','Út','St','Čt','Pá','So','Ne'].map(x=>`<span>${x}</span>`).join('')}</div><div class='calendar-grid'>${cells.join('')}</div></section>`;
   }
@@ -55,22 +55,48 @@
     const past=new Date(event.ends_at)<new Date();
     const day=new Intl.DateTimeFormat('cs-CZ',{timeZone:TZ,day:'2-digit'}).format(new Date(event.starts_at));
     const mon=new Intl.DateTimeFormat('cs-CZ',{timeZone:TZ,month:'short'}).format(new Date(event.starts_at));
-    return `<article class='calendar-session-card ${past?'past':''}' data-session-id='${esc(event.id)}'><div class='calendar-date-block'><strong>${esc(day)}</strong><span>${esc(mon)}</span></div><div class='calendar-session-main'><div class='calendar-session-kicker'>${past?'ODEHRÁNO':'DALŠÍ HRANÍ'}</div><h3>${esc(event.title)}</h3><p class='calendar-session-time'>🕒 ${esc(fmtDate(event.starts_at))}, ${esc(fmtTime(event.starts_at))}–${esc(fmtTime(event.ends_at))}</p>${event.location?`<p>📍 ${esc(event.location)}</p>`:''}${event.description?`<p class='calendar-session-description'>${esc(event.description)}</p>`:''}<div class='calendar-session-actions'><a class='button calendar-google-button' target='_blank' rel='noopener noreferrer' href='${esc(googleUrl(event))}'>Google Kalendář</a>${canManage()?`<button class='button secondary' type='button' data-edit-session='${esc(event.id)}'>Upravit</button><button class='button ghost calendar-delete' type='button' data-delete-session='${esc(event.id)}'>Smazat</button>`:''}</div></div></article>`;
+    const endLabel=key(event.starts_at)===key(event.ends_at)?fmtTime(event.ends_at):`${fmtDate(event.ends_at)}, ${fmtTime(event.ends_at)}`;
+    return `<article class='calendar-session-card ${past?'past':''}' data-session-id='${esc(event.id)}'><div class='calendar-date-block'><strong>${esc(day)}</strong><span>${esc(mon)}</span></div><div class='calendar-session-main'><div class='calendar-session-kicker'>${past?'ODEHRÁNO':'DALŠÍ HRANÍ'}</div><h3>${esc(event.title)}</h3><p class='calendar-session-time'>🕒 ${esc(fmtDate(event.starts_at))}, ${esc(fmtTime(event.starts_at))}–${esc(endLabel)}</p>${event.location?`<p>📍 ${esc(event.location)}</p>`:''}${event.description?`<p class='calendar-session-description'>${esc(event.description)}</p>`:''}<div class='calendar-session-actions'><a class='button calendar-google-button' target='_blank' rel='noopener noreferrer' href='${esc(googleUrl(event))}'>Přidat do Google kalendáře</a>${canManage()?`<button class='button secondary' type='button' data-edit-session='${esc(event.id)}'>Upravit</button><button class='button ghost calendar-delete' type='button' data-delete-session='${esc(event.id)}'>Smazat</button>`:''}</div></div></article>`;
   }
 
   function render(){
     if(!isRoute()) return;
     const upcoming=state.sessions.filter(e=>new Date(e.ends_at)>=new Date()),past=state.sessions.filter(e=>new Date(e.ends_at)<new Date()).slice(-4).reverse();
-    app.innerHTML=`<article class='standard-reference calendar-reference'><section class='hero calendar-hero'><div class='eyebrow'>DRUŽINA</div><h1>Kalendář</h1><p>Termíny hraní Družiny. Kliknutím na Google Kalendář se otevře předvyplněná událost, kterou už jen potvrdíš.</p>${canManage()?`<div class='hero-actions'><button class='button' id='calendarNewSession' type='button'>+ Nový termín</button></div>`:''}</section>${monthGrid()}<section class='calendar-list-section'><div class='section-head'><h2>Nadcházející hraní</h2><p>${upcoming.length?upcoming.length+' naplánováno':'Zatím nic naplánovaného'}</p></div><div class='calendar-session-list'>${upcoming.length?upcoming.map(card).join(''):`<div class='calendar-empty'>🎲 Žádný další termín zatím není zadaný.</div>`}</div></section>${past.length?`<section class='calendar-list-section calendar-past-section'><div class='section-head'><h2>Poslední termíny</h2></div><div class='calendar-session-list'>${past.map(card).join('')}</div></section>`:''}<div class='calendar-modal' id='calendarModal' hidden></div></article>`;
+    app.innerHTML=`<article class='standard-reference calendar-reference'><section class='hero calendar-hero'><div class='eyebrow'>DRUŽINA</div><h1>Kalendář</h1><p>Termíny hraní Družiny. Klikni na akci a zvol Přidat do Google kalendáře. Otevře se předvyplněná událost, kterou už jen potvrdíš.</p>${canManage()?`<div class='hero-actions'><button class='button' id='calendarNewSession' type='button'>+ Nový termín</button></div>`:''}</section>${monthGrid()}<section class='calendar-list-section'><div class='section-head'><h2>Nadcházející hraní</h2><p>${upcoming.length?upcoming.length+' naplánováno':'Zatím nic naplánovaného'}</p></div><div class='calendar-session-list'>${upcoming.length?upcoming.map(card).join(''):`<div class='calendar-empty'>🎲 Žádný další termín zatím není zadaný.</div>`}</div></section>${past.length?`<section class='calendar-list-section calendar-past-section'><div class='section-head'><h2>Poslední termíny</h2></div><div class='calendar-session-list'>${past.map(card).join('')}</div></section>`:''}<div class='calendar-modal' id='calendarModal' hidden></div></article>`;
     bind();
   }
 
   function bind(){
     app.querySelector('#calendarNewSession')?.addEventListener('click',()=>openForm());
     app.querySelectorAll('[data-month]').forEach(b=>b.addEventListener('click',()=>{state.viewMonth=new Date(state.viewMonth.getFullYear(),state.viewMonth.getMonth()+Number(b.dataset.month),1);render();}));
-    app.querySelectorAll('[data-calendar-jump]').forEach(b=>b.addEventListener('click',()=>{const t=app.querySelector(`[data-session-id='${CSS.escape(b.dataset.calendarJump)}']`);if(t){t.scrollIntoView({behavior:'smooth',block:'center'});t.classList.add('calendar-session-focus');setTimeout(()=>t.classList.remove('calendar-session-focus'),1800);}}));
-    app.querySelectorAll('[data-edit-session]').forEach(b=>b.addEventListener('click',()=>{const e=state.sessions.find(x=>x.id===b.dataset.editSession);if(e)openForm(e);}));
-    app.querySelectorAll('[data-delete-session]').forEach(b=>b.addEventListener('click',()=>removeSession(b.dataset.deleteSession)));
+    app.querySelectorAll('[data-open-session]').forEach(b=>b.addEventListener('click',()=>{const e=state.sessions.find(x=>x.id===b.dataset.openSession);if(e)openDetails(e);}));
+    bindSessionActions(app);
+  }
+
+  function bindSessionActions(root){
+    root.querySelectorAll('[data-edit-session]').forEach(b=>b.addEventListener('click',()=>{const e=state.sessions.find(x=>x.id===b.dataset.editSession);if(e)openForm(e);}));
+    root.querySelectorAll('[data-delete-session]').forEach(b=>b.addEventListener('click',()=>removeSession(b.dataset.deleteSession)));
+  }
+  function closeModal(){
+    const modal=app.querySelector('#calendarModal');
+    if(!modal) return;
+    modal.hidden=true;modal.innerHTML='';
+    if(modal.returnFocus?.isConnected) modal.returnFocus.focus();
+  }
+  function showModal(markup){
+    const modal=app.querySelector('#calendarModal');
+    if(!modal) return null;
+    if(modal.hidden) modal.returnFocus=document.activeElement;
+    modal.innerHTML=markup;modal.hidden=false;
+    modal.onclick=e=>{if(e.target===modal)closeModal();};
+    modal.onkeydown=e=>{if(e.key==='Escape'){e.preventDefault();closeModal();}};
+    modal.querySelector('.calendar-modal-close').addEventListener('click',closeModal);
+    modal.querySelector('.calendar-modal-close').focus();
+    return modal;
+  }
+  function openDetails(event){
+    const modal=showModal(`<div class='calendar-dialog calendar-event-dialog' role='dialog' aria-modal='true' aria-label='${esc(event.title)}'><button class='calendar-modal-close' type='button' aria-label='Zavřít'>×</button>${card(event)}</div>`);
+    if(modal) bindSessionActions(modal);
   }
 
   function localForm(event){
@@ -80,14 +106,11 @@
   }
   function openForm(event=null){
     if(!canManage()) return;
-    const modal=app.querySelector('#calendarModal'),v=localForm(event);
+    const v=localForm(event);
+    const modal=showModal(`<div class='calendar-dialog' role='dialog' aria-modal='true'><button class='calendar-modal-close' type='button' aria-label='Zavřít'>×</button><div class='calendar-dialog-heading'><span>DRUŽINA</span><h2>${event?'Upravit termín':'Nový termín'}</h2></div><form id='calendarSessionForm'><label>Název<input name='title' maxlength='120' required value='${esc(event?.title||'DC20 – Kostelec')}'></label><div class='calendar-form-grid'><label>Začátek – datum<input name='start_date' type='date' required value='${esc(v.sd)}'></label><label>Čas<input name='start_time' type='time' required value='${esc(v.st)}'></label><label>Konec – datum<input name='end_date' type='date' required value='${esc(v.ed)}'></label><label>Čas<input name='end_time' type='time' required value='${esc(v.et)}'></label></div><label>Místo<input name='location' maxlength='240' placeholder='např. Kostelec / u Honzy' value='${esc(event?.location||'')}'></label><label>Poznámka<textarea name='description' maxlength='2000' rows='4' placeholder='Co se bude hrát, co vzít s sebou…'>${esc(event?.description||'')}</textarea></label><div class='calendar-form-status' role='status'></div><div class='calendar-form-actions'><button class='button' type='submit'>${event?'Uložit změny':'Vytvořit termín'}</button><button class='button ghost calendar-form-cancel' type='button'>Zrušit</button></div></form></div>`);
     if(!modal) return;
-    modal.hidden=false;
-    modal.innerHTML=`<div class='calendar-dialog' role='dialog' aria-modal='true'><button class='calendar-modal-close' type='button' aria-label='Zavřít'>×</button><div class='calendar-dialog-heading'><span>DRUŽINA</span><h2>${event?'Upravit termín':'Nový termín'}</h2></div><form id='calendarSessionForm'><label>Název<input name='title' maxlength='120' required value='${esc(event?.title||'DC20 – Kostelec')}'></label><div class='calendar-form-grid'><label>Začátek – datum<input name='start_date' type='date' required value='${esc(v.sd)}'></label><label>Čas<input name='start_time' type='time' required value='${esc(v.st)}'></label><label>Konec – datum<input name='end_date' type='date' required value='${esc(v.ed)}'></label><label>Čas<input name='end_time' type='time' required value='${esc(v.et)}'></label></div><label>Místo<input name='location' maxlength='240' placeholder='např. Kostelec / u Honzy' value='${esc(event?.location||'')}'></label><label>Poznámka<textarea name='description' maxlength='2000' rows='4' placeholder='Co se bude hrát, co vzít s sebou…'>${esc(event?.description||'')}</textarea></label><div class='calendar-form-status' role='status'></div><div class='calendar-form-actions'><button class='button' type='submit'>${event?'Uložit změny':'Vytvořit termín'}</button><button class='button ghost calendar-form-cancel' type='button'>Zrušit</button></div></form></div>`;
-    const close=()=>{modal.hidden=true;modal.innerHTML='';};
-    modal.querySelector('.calendar-modal-close').addEventListener('click',close);
+    const close=closeModal;
     modal.querySelector('.calendar-form-cancel').addEventListener('click',close);
-    modal.addEventListener('click',e=>{if(e.target===modal)close();});
     modal.querySelector('#calendarSessionForm').addEventListener('submit',e=>save(e,event,close));
   }
 

@@ -11,7 +11,7 @@ GANGY
 - Logo / ikonka (volitelné)
 - Popis
 
-POSTAVY
+ŘEZNÍCI
 - Jméno
 - Popis
 - Obrázek (volitelný)
@@ -45,5 +45,5 @@ Běžná změna obsahu v Pages CMS nepotřebuje měnit version.json ani Service 
 Postup zůstává:
 Pages CMS -> Save -> commit do main -> GitHub Pages deploy -> aplikace při dalším online načtení vezme nový obsah.
 
-Gangy, Postavy a Kronika používají network-first načítání. Když internet není dostupný,
+Gangy, Řezníci a Kronika používají network-first načítání. Když internet není dostupný,
 PWA zobrazí poslední uloženou verzi obsahu. Po návratu online se znovu načte aktuální JSON.

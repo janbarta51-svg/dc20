@@ -227,7 +227,7 @@ jobs:
             };
 
             const routes = [
-              'home','character','combo','combat','cleric','champion','bard',
+              'home','combo','combat','cleric','champion','bard',
               'summoner','toolkit','gangcyklopedie','postavy','calendar','kronika'
             ];
 
@@ -353,7 +353,7 @@ jobs:
               htmlOverflow: getComputedStyle(document.documentElement).overflowY,
               bodyOverflow: getComputedStyle(document.body).overflowY
             }));
-            await page.evaluate(() => window.scrollTo(0, Math.min(900, document.documentElement.scrollHeight - innerHeight)));
+            await page.evaluate(() => window.scrollTo({top:Math.min(900, document.documentElement.scrollHeight - innerHeight),behavior:'instant'}));
             await page.waitForTimeout(120);
             const standaloneAfter = await page.evaluate(() => window.scrollY);
             if (
@@ -403,3 +403,4 @@ jobs:
             process.exit(1);
           });
           NODE
+          node tools/check_calendar.cjs

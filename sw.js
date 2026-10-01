@@ -1,4 +1,4 @@
-const CACHE='gangsterka-dc20-v15';
+const CACHE='gangsterka-dc20-v16';
 
 const CMS_PATHS=[
   './content/gangcyklopedie.json',
@@ -32,6 +32,9 @@ const ASSETS=[
   './assets/media/commander-art.webp',
   './assets/media/spellblade-art.webp',
   './assets/media/paper-texture.webp',
+  './assets/downloads/DC20_Beta_0.10.0_fillable_Character_Sheet_ENG.pdf',
+  './assets/downloads/tahak.jpg',
+  './assets/downloads/statusy.jpg',
   './assets/references/DC20_Cleric_Class_Reference.pdf',
   './assets/references/DC20_Champion_Class_Reference.pdf',
   './assets/references/DC20_Bard_Class_Reference.pdf',

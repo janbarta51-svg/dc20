@@ -349,7 +349,7 @@
     if(!state.session){ setConnection('Pro sdílení se nejdřív přihlas','error'); return; }
     const catalog=await loadShareCatalog();
     sharePicker.hidden=false;
-    sharePicker.innerHTML='<div class="chat-share-picker-head"><strong>Sdílet z Gangsterky</strong><button type="button" class="chat-share-picker-close" aria-label="Zavřít">×</button></div><div class="chat-share-filters"><input type="search" placeholder="Hledat spell, postavu, gang…" aria-label="Hledat obsah"><select aria-label="Typ obsahu"><option value="">Vše</option><option value="spell">Spelly</option><option value="maneuver">Maneuvers</option><option value="character">Postavy</option><option value="gang">Gangy</option></select></div><div class="chat-share-results"></div>';
+    sharePicker.innerHTML='<div class="chat-share-picker-head"><strong>Sdílet z Gangsterky</strong><button type="button" class="chat-share-picker-close" aria-label="Zavřít">×</button></div><div class="chat-share-filters"><input type="search" placeholder="Hledat spell, postavu, gang…" aria-label="Hledat obsah"><select aria-label="Typ obsahu"><option value="">Vše</option><option value="spell">Spelly</option><option value="maneuver">Maneuvers</option><option value="character">Řezníci</option><option value="gang">Gangy</option></select></div><div class="chat-share-results"></div>';
     const input=sharePicker.querySelector('input');
     const select=sharePicker.querySelector('select');
     const results=sharePicker.querySelector('.chat-share-results');

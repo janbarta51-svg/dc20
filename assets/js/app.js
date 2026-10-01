@@ -285,7 +285,7 @@
   function setSelected(key,set){selections[key]=[...set];saveSelections()}
   function classRoute(){
     const h=(location.hash||'#home').slice(1);
-    return ['home','character','combo','combat','cleric','champion','bard','summoner','toolkit','gangcyklopedie','postavy','calendar','kronika'].includes(h)?h:'home';
+    return ['home','combo','combat','cleric','champion','bard','summoner','toolkit','gangcyklopedie','postavy','calendar','kronika'].includes(h)?h:'home';
   }
   function groupBy(arr,keyFn){
     return arr.reduce((acc,item)=>{ const key=keyFn(item); (acc[key] ||= []).push(item); return acc; },{});
@@ -327,22 +327,30 @@
   }
 
   function renderHome(){
-    const coming=lang==='en'?'Content coming later.':'Obsah dodělám později';
-    const downloadTitle=lang==='en'?'Download PDF':'Stáhnout PDF';
-    const downloadHint=lang==='en'?'Full class references':'Kompletní class reference';
-    const pdfs=[
-      ['Cleric','assets/references/DC20_Cleric_Class_Reference.pdf'],
-      ['Champion','assets/references/DC20_Champion_Class_Reference.pdf'],
-      ['Bard','assets/references/DC20_Bard_Class_Reference.pdf'],
-      ['Summoner','assets/references/DC20_Summoner_Class_Reference.pdf']
+    const coming=lang==='en'?'Rules, campaign notes and everything you need at the table.':'Pravidla, příběhy a všechno potřebné ke hraní.';
+    const groups=[
+      {
+        title:lang==='en'?'Downloads':'Ke stažení',
+        hint:lang==='en'?'Character sheet and cheat sheets':'List postavy a herní taháky',
+        files:[
+          [lang==='en'?'Character sheet':'List postavy','assets/downloads/DC20_Beta_0.10.0_fillable_Character_Sheet_ENG.pdf',lang==='en'?'PDF · Fillable · English':'PDF · Vyplnitelný · Anglicky'],
+          [lang==='en'?'Cheat sheet':'Tahák','assets/downloads/tahak.jpg','JPG'],
+          [lang==='en'?'Statuses':'Statusy','assets/downloads/statusy.jpg','JPG']
+        ]
+      },
+      {
+        title:'Class reference',
+        hint:lang==='en'?'Full class references':'Kompletní class reference',
+        files:[
+          ['Bard','assets/references/DC20_Bard_Class_Reference.pdf','PDF'],
+          ['Champion','assets/references/DC20_Champion_Class_Reference.pdf','PDF'],
+          ['Cleric','assets/references/DC20_Cleric_Class_Reference.pdf','PDF'],
+          ['Summoner','assets/references/DC20_Summoner_Class_Reference.pdf','PDF']
+        ]
+      }
     ];
     const pdfIcon=`<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M16 5h23l12 12v38a4 4 0 01-4 4H16a4 4 0 01-4-4V9a4 4 0 014-4z"/><path d="M39 5v14h12"/><path d="M32 28v18m0 0l-8-8m8 8l8-8"/><path d="M22 53h20"/></svg>`;
-    app.innerHTML=`<section class="home-landing"><div class="home-content"><img src="assets/media/dc20-logo.webp" alt="DC20"><div class="home-gangsterka">Gangsterka</div><p class="home-coming">${esc(coming)}</p><section class="home-downloads"><div class="home-download-heading"><span>${esc(downloadTitle)}</span><small>${esc(downloadHint)}</small></div><div class="pdf-download-grid">${pdfs.map(([name,path])=>`<a class="pdf-download-card" href="${esc(path)}" download><span class="pdf-download-icon">${pdfIcon}</span><span class="pdf-download-copy"><strong>${esc(name)}</strong><small>PDF</small></span><span class="pdf-download-arrow">↓</span></a>`).join('')}</div></section></div></section>`;
-  }
-
-  function renderCharacter(){
-    const d=R.core.characterCreation;
-    app.innerHTML=`<article class="standard-reference">${hero(pick(d.title),pick(d.intro),'CHARACTER CREATION')}<section class="section"><div class="step-list">${d.steps.map(s=>`<article class="card step"><div class="step-num">${s.n}</div><div><h3>${esc(lang==='en'?s.en:s.cs)}</h3><p>${esc(lang==='en'?s.enText:s.csText)}</p></div></article>`).join('')}</div></section></article>`;
+    app.innerHTML=`<section class="home-landing"><div class="home-content"><img src="assets/media/dc20-logo.webp" alt="DC20"><div class="home-gangsterka">Gangsterka</div><p class="home-coming">${esc(coming)}</p>${groups.map(group=>`<section class="home-downloads"><div class="home-download-heading"><span>${esc(group.title)}</span><small>${esc(group.hint)}</small></div><div class="pdf-download-grid${group.files.length===3?' game-download-grid':''}">${group.files.map(([name,path,format])=>`<a class="pdf-download-card" href="${esc(path)}" download><span class="pdf-download-icon">${pdfIcon}</span><span class="pdf-download-copy"><strong>${esc(name)}</strong><small>${esc(format)}</small></span><span class="pdf-download-arrow">↓</span></a>`).join('')}</div></section>`).join('')}</div></section>`;
   }
 
   function renderCombo(){
@@ -951,7 +959,7 @@
   }
   function renderCharacters(){
     const cards=(postavy||[]).map(p=>{const title=p.name||p.title||'Bez jména';return accordionItem({title,image:p.image||'',body:p.description||p.body||'',shareType:'character',shareKey:slug(title)});}).join('');
-    app.innerHTML=`<article class="standard-reference lore-reference">${hero('Postavy')}<section class="lore-list">${cards}</section></article>`;
+    app.innerHTML=`<article class="standard-reference lore-reference">${hero('Řezníci')}<section class="lore-list">${cards}</section></article>`;
     bindLoreAccordions();
   }
   function renderChronicle(){
@@ -988,7 +996,6 @@
     $('#siteHeader')?.classList.remove('mobile-open');
     $('#navToggle').setAttribute('aria-expanded','false');
     if(route==='home') renderHome();
-    else if(route==='character') renderCharacter();
     else if(route==='combo') renderCombo();
     else if(route==='combat') renderCombat();
     else if(['cleric','champion','bard','summoner'].includes(route)) renderClass(route);

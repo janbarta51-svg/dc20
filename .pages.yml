@@ -45,13 +45,13 @@ content:
               media: false
 
   - name: characters
-    label: Postavy
+    label: Řezníci
     type: file
     path: content/postavy.json
     format: json
     fields:
       - name: characters
-        label: Seznam postav
+        label: Seznam řezníků
         type: object
         list:
           collapsible:
@@ -62,7 +62,7 @@ content:
             label: Jméno
             type: string
             required: true
-            description: Jméno postavy, které se zobrazí v záložce Postavy.
+            description: Jméno postavy, které se zobrazí v záložce Řezníci.
 
           - name: description
             label: Popis

@@ -374,8 +374,8 @@ html[data-theme="dark"] .aside-art img{mix-blend-mode:normal;opacity:.92;filter:
 .class-title-row{display:block}
 .source-note{display:none!important}
 
-/* navigation: four tabs / logo / four tabs */
-.site-header{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);min-height:118px;padding:8px 78px 8px 18px;gap:18px}
+/* navigation: classes and Řezníci / logo / campaign and tools */
+.site-header{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);min-height:118px;padding:8px 134px 8px 18px;gap:18px}
 .nav-cluster{gap:7px;flex-wrap:nowrap}
 .nav-left{justify-content:flex-end}.nav-right{justify-content:flex-start}
 .nav-cluster a{padding:9px 10px;font-size:11.5px}
@@ -424,7 +424,7 @@ html[data-theme="dark"] .lore-image{
 }
 html[data-theme="dark"] .choice-wrap:has(.details.open){background:rgba(119,82,180,.08)}
 
-@media(max-width:1280px){
+@media(max-width:1340px){
   .site-header{grid-template-columns:auto 1fr auto;min-height:96px;padding:8px 12px;gap:10px}
   .nav-toggle{display:block;grid-column:1;grid-row:1;align-self:center}
   .brand-center{grid-column:2;grid-row:1;justify-self:center;width:106px}.brand-center img{width:62px;height:68px}.brand-center span{font-size:13px}
@@ -447,6 +447,14 @@ html[data-theme="dark"] .choice-wrap:has(.details.open){background:rgba(119,82,1
 .home-download-heading span{color:var(--purple);font-size:clamp(24px,3vw,34px);font-variant-caps:small-caps;font-weight:500}
 .home-download-heading small{color:var(--muted);font:700 11px var(--sans);letter-spacing:.06em;text-transform:uppercase}
 .pdf-download-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:17px}
+.game-download-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(min-width:1101px){
+  .home-downloads .pdf-download-grid:not(.game-download-grid) .pdf-download-card{grid-template-columns:46px minmax(0,1fr) 22px;gap:9px;padding:14px 10px}
+  .home-downloads .pdf-download-grid:not(.game-download-grid) .pdf-download-icon{width:44px;height:54px}
+  .home-downloads .pdf-download-grid:not(.game-download-grid) .pdf-download-icon svg{width:34px;height:40px}
+  .home-downloads .pdf-download-grid:not(.game-download-grid) .pdf-download-copy strong{font-size:20px}
+  .home-downloads .pdf-download-grid:not(.game-download-grid) .pdf-download-arrow{width:22px;height:22px;font-size:14px}
+}
 .pdf-download-card{
   display:grid;grid-template-columns:72px minmax(0,1fr) 28px;align-items:center;gap:14px;min-height:106px;
   padding:15px 15px 15px 13px;color:var(--ink);text-decoration:none;border:1px solid var(--line);
@@ -1987,6 +1995,7 @@ html.pwa-standalone body{
 .calendar-session-actions .button{text-decoration:none}
 .calendar-google-button{display:inline-flex;align-items:center}
 .calendar-google-button::before{content:'📅';margin-right:7px}
+.calendar-event-dialog .calendar-session-card{margin-top:32px}
 .calendar-delete{color:#9c2f2f;border-color:color-mix(in srgb,#9c2f2f 38%,var(--line))}
 .calendar-empty{
   padding:28px;
