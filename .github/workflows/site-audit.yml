@@ -404,3 +404,4 @@ jobs:
           });
           NODE
           node tools/check_calendar.cjs
+          node tools/check_updates.cjs

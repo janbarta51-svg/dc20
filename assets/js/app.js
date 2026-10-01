@@ -1060,8 +1060,19 @@
   setTimeout(()=>splash?.classList.add('hide'),splashDelay);
   setTimeout(()=>splash?.remove(),splashDelay+650);
 
-  const APP_VERSION='2026.09.23.13';
+  const APP_VERSION='2026.10.01.2';
   let updatePromptShown=false;
+
+  function isNewerAppVersion(version){
+    const latest=String(version||'').split('.');
+    const current=APP_VERSION.split('.');
+    if(latest.length!==current.length || latest.some(part=>!/^\d+$/.test(part))) return false;
+    for(let i=0;i<current.length;i++){
+      const difference=Number(latest[i])-Number(current[i]);
+      if(difference) return difference>0;
+    }
+    return false;
+  }
 
   function showUpdatePrompt(){
     if(updatePromptShown) return;
@@ -1087,7 +1098,7 @@
       const response=await fetch(`version.json?t=${Date.now()}`,{cache:'no-store'});
       if(!response.ok) return;
       const data=await response.json();
-      if(data?.version && data.version!==APP_VERSION) showUpdatePrompt();
+      if(isNewerAppVersion(data?.version)) showUpdatePrompt();
     }catch(e){}
   }
 
