@@ -2,7 +2,7 @@
   "characters": [
     {
       "name": "Bogdan “Doga” Bukowski",
-      "description": "- vzhled: velmi vysoký, svalnatý, vlasy do běla; pohlaví: muž; věk: 44\n- Bogdan vyrůstal mezi Řezníky a o tom, že se vyšplhá až na jejich vrchol, jakoby nebylo od začátku vůbec pochyb.\n\n- Síla, ledové nervy, železná vůle - to byly kvality, kterých si ostatní z gangu cenili už od jeho mládí a pro které ho následovali.\n- Možná proto, že to byla jediná věc, ve které přímo nevynikal, nesmírně si váží inteligence. Spřádání komplikovaných plánů někde u stolu možná není jeho šálek čaje, absolutně ale takový talent podporuje, byl pro něj klíčovým při výběru manželky a od těch z další generace členů gangu, kteří by snad chtěli pomýšlet o vysokých pozicích, jej bude určitě požadovat.\n\n",
+      "description": "- vzhled: velmi vysoký, svalnatý, vlasy do běla; pohlaví: muž; věk: 44\n- Bogdan vyrůstal mezi Řezníky a o tom, že se vyšplhá až na jejich vrchol, jakoby nebylo od začátku vůbec pochyb.\n- Síla, ledové nervy, železná vůle - to byly kvality, kterých si ostatní z gangu cenili už od jeho mládí a pro které ho následovali.\n- Možná proto, že to byla jediná věc, ve které přímo nevynikal, nesmírně si váží inteligence. Spřádání komplikovaných plánů někde u stolu možná není jeho šálek čaje, absolutně ale takový talent podporuje, byl pro něj klíčovým při výběru manželky a od těch z další generace členů gangu, kteří by snad chtěli pomýšlet o vysokých pozicích, jej bude určitě požadovat.\n\n",
       "image": "/assets/uploads/1000036308.png"
     },
     {
@@ -17,39 +17,48 @@
     },
     {
       "name": "Hrast “Rybíz” Stoklásek",
-      "description": "(vzhled: starý, šlachovitý; pohlaví: muž; věk: 68)\n\nHrast je protivný, tvrdohlavý dědek, který si stále nedokáže přiznat, že jeho čas je pryč.\n\nPřísný otec a tyran, který věří v tvrdou disciplínu. Bojí se, že jeho gang “měkne“.\n\nVětšina rozhodnutí už jde dnes mimo něj, avšak stále se těší velké úctě starších generací, a to obzvlášť u svých starých soupeřů. I mladší Řezníci pak musí uznat, že bez něj by tento gang dost možná před třiceti lety zanikl a bylo by nerozumné i nečestné si ho přímo znepřátelit.\n\nNejvíce času tráví s Brankem.  "
+      "description": "- (vzhled: starý, šlachovitý; pohlaví: muž; věk: 68)\n- Hrast je protivný, tvrdohlavý dědek, který si stále nedokáže přiznat, že jeho čas je pryč.\n- Přísný otec a tyran, který věří v tvrdou disciplínu. Bojí se, že jeho gang “měkne“.\n- Většina rozhodnutí už jde dnes mimo něj, avšak stále se těší velké úctě starších generací, a to obzvlášť u svých starých soupeřů. I mladší Řezníci pak musí uznat, že bez něj by tento gang dost možná před třiceti lety zanikl a bylo by nerozumné i nečestné si ho přímo znepřátelit.\n- Nejvíce času tráví s Brankem.  \n\n",
+      "image": "/assets/uploads/1000036870.png"
     },
     {
       "name": "Lubica “Jolanka” Zátopková",
-      "description": "(vzhled: vychrtlá, éterická, černé vlasy, fialové oči; pohlaví: žena; věk: 23)\n\nVyučená pro účetnictví a investice. Beznadějně zamilovaná do svého manžela Chrudoše.\n\nČasto nepřítomná, zahleděná kamsi do dáli.\n\nSvé bratry miluje, i když je pořád vidí jako malé chlapce a příliš nerespektuje jejich názory. Jako prvorozená vnučka Hrasta a dcera Bogdana a Jeleny pohrdá Milanem i Imislavem, nicméně je k nim spíše okatě slušná a snaží se je ignorovat, než že by byla vyloženě útočná.\n\n"
+      "description": "- (vzhled: vychrtlá, éterická, černé vlasy, fialové oči; pohlaví: žena; věk: 23)\n- Vyučená pro účetnictví a investice. Beznadějně zamilovaná do svého manžela Chrudoše.\n- Často nepřítomná, zahleděná kamsi do dáli.\n- Své bratry miluje, i když je pořád vidí jako malé chlapce a příliš nerespektuje jejich názory. Jako prvorozená vnučka Hrasta a dcera Bogdana a Jeleny pohrdá Milanem i Imislavem, nicméně je k nim spíše okatě slušná a snaží se je ignorovat, než že by byla vyloženě útočná.\n\n",
+      "image": "/assets/uploads/1000036871.png"
     },
     {
       "name": "Chrudoš \"Zlatý\" Zátopek",
-      "description": "(vzhled: fešný blonďák, hubený; pohlaví: muž; věk: 26)\n\nNejvětší naděje a talent Řezníků. Styl, charisma a hlavně úžasné magické schopnosti ho pasují na největší úlovek gangu za dlouhou dobu. Chrudoš totiž vyrůstal v Dragnym Pogromu, takže jeho přiženění a ochota přejít k Řezníkům byla velkou výhrou.\n\nKdekdo ho nazývá arogantní, nicméně je to arogance, když je to pravda? Chrudoš je mezi mladými Řezníky liga sama o sobě a bere to jako samozřejmost. Až na občasnou debatu o oblecích s Ludovidem s ostatními příliš volného času netráví.\n\nS tchánem Bogdanem občas naráží na to, že se Chrudoš už teď ambiciózně cpe do vedení gangu s odkazem na své mimořádné schopnosti. Bogdan se zatím odvolává na nedostatek zkušeností, pokud ale o své eso nechce přijít, bude muset být velice diplomatický a dost možná se brzy podvolit.  "
+      "description": "- (vzhled: fešný blonďák, hubený; pohlaví: muž; věk: 26)\n- Největší naděje a talent Řezníků. Styl, charisma a hlavně úžasné magické schopnosti ho pasují na největší úlovek gangu za dlouhou dobu. Chrudoš totiž vyrůstal v Dragnym Pogromu, takže jeho přiženění a ochota přejít k Řezníkům byla velkou výhrou.\n- Kdekdo ho nazývá arogantní, nicméně je to arogance, když je to pravda? Chrudoš je mezi mladými Řezníky liga sama o sobě a bere to jako samozřejmost. Až na občasnou debatu o oblecích s Ludovidem s ostatními příliš volného času netráví.\n- S tchánem Bogdanem občas naráží na to, že se Chrudoš už teď ambiciózně cpe do vedení gangu s odkazem na své mimořádné schopnosti. Bogdan se zatím odvolává na nedostatek zkušeností, pokud ale o své eso nechce přijít, bude muset být velice diplomatický a dost možná se brzy podvolit.  \n\n",
+      "image": "/assets/uploads/1000036872.png"
     },
     {
       "name": "Nitrabor \"Pasák\" Hławiczka",
-      "description": "(vzhled: menší, postarší gentleman; pohlaví: muž; věk: 60)\n\nMagický kutil, vášnivý čtenář a archivista.\n\nDo záležitostí gangu se neplete; nemůže vystát Hrasta.\n\n"
+      "description": "- (vzhled: menší, postarší gentleman; pohlaví: muž; věk: 60)\n- Magický kutil, vášnivý čtenář a archivista.\n- Do záležitostí gangu se neplete; nemůže vystát Hrasta.\n\n",
+      "image": "/assets/uploads/1000036873.png"
     },
     {
       "name": "Pribislav \"Sekáček\" Hławiczka",
-      "description": "(vzhled: energický malý chlápek; pohlaví: muž; věk: 40)\n\nKdyž chceš magické zvíře naporcovat tak, abys nepřišel ani o ždibec magie a alchymistického potenciálu, jdi za Pribislavem.\n\nZkušený řezník spokojený tam, kde je.\n\nTo, že se jeho syn Imislav přímo angažuje ve věcech gangu ho znepokojuje, nicméně ho maximálně podporuje.\n\n"
+      "description": "- (vzhled: energický malý chlápek; pohlaví: muž; věk: 40)\n- Když chceš magické zvíře naporcovat tak, abys nepřišel ani o ždibec magie a alchymistického potenciálu, jdi za Pribislavem.\n- Zkušený řezník spokojený tam, kde je.\n- To, že se jeho syn Imislav přímo angažuje ve věcech gangu ho znepokojuje, nicméně ho maximálně podporuje.\n\n",
+      "image": "/assets/uploads/1000036874.png"
     },
     {
       "name": "Branko “Drtikol” Jakeš",
-      "description": "(vzhled: opravdu masivní; pohlaví: muž; věk: 50)\n\nŘezníci mají silný základní kámen, díky kterému se nemusí obávat útoků na svoji základnu a mohou se odvážněji snažit o expanzi. Tím základním kamenem je Drtikol.\n\nDrtikol je bojovník s obrovskou reputací, naprostá legenda gangových válek a Hrastova věrná skála, o kterou se zlomily celé zástupy nepřátel.\n\nPro vás je to ale ten smutný tichý muž, který zachmuřeně sedí za dveřmi hospody a všichni se ho bojí. Vy jste se ho nikdy nebáli, protože pro děti z gangu, a to opravdu jen pro ty, vybojuje vždy maličkatý úsměv.\n\nI jeho bojové schopnosti znáte pouze z vyprávění postarších štamgastů, sami jste jich nikdy nebyly svědkem. Už před snad 25 lety se totiž něco stalo, něco co ví jen on a váš děd, kvůli čemuž se Branko zapřísáhl, že už nikdy nezaútočí.\n\nOstatní gangy se tak nemusí obávat Drtikola na svém území. Aby se mu vyhli, stačí zůstat dále od hospody.\n\n"
+      "description": "- (vzhled: opravdu masivní; pohlaví: muž; věk: 50)\n- Řezníci mají silný základní kámen, díky kterému se nemusí obávat útoků na svoji základnu a mohou se odvážněji snažit o expanzi. Tím základním kamenem je Drtikol.\n- Drtikol je bojovník s obrovskou reputací, naprostá legenda gangových válek a Hrastova věrná skála, o kterou se zlomily celé zástupy nepřátel.\n- Pro vás je to ale ten smutný tichý muž, který zachmuřeně sedí za dveřmi hospody a všichni se ho bojí. Vy jste se ho nikdy nebáli, protože pro děti z gangu, a to opravdu jen pro ty, vybojuje vždy maličkatý úsměv.\n- I jeho bojové schopnosti znáte pouze z vyprávění postarších štamgastů, sami jste jich nikdy nebyly svědkem. Už před snad 25 lety se totiž něco stalo, něco co ví jen on a váš děd, kvůli čemuž se Branko zapřísáhl, že už nikdy nezaútočí.\n- Ostatní gangy se tak nemusí obávat Drtikola na svém území. Aby se mu vyhli, stačí zůstat dále od hospody.\n\n",
+      "image": "/assets/uploads/1000036875.png"
     },
     {
       "name": "Lech “Moudrý” Wróbel",
-      "description": "(vzhled: hubený, vitální, stylový; pohlaví: muž; věk: 61)\n\nHospodský, za kterým si pijani chodí pro životný rady.\n\nNaprosto žádné bojové schopnosti."
+      "description": "- (vzhled: hubený, vitální, stylový; pohlaví: muž; věk: 61)\n- Hospodský, za kterým si pijani chodí pro životný rady.\n- Naprosto žádné bojové schopnosti.\n\n",
+      "image": "/assets/uploads/1000036876.png"
     },
     {
       "name": "Gojko “Kazimrd” Šuštar",
-      "description": "(vzhled: rozložitý, malý; pohlaví: muž; věk: 40)\n\nČlen nejužšího vedení gangu. Cholerický a hlasitý, vyžaduje poslušnost.\n\nKrutý ke zvířatům.\n\nMá 5 dětí ve věku 1 až 13, většinou s prostitutkami."
+      "description": "- (vzhled: rozložitý, malý; pohlaví: muž; věk: 40)\n- Člen nejužšího vedení gangu. Cholerický a hlasitý, vyžaduje poslušnost.\n- Krutý ke zvířatům.\n- Má 5 dětí ve věku 1 až 13, většinou s prostitutkami.\n\n",
+      "image": "/assets/uploads/1000036877.png"
     },
     {
       "name": "Dalibor “Šulek” Šuštar",
-      "description": "### Dalibor “Šulek” Šuštar\n\n(vzhled: rozložitý, malý; pohlaví: muž; věk: 45)\n\nGojkův bratr. Veselá kopa, a to i v dobách války a jiných tragédií. Nebere nic vážně.\n\nMá rád velké výbuchy."
+      "description": "- (vzhled: rozložitý, malý; pohlaví: muž; věk: 45)\n- Gojkův bratr. Veselá kopa, a to i v dobách války a jiných tragédií. Nebere nic vážně.\n- Má rád velké výbuchy.\n\n",
+      "image": "/assets/uploads/1000036878.png"
     }
   ]
 }
