@@ -115,6 +115,7 @@ body::after{
 .class-aside{position:sticky;top:82px;display:grid;gap:18px}
 .aside-art{border:1px solid var(--line);background:color-mix(in srgb,var(--paper) 92%,transparent);padding:12px;box-shadow:0 8px 24px rgba(40,25,60,.08)}
 .aside-art img{display:block;width:100%;height:auto;max-height:460px;object-fit:contain;mix-blend-mode:multiply;filter:drop-shadow(0 8px 18px rgba(18,10,26,.15))}
+.class-bard .aside-art img,.class-champion .aside-art img{mix-blend-mode:normal}
 .aside-copy{padding-top:10px;border-top:1px solid var(--soft)}
 .aside-copy h3{margin:2px 0 6px;font-size:22px;color:var(--purple);font-weight:500}
 .aside-copy p{margin:0;color:var(--muted);font-size:14px;line-height:1.5}

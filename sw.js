@@ -1,4 +1,4 @@
-const CACHE='gangsterka-dc20-v17';
+const CACHE='gangsterka-dc20-v18';
 
 const CMS_PATHS=[
   './content/gangcyklopedie.json',
@@ -29,7 +29,8 @@ const ASSETS=[
   './assets/icons/gangsterka-512.png',
   './assets/media/dc20-logo.webp',
   './assets/media/cleric-art.webp',
-  './assets/media/commander-art.webp',
+  './assets/media/champion-crossbow.jpg',
+  './assets/media/bard-violin.jpg',
   './assets/media/spellblade-art.webp',
   './assets/media/paper-texture.webp',
   './assets/downloads/DC20_Beta_0.10.0_fillable_Character_Sheet_ENG.pdf',

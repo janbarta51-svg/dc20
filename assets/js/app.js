@@ -105,10 +105,17 @@
       title:{en:'Divine Scholar', cs:'Božský učenec'},
       text:{en:'A calmer divine portrait for the Cleric reference page.', cs:'Klidnější božská ilustrace pro stránku Clerica.'}
     },
-    commander: {
-      img:'assets/media/commander-art.webp',
-      title:{en:'Battle Captain', cs:'Bitevní kapitán'},
-      text:{en:'A martial leader with strong battlefield presence.', cs:'Bojový vůdce se silnou přítomností na bojišti.'}
+    champion: {
+      img:'assets/media/champion-crossbow.jpg',
+      title:{en:'Champion', cs:'Champion'},
+      alt:{en:'Young warrior holding a crossbow', cs:'Mladý bojovník s kuší'},
+      text:{en:'A young warrior with a crossbow.', cs:'Mladý bojovník s kuší.'}
+    },
+    bard: {
+      img:'assets/media/bard-violin.jpg',
+      title:{en:'Bard', cs:'Bard'},
+      alt:{en:'Bard holding a violin', cs:'Bard s houslemi'},
+      text:{en:'A bard with a violin.', cs:'Bard s houslemi.'}
     },
     spellblade: {
       img:'assets/media/spellblade-art.webp',
@@ -587,15 +594,18 @@
       summoner:'assets/references/DC20_Summoner_Class_Reference.pdf'
     };
     const cheatIcon=`<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M16 5h23l12 12v38a4 4 0 01-4 4H16a4 4 0 01-4-4V9a4 4 0 014-4z"/><path d="M39 5v14h12"/><path d="M22 31h20M22 39h14M22 47h18"/><path d="M18 31h.1M18 39h.1M18 47h.1"/></svg>`;
+    const pdfPath=cheatPaths[cls]||referencePaths[cls];
+    const pdfLabel=cheatPaths[cls]?'Cheat Sheet':'Class Reference';
+    const pdfLink=pdfPath?`<a class="pdf-download-card class-cheat-download" href="${esc(pdfPath)}" download><span class="pdf-download-icon">${cheatIcon}</span><span class="pdf-download-copy"><strong>${pdfLabel}</strong><small>${esc(c.name)} · PDF</small></span><span class="pdf-download-arrow">↓</span></a>`:'';
     const artBlock = art ? `<section class="aside-art">
         <div class="eyebrow">${esc(t('artLabel'))}</div>
-        <img src="${esc(art.img)}" alt="${esc(art.title[lang] || art.title.en)}">
+        <img src="${esc(art.img)}" alt="${esc(pick(art.alt||art.title))}">
         <div class="aside-copy"><h3>${esc(art.title[lang] || art.title.en)}</h3><p>${esc(art.text[lang] || art.text.en)}</p></div>
-        ${cheatPaths[cls]?`<a class="pdf-download-card class-cheat-download" href="${esc(cheatPaths[cls])}" download><span class="pdf-download-icon">${cheatIcon}</span><span class="pdf-download-copy"><strong>Cheat Sheet</strong><small>${esc(c.name)} · PDF</small></span><span class="pdf-download-arrow">↓</span></a>`:''}
+        ${pdfLink}
       </section>` : `<section class="aside-art class-reference-aside">
         <div class="eyebrow">CLASS REFERENCE</div>
         <div class="aside-copy"><h3>${esc(c.name)}</h3><p>${esc(pick(c.tagline))}</p></div>
-        ${referencePaths[cls]?`<a class="pdf-download-card class-cheat-download" href="${esc(referencePaths[cls])}" download><span class="pdf-download-icon">${cheatIcon}</span><span class="pdf-download-copy"><strong>Class Reference</strong><small>${esc(c.name)} · PDF</small></span><span class="pdf-download-arrow">↓</span></a>`:''}
+        ${pdfLink}
       </section>`;
     return `<aside class="class-aside">${artBlock}<section class="side-panel"><h4>${esc(t('buildPanelTitle'))}</h4><p>${esc(buildText)}</p><ul><li>${esc(t('storedNotice'))}</li><li>${esc(c.level1.training)}</li><li>${esc(`${t('spells')}: ${c.level1.spells} • ${t('maneuvers')}: ${c.level1.maneuvers}`)}</li></ul></section></aside>`;
   }
@@ -1060,7 +1070,7 @@
   setTimeout(()=>splash?.classList.add('hide'),splashDelay);
   setTimeout(()=>splash?.remove(),splashDelay+650);
 
-  const APP_VERSION='2026.10.01.2';
+  const APP_VERSION='2026.10.02.1';
   let updatePromptShown=false;
 
   function isNewerAppVersion(version){
