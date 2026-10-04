@@ -10,6 +10,7 @@
 .nav-cluster a{min-height:44px;font-size:14px;padding:10px 12px;border-radius:8px}
 .button{display:inline-flex;align-items:center;justify-content:center;min-height:44px;font-size:14px;line-height:1.35;border-radius:9px;padding:10px 16px;text-align:center}
 .tool-button{font-size:14px;min-height:44px;border-radius:9px}
+.account-toggle{justify-content:center}
 .home-intro>img{width:min(210px,35vw)}
 .home-gangsterka{margin:8px 0 0;line-height:1.15}
 .home-download-heading h2{margin:0;color:var(--purple);font-size:clamp(24px,3vw,34px);font-variant-caps:small-caps;font-weight:500}
@@ -73,6 +74,8 @@
     width:48px!important;min-width:48px!important;height:48px;padding:0!important;font-size:14px;border-radius:12px;
   }
   .account-toggle-label{display:none}
+  .header-tools .account-toggle .account-avatar{width:32px;height:32px;flex-basis:32px}
+  .header-tools .account-toggle .account-avatar-fallback{font-size:12px}
   .app-shell{width:calc(100% - 20px);margin:12px auto max(96px,calc(80px + env(safe-area-inset-bottom)));min-width:0}
   .home-landing{display:block;min-height:0;padding:20px 16px 24px;border-radius:16px}
   .home-content{width:100%;min-width:0}

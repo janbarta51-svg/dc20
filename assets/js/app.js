@@ -1068,7 +1068,7 @@
   setTimeout(()=>splash?.classList.add('hide'),splashDelay);
   setTimeout(()=>splash?.remove(),splashDelay+650);
 
-  const APP_VERSION='2026.10.04.1';
+  const APP_VERSION='2026.10.04.2';
   let updatePromptShown=false;
 
   function isNewerAppVersion(version){
