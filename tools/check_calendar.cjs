@@ -50,7 +50,7 @@ async function checkLink(page, event, dates) {
     await page.clock.setFixedTime(new Date('2026-10-01T12:00:00Z'));
     await page.route('**/__calendar_check__', route => route.fulfill({
       contentType: 'text/html',
-      body: '<!doctype html><html><head><link rel="stylesheet" href="/assets/css/styles.css"></head><body><main id="app" class="app-shell"></main></body></html>'
+      body: '<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/assets/css/styles.css"><link rel="stylesheet" href="/assets/css/mobile.css"></head><body><main id="app" class="app-shell"></main></body></html>'
     }));
     await page.addInitScript(({ sessions }) => {
       window.calendarFixture = { role: 'member', signedIn: true, reads: [] };
@@ -122,11 +122,23 @@ async function checkLink(page, event, dates) {
     assert.equal(await page.locator('#calendarSessionForm [name="end_time"]').inputValue(), '22:00');
     await page.locator('.calendar-form-cancel').click();
 
+    // Monthly events and Google Calendar links remain usable on narrow phones.
+    for (const width of [320, 390, 430]) {
+      await page.setViewportSize({ width, height: 844 });
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
+      const event = page.locator('[data-open-session="winter"]').first();
+      assert.ok((await event.boundingBox()).height >= 48);
+      await event.click();
+      const googleLink = await checkLink(page, sessions[7], '20261204T170000Z/20261204T210000Z');
+      assert.ok((await googleLink.boundingBox()).height >= 48);
+      await page.locator('#calendarModal .calendar-modal-close').click();
+    }
+
     await page.evaluate(async () => { window.calendarFixture.signedIn = false; await window.renderDC20Calendar(); });
     assert.equal(await page.locator('.calendar-grid').count(), 0);
     assert.match(await page.locator('#app').innerText(), /přihlášení členové/);
     assert.deepEqual(errors, []);
-    console.log('Calendar OK: old events, summer/winter times, overnight events, popup, member/admin access.');
+    console.log('Calendar OK: old events, summer/winter times, overnight events, popup, member/admin access and mobile controls.');
   } finally {
     await browser.close();
   }

@@ -10,6 +10,7 @@
   button.id='accountToggle';
   button.className='tool-button account-toggle';
   button.title='Účet';
+  button.setAttribute('aria-label','Účet hráče');
   button.innerHTML='<span class="account-avatar account-avatar-fallback">👤</span><span class="account-toggle-label">Přihlásit</span>';
   tools.prepend(button);
 

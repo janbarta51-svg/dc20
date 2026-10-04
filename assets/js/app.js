@@ -357,7 +357,7 @@
       }
     ];
     const pdfIcon=`<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M16 5h23l12 12v38a4 4 0 01-4 4H16a4 4 0 01-4-4V9a4 4 0 014-4z"/><path d="M39 5v14h12"/><path d="M32 28v18m0 0l-8-8m8 8l8-8"/><path d="M22 53h20"/></svg>`;
-    app.innerHTML=`<section class="home-landing"><div class="home-content"><img src="assets/media/dc20-logo.webp" alt="DC20"><div class="home-gangsterka">Gangsterka</div><p class="home-coming">${esc(coming)}</p>${groups.map(group=>`<section class="home-downloads"><div class="home-download-heading"><span>${esc(group.title)}</span><small>${esc(group.hint)}</small></div><div class="pdf-download-grid${group.files.length===3?' game-download-grid':''}">${group.files.map(([name,path,format])=>`<a class="pdf-download-card" href="${esc(path)}" download><span class="pdf-download-icon">${pdfIcon}</span><span class="pdf-download-copy"><strong>${esc(name)}</strong><small>${esc(format)}</small></span><span class="pdf-download-arrow">↓</span></a>`).join('')}</div></section>`).join('')}</div></section>`;
+    app.innerHTML=`<section class="home-landing"><div class="home-content"><div class="home-intro"><img src="assets/media/dc20-logo.webp" alt="DC20"><div><h1 class="home-gangsterka">Gangsterka</h1><p class="home-coming">${esc(coming)}</p></div></div>${groups.map(group=>`<section class="home-downloads"><div class="home-download-heading"><h2>${esc(group.title)}</h2><small>${esc(group.hint)}</small></div><div class="pdf-download-grid${group.files.length===3?' game-download-grid':''}">${group.files.map(([name,path,format])=>`<a class="pdf-download-card" href="${esc(path)}" download><span class="pdf-download-icon">${pdfIcon}</span><span class="pdf-download-copy"><strong>${esc(name)}</strong><small>${esc(format)}</small></span><span class="pdf-download-arrow" aria-hidden="true">↓</span></a>`).join('')}</div></section>`).join('')}</div></section>`;
   }
 
   function renderCombo(){
@@ -677,7 +677,7 @@
     const csSummary=type==='spell'?spellSummaryCs(x):maneuverSummaryCs(x);
     const meta=`<span><strong>${esc(t('cost'))}:</strong> ${esc(x.cost)}</span><span><strong>${esc(t('range'))}:</strong> ${esc(x.range)}</span>${type==='spell'?`<span><strong>${esc(t('school'))}:</strong> ${esc(x.school)}</span><span><strong>${esc(t('duration'))}:</strong> ${esc(x.duration)}</span>`:''}`;
     const body=formatRuleBody(x.body_en,'web');
-    return `<div class="choice-wrap" data-name="${esc(x.name.toLowerCase())}" data-school="${esc(type==='spell'?x.school:x.category)}" data-share-type="${esc(type)}" data-share-key="${esc(x.id)}"><div class="choice-row"><input type="checkbox" class="choice-check" data-class="${esc(cls)}" data-id="${esc(x.id)}" ${checked?'checked':''}><span class="name detail-toggle">${esc(x.name)}</span><span class="cost">${esc(x.cost)}</span></div><div class="details"><div class="meta">${meta}</div>${lang==='cs'?`<p class="cs-summary"><strong>Česky stručně:</strong> ${esc(csSummary)}</p><details><summary>${esc(t('original'))}</summary><div class="rules-text">${body}</div></details>`:`<div class="rules-text">${body}</div>`}</div></div>`;
+    return `<div class="choice-wrap" data-name="${esc(x.name.toLowerCase())}" data-school="${esc(type==='spell'?x.school:x.category)}" data-share-type="${esc(type)}" data-share-key="${esc(x.id)}"><div class="choice-row"><label class="choice-check-target"><input type="checkbox" class="choice-check" aria-label="${esc((lang==='en'?'Select ':'Vybrat ')+x.name)}" data-class="${esc(cls)}" data-id="${esc(x.id)}" ${checked?'checked':''}></label><button type="button" class="name detail-toggle" aria-expanded="false">${esc(x.name)}</button><span class="cost">${esc(x.cost)}</span></div><div class="details"><div class="meta">${meta}</div>${lang==='cs'?`<p class="cs-summary"><strong>Česky stručně:</strong> ${esc(csSummary)}</p><details><summary>${esc(t('original'))}</summary><div class="rules-text">${body}</div></details>`:`<div class="rules-text">${body}</div>`}</div></div>`;
   }
   function selectionFooter(cls,count=selectedSet(cls).size){
     return `<div class="selection-footer"><b><span class="selection-count">${count}</span> ${esc(t('selected'))}</b><div><button class="button secondary clear-selection" data-class="${esc(cls)}">${esc(t('clear'))}</button> <button class="button generate-selector" data-class="${esc(cls)}">${esc(t('generate'))}</button></div></div>`;
@@ -709,7 +709,7 @@
       const cnt=$('.selection-count',group);
       if(cnt) cnt.textContent=set.size;
     }));
-    $$('.detail-toggle',root).forEach(el=>el.addEventListener('click',()=>{const wrap=el.closest('.choice-wrap');const detail=$('.details',wrap);const open=detail.classList.toggle('open');wrap.classList.toggle('open',open);}));
+    $$('.detail-toggle',root).forEach(el=>el.addEventListener('click',()=>{const wrap=el.closest('.choice-wrap');const detail=$('.details',wrap);const open=detail.classList.toggle('open');wrap.classList.toggle('open',open);el.setAttribute('aria-expanded',String(open));}));
     $$('.selector-search',root).forEach(inp=>inp.addEventListener('input',()=>applyFilter(inp.closest('[data-selector]'))));
     $$('.selector-school',root).forEach(sel=>sel.addEventListener('change',()=>applyFilter(sel.closest('[data-selector]'))));
     $$('.clear-selection',root).forEach(btn=>btn.addEventListener('click',()=>{
@@ -1003,8 +1003,11 @@
   function render(){
     const route=classRoute();
     $$('.nav-cluster a, .brand-center').forEach(a=>a.classList.toggle('active',a.dataset.route===route));
-    $('#siteHeader')?.classList.remove('mobile-open');
-    $('#navToggle').setAttribute('aria-expanded','false');
+    if(window.closeDC20Navigation) window.closeDC20Navigation();
+    else{
+      $('#siteHeader')?.classList.remove('mobile-open');
+      $('#navToggle').setAttribute('aria-expanded','false');
+    }
     if(route==='home') renderHome();
     else if(route==='combo') renderCombo();
     else if(route==='combat') renderCombat();
@@ -1034,11 +1037,6 @@
     store.set('dc20-theme',theme);
     document.documentElement.dataset.theme=theme;
     $('#themeToggle').textContent=theme==='light'?'☀':'☾';
-  });
-  $('#navToggle').addEventListener('click',()=>{
-    const header=$('#siteHeader');
-    const open=header.classList.toggle('mobile-open');
-    $('#navToggle').setAttribute('aria-expanded',open?'true':'false');
   });
   document.addEventListener('pointerover',e=>{
     const b=e.target.closest?.('.glossary-term');
@@ -1070,7 +1068,7 @@
   setTimeout(()=>splash?.classList.add('hide'),splashDelay);
   setTimeout(()=>splash?.remove(),splashDelay+650);
 
-  const APP_VERSION='2026.10.02.1';
+  const APP_VERSION='2026.10.04.1';
   let updatePromptShown=false;
 
   function isNewerAppVersion(version){

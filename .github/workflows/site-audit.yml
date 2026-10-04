@@ -189,7 +189,7 @@ jobs:
           python3 - <<'PY'
           import re
           from pathlib import Path
-          for filename in ['assets/css/styles.css','assets/css/lore-fixes.css']:
+          for filename in ['assets/css/styles.css','assets/css/lore-fixes.css','assets/css/mobile.css']:
               text=Path(filename).read_text(encoding='utf-8')
               text=re.sub(r'/\*.*?\*/','',text,flags=re.S)
               if text.count('{') != text.count('}'):
@@ -405,3 +405,4 @@ jobs:
           NODE
           node tools/check_calendar.cjs
           node tools/check_updates.cjs
+          node tools/check_mobile.cjs

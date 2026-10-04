@@ -15,6 +15,7 @@
   <link rel="apple-touch-icon" href="assets/icons/gangsterka-192.png">
   <link rel="stylesheet" href="assets/css/styles.css">
   <link rel="stylesheet" href="assets/css/lore-fixes.css">
+  <link rel="stylesheet" href="assets/css/mobile.css">
 </head>
 <body>
   <div id="splash" class="splash-screen" aria-hidden="true">
@@ -26,35 +27,38 @@
   </div>
 
   <header class="site-header" id="siteHeader">
-    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+    <button class="nav-toggle" id="navToggle" type="button" aria-label="Menu" aria-controls="siteMenu" aria-expanded="false"><span aria-hidden="true">☰</span><span>Menu</span></button>
 
-    <nav class="nav-cluster nav-left" aria-label="Primary navigation left">
-      <a href="#bard" data-route="bard">Bard</a>
-      <a href="#champion" data-route="champion">Champion</a>
-      <a href="#cleric" data-route="cleric">Cleric</a>
-      <a href="#summoner" data-route="summoner">Summoner</a>
-      <a href="#postavy" data-route="postavy">Řezníci</a>
-    </nav>
+    <div class="site-menu" id="siteMenu">
+      <nav class="nav-cluster nav-left" aria-label="Primary navigation left">
+        <a href="#bard" data-route="bard">Bard</a>
+        <a href="#champion" data-route="champion">Champion</a>
+        <a href="#cleric" data-route="cleric">Cleric</a>
+        <a href="#summoner" data-route="summoner">Summoner</a>
+        <a href="#postavy" data-route="postavy">Řezníci</a>
+      </nav>
 
-    <a class="brand-center" href="#home" data-route="home" aria-label="Gangsterka home">
+      <nav class="nav-cluster nav-right" aria-label="Primary navigation right">
+        <a href="#gangcyklopedie" data-route="gangcyklopedie">Gangy z Kostelce</a>
+        <a href="#kronika" data-route="kronika">Kronika</a>
+        <a href="#combat" data-route="combat">Combat</a>
+        <a href="#combo" data-route="combo">Combo</a>
+        <a href="#toolkit" data-route="toolkit">Toolkit</a>
+        <a href="#calendar" data-route="calendar">Kalendář</a>
+      </nav>
+    </div>
+
+    <a class="brand-center" href="#home" data-route="home" aria-label="Gangsterka — úvod">
       <img src="assets/media/dc20-logo.webp" alt="DC20">
       <span>Gangsterka</span>
     </a>
-
-    <nav class="nav-cluster nav-right" aria-label="Primary navigation right">
-      <a href="#gangcyklopedie" data-route="gangcyklopedie">Gangy z Kostelce</a>
-      <a href="#kronika" data-route="kronika">Kronika</a>
-      <a href="#combat" data-route="combat">Combat</a>
-      <a href="#combo" data-route="combo">Combo</a>
-      <a href="#toolkit" data-route="toolkit">Toolkit</a>
-      <a href="#calendar" data-route="calendar">Kalendář</a>
-    </nav>
 
     <div class="header-tools">
       <button class="tool-button" id="langToggle" type="button" title="Change language">EN</button>
       <button class="tool-button" id="themeToggle" type="button" title="Change theme">☀</button>
     </div>
   </header>
+  <div class="menu-backdrop" id="menuBackdrop" hidden aria-hidden="true"></div>
 
   <main id="app" class="app-shell" tabindex="-1"></main>
 
