@@ -38,11 +38,15 @@
     },
     {
       "title": "Torlichovci",
-      "description": "kouzelné předměty"
+      "description": "- kouzelné předměty\n\n"
     },
     {
       "title": "Hertz a jeho parta",
-      "description": "obchod s lidmi"
+      "description": "- obchod s lidmi\n\n"
+    },
+    {
+      "title": "Vagabundos ",
+      "description": "- vybírání skladů, lodí, povozů\n\n"
     }
   ]
 }
