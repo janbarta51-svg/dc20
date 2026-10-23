@@ -218,3 +218,22 @@
   .pdf-download-card{gap:9px;padding-inline:10px}
   .chat-header{gap:4px;padding-inline:8px}
 }
+
+
+/* Campaign lore hierarchy: keep nested bullets readable without wasting mobile width. */
+@media screen and (max-width:760px){
+  .lore-item[data-share-type="gang"] .lore-prose .lore-bullets-level-1>li,
+  .lore-item[data-share-type="character"] .lore-prose .lore-bullets-level-1>li{
+    padding-left:25px;
+  }
+  .lore-item[data-share-type="gang"] .lore-prose .lore-bullets-level-2,
+  .lore-item[data-share-type="character"] .lore-prose .lore-bullets-level-2,
+  .lore-item[data-share-type="gang"] .lore-prose .lore-bullets-level-3,
+  .lore-item[data-share-type="character"] .lore-prose .lore-bullets-level-3{
+    padding-left:12px;
+  }
+  .lore-item[data-share-type="gang"] .lore-prose .lore-bullets-level-2>li,
+  .lore-item[data-share-type="character"] .lore-prose .lore-bullets-level-2>li{
+    padding-left:25px;
+  }
+}
