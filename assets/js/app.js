@@ -923,22 +923,63 @@
   }
   function richText(text=''){
     const lines=String(text||'').replace(/\r/g,'').split('\n');
-    let out='', list=false;
-    const closeList=()=>{if(list){out+='</ul>';list=false;}};
-    for(const raw of lines){
-      const line=raw.trim();
-      if(!line){closeList();continue;}
-      if(line.startsWith('### ')){closeList();out+=`<h4>${inlineMarkup(line.slice(4))}</h4>`;continue;}
-      if(line.startsWith('## ')){closeList();out+=`<h3>${inlineMarkup(line.slice(3))}</h3>`;continue;}
-      if(line.startsWith('# ')){closeList();out+=`<h2>${inlineMarkup(line.slice(2))}</h2>`;continue;}
-      if(/^[-*] /.test(line)){
-        if(!list){out+='<ul>';list=true;}
-        out+=`<li>${inlineMarkup(line.slice(2))}</li>`;
+    let out='', listDepth=0;
+
+    const closeLists=(targetDepth=0)=>{
+      while(listDepth>targetDepth){
+        out+='</li></ul>';
+        listDepth--;
+      }
+    };
+
+    const openList=()=>{
+      listDepth++;
+      out+=`<ul class="lore-bullets lore-bullets-level-${listDepth}">`;
+    };
+
+    for(const rawLine of lines){
+      const raw=rawLine.replace(/\t/g,'  ');
+      const trimmed=raw.trim();
+
+      if(!trimmed){
+        closeLists();
         continue;
       }
-      closeList();out+=`<p>${inlineMarkup(line)}</p>`;
+
+      if(trimmed.startsWith('### ')){closeLists();out+=`<h4>${inlineMarkup(trimmed.slice(4))}</h4>`;continue;}
+      if(trimmed.startsWith('## ')){closeLists();out+=`<h3>${inlineMarkup(trimmed.slice(3))}</h3>`;continue;}
+      if(trimmed.startsWith('# ')){closeLists();out+=`<h2>${inlineMarkup(trimmed.slice(2))}</h2>`;continue;}
+
+      const bullet=raw.match(/^(\s*)[-*+]\s+(.+)$/);
+      if(bullet){
+        const indent=bullet[1].length;
+        let depth=Math.max(1,1+Math.floor(indent/2));
+
+        // Never create an empty skipped nesting level when indentation jumps unexpectedly.
+        if(listDepth && depth>listDepth+1) depth=listDepth+1;
+
+        if(listDepth===0){
+          openList();
+          depth=1;
+          out+=`<li>${inlineMarkup(bullet[2])}`;
+        }else if(depth===listDepth){
+          out+=`</li><li>${inlineMarkup(bullet[2])}`;
+        }else if(depth>listDepth){
+          while(listDepth<depth) openList();
+          out+=`<li>${inlineMarkup(bullet[2])}`;
+        }else{
+          closeLists(depth);
+          out+=`</li><li>${inlineMarkup(bullet[2])}`;
+        }
+        continue;
+      }
+
+      closeLists();
+      out+=`<p>${inlineMarkup(trimmed)}</p>`;
     }
-    closeList();return out;
+
+    closeLists();
+    return out;
   }
   function legacyGangInfo(g){
     if(g.information) return g.information;
