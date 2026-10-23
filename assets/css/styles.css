@@ -415,6 +415,73 @@ html[data-theme="dark"] .nav-cluster a.active{background:rgba(50,40,73,.95);bord
 .lore-prose li::marker{color:var(--purple2)}
 .lore-prose ul ul li::marker{color:var(--gold)}
 .lore-prose ul ul ul li::marker{color:var(--muted)}
+
+/* Campaign lore lists: make hierarchy obvious on desktop and mobile.
+   Level 1 mirrors the source document (❖), nested items use ➢. */
+.lore-item[data-share-type="gang"] .lore-prose .lore-bullets,
+.lore-item[data-share-type="character"] .lore-prose .lore-bullets{
+  list-style:none;
+  padding-left:0;
+}
+.lore-item[data-share-type="gang"] .lore-prose .lore-bullets>li,
+.lore-item[data-share-type="character"] .lore-prose .lore-bullets>li{
+  position:relative;
+  overflow-wrap:anywhere;
+}
+.lore-item[data-share-type="gang"] .lore-prose .lore-bullets-level-1,
+.lore-item[data-share-type="character"] .lore-prose .lore-bullets-level-1{
+  margin:7px 0 14px;
+}
+.lore-item[data-share-type="gang"] .lore-prose .lore-bullets-level-1>li,
+.lore-item[data-share-type="character"] .lore-prose .lore-bullets-level-1>li{
+  margin:7px 0;
+  padding-left:27px;
+}
+.lore-item[data-share-type="gang"] .lore-prose .lore-bullets-level-1>li::before,
+.lore-item[data-share-type="character"] .lore-prose .lore-bullets-level-1>li::before{
+  content:"❖";
+  position:absolute;
+  left:0;
+  top:.02em;
+  color:var(--purple2);
+  font-size:.95em;
+}
+.lore-item[data-share-type="gang"] .lore-prose .lore-bullets-level-2,
+.lore-item[data-share-type="character"] .lore-prose .lore-bullets-level-2{
+  margin:5px 0 8px;
+  padding-left:18px;
+}
+.lore-item[data-share-type="gang"] .lore-prose .lore-bullets-level-2>li,
+.lore-item[data-share-type="character"] .lore-prose .lore-bullets-level-2>li{
+  margin:5px 0;
+  padding-left:27px;
+}
+.lore-item[data-share-type="gang"] .lore-prose .lore-bullets-level-2>li::before,
+.lore-item[data-share-type="character"] .lore-prose .lore-bullets-level-2>li::before{
+  content:"➢";
+  position:absolute;
+  left:0;
+  top:0;
+  color:var(--gold);
+  font-size:1em;
+}
+.lore-item[data-share-type="gang"] .lore-prose .lore-bullets-level-3,
+.lore-item[data-share-type="character"] .lore-prose .lore-bullets-level-3{
+  margin:4px 0 6px;
+  padding-left:18px;
+}
+.lore-item[data-share-type="gang"] .lore-prose .lore-bullets-level-3>li,
+.lore-item[data-share-type="character"] .lore-prose .lore-bullets-level-3>li{
+  margin:4px 0;
+  padding-left:22px;
+}
+.lore-item[data-share-type="gang"] .lore-prose .lore-bullets-level-3>li::before,
+.lore-item[data-share-type="character"] .lore-prose .lore-bullets-level-3>li::before{
+  content:"•";
+  position:absolute;
+  left:2px;
+  color:var(--muted);
+}
 .lore-detail-inner:not(:has(.lore-image)){grid-template-columns:1fr}
 .chronicle-reference .lore-toggle{padding-top:15px;padding-bottom:15px}
 
