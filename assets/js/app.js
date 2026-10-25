@@ -1109,8 +1109,16 @@
   setTimeout(()=>splash?.classList.add('hide'),splashDelay);
   setTimeout(()=>splash?.remove(),splashDelay+650);
 
-  const APP_VERSION='2026.10.04.2';
+  // Keep the loaded build version in sync with version.json on each release.
+  const APP_VERSION='2026.10.25.1';
   let updatePromptShown=false;
+  let reloadingForUpdate=false;
+
+  function reloadAppOnce(){
+    if(reloadingForUpdate) return;
+    reloadingForUpdate=true;
+    location.reload();
+  }
 
   function isNewerAppVersion(version){
     const latest=String(version||'').split('.');
@@ -1123,31 +1131,38 @@
     return false;
   }
 
+  function hideUpdatePrompt(){
+    document.querySelector('.app-update-bar')?.remove();
+    updatePromptShown=false;
+  }
+
   function showUpdatePrompt(){
-    if(updatePromptShown) return;
+    if(updatePromptShown || document.querySelector('.app-update-bar')) return;
     updatePromptShown=true;
     const bar=document.createElement('div');
     bar.className='app-update-bar';
     bar.innerHTML=`<span>🆕 Je dostupná nová verze Gangsterky.</span><button type="button">Aktualizovat</button>`;
     bar.querySelector('button').addEventListener('click',async()=>{
-      bar.querySelector('button').disabled=true;
-      bar.querySelector('button').textContent='Aktualizuji…';
+      const button=bar.querySelector('button');
+      button.disabled=true;
+      button.textContent='Aktualizuji…';
       try{
         const reg=await navigator.serviceWorker?.getRegistration();
         await reg?.update();
       }catch(e){}
-      location.reload();
+      reloadAppOnce();
     });
     document.body.appendChild(bar);
   }
 
   async function checkForAppUpdate(){
-    if(!navigator.onLine) return;
+    if(!navigator.onLine || reloadingForUpdate) return;
     try{
       const response=await fetch(`version.json?t=${Date.now()}`,{cache:'no-store'});
       if(!response.ok) return;
       const data=await response.json();
       if(isNewerAppVersion(data?.version)) showUpdatePrompt();
+      else hideUpdatePrompt();
     }catch(e){}
   }
 
@@ -1169,11 +1184,7 @@
     navigator.serviceWorker.register('sw.js',{updateViaCache:'none'})
       .then(reg=>{
         reg.update().catch(()=>{});
-        navigator.serviceWorker.addEventListener('controllerchange',()=>{
-          if(sessionStorage.getItem('dc20-sw-reloading')==='1') return;
-          sessionStorage.setItem('dc20-sw-reloading','1');
-          location.reload();
-        });
+        navigator.serviceWorker.addEventListener('controllerchange',reloadAppOnce);
         navigator.serviceWorker.addEventListener('message',event=>{
           if(event.data?.type==='SW_UPDATED') checkForAppUpdate();
         });
