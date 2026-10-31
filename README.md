@@ -15,7 +15,7 @@ Konfigurace je v `.pages.yml` v kořeni projektu a obsahuje tři části:
 
 Každý gang je v CMS sbalený pod svým názvem. Pro seznamy používej běžné Markdown odrážky `- položka` nebo nástroj seznamu v editoru.
 
-### Řezníci
+### Postavy
 - **Jméno**
 - **Popis** — rich-text/Markdown editor
 - **Obrázek** — volitelný
@@ -35,7 +35,7 @@ Nahraná loga gangů a obrázky postav se ukládají do `assets/uploads/`.
 2. Povol Pages CMS pro repository `dc20`.
 3. Vyber branch `main`.
 4. Pages CMS načte `.pages.yml` automaticky.
-5. V levém menu uvidíš **Gangy**, **Řezníci** a **Kronika**.
+5. V levém menu uvidíš **Gangy**, **Postavy** a **Kronika**.
 
 Po uložení Pages CMS vytvoří commit do GitHubu. CMS JSON soubory web načítá network-first, takže online vždy preferuje nejnovější obsah a poslední úspěšná verze zůstává dostupná offline.
 
