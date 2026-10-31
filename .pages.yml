@@ -28,7 +28,7 @@ content:
           - name: logo
             label: Znak gangu
             type: image
-            description: Volitelný malý znak vedle názvu gangu v Gangcyklopedii. Bez nahraného obrázku se žádná ikonka nezobrazí.
+            description: Nahraj znak (PNG, JPG, WebP nebo SVG). Na webu bude vedle názvu gangu přes téměř celou výšku řádku, vždy celý a bez ořezu. Pokud ho nevybereš, nebude se zobrazovat žádný obrázek.
             options:
               categories: [image]
               extensions: [png, jpg, jpeg, webp, svg]
@@ -68,7 +68,7 @@ content:
           - name: logo
             label: Znak gangu
             type: image
-            description: Volitelný malý znak gangu vedle jeho názvu v sekci Postavy místo složky. Bez nahraného obrázku se žádná ikonka nezobrazí.
+            description: Nahraj znak gangu pro sekci Postavy. Zobrazí se v plné výšce řádku vedle názvu, bez oříznutí. Bez obrázku se nezobrazí žádný symbol. Znak může být jiný než v Gangcyklopedii.
             options:
               categories: [image]
               extensions: [png, jpg, jpeg, webp, svg]
