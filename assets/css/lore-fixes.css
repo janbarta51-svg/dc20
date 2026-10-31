@@ -22,3 +22,20 @@
 .lore-toggle[aria-expanded="true"] .lore-chevron::before{
   content:"−";
 }
+
+/* Gang folders in Postavy use exactly the same + / − control as Gangcyklopedie. */
+.character-gang-chevron{
+  display:inline-block;
+  min-width:1ch;
+  font-size:0;
+  line-height:1;
+  text-align:center;
+  user-select:none;
+}
+.character-gang-chevron::before{
+  content:"+";
+  font:800 18px var(--sans);
+  line-height:1;
+  color:var(--gold);
+}
+.character-gang[open] .character-gang-chevron::before{content:"−";}
