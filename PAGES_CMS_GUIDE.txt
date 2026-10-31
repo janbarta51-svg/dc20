@@ -8,11 +8,14 @@ PAGES CMS — RYCHLÉ POUŽITÍ
 
 GANGY
 - Název gangu
-- Logo / ikonka (volitelné)
+- Znak gangu (volitelný obrázek, zobrazí se jako malá ikona vedle názvu)
+- Pokud znak nenahraješ, žádná ikona se nezobrazí.
 - Popis
 
 POSTAVY
 - Nejprve přidej gang (složku), například Řezníci nebo Vargnótt.
+- U gangu můžeš nahrát volitelný „Znak gangu“ vedle názvu (místo ikony složky).
+- Když žádný znak nepřiřadíš, nezobrazí se žádný obrázek ani náhradní symbol.
 - U gangu otevři pole „Postavy v tomto gangu“.
 - Přidej postavu: Jméno, Popis a Obrázek (volitelný).
 - Podle potřeby přidávej další postavy do stejného gangu.
@@ -38,7 +41,8 @@ Když používáš Source/Markdown mód, funguje například:
 - První tradice
 - Druhá tradice
 
-Loga gangů a obrázky postav se automaticky ukládají do assets/uploads/.
+Znaky gangů (v Gangcyklopedii i v Postavách) a obrázky postav se automaticky ukládají do assets/uploads/.
+Znak se nastavuje samostatně v každé z těchto dvou sekcí; mezi nimi se automaticky nekopíruje.
 Po uložení změn vytvoří Pages CMS commit do GitHubu a GitHub Pages nasadí novou verzi webu.
 
 
