@@ -32,12 +32,28 @@
           information: g.information || g.description || ''
         }));
       } else if (isCharacters) {
-        const items = Array.isArray(data) ? data : (Array.isArray(data?.characters) ? data.characters : []);
-        normalized = items.map(c => ({
-          ...c,
-          name: c.name || c.title || 'Bez jména',
-          image: c.image || c.icon || c.logo || '',
-          description: c.description || c.body || ''
+        // Current shape: { groups: [{ name, characters: [...] }] }.
+        // Older content is still supported as the default Řezníci group.
+        let groups;
+        if (Array.isArray(data?.groups)) {
+          groups=data.groups;
+        } else if (Array.isArray(data?.characters)) {
+          groups=[{name:'Řezníci',characters:data.characters}];
+        } else if (Array.isArray(data)) {
+          groups=data.some(item=>Array.isArray(item?.characters))
+            ? data : [{name:'Řezníci',characters:data}];
+        } else {
+          groups=[];
+        }
+        normalized=groups.map(group=>({
+          ...group,
+          name:group.name || group.title || 'Bez názvu',
+          characters:(Array.isArray(group.characters)?group.characters:[]).map(c=>({
+            ...c,
+            name:c.name || c.title || 'Bez jména',
+            image:c.image || c.icon || c.logo || '',
+            description:c.description || c.body || ''
+          }))
         }));
       } else {
         const items = Array.isArray(data) ? data : (Array.isArray(data?.sessions) ? data.sessions : []);
