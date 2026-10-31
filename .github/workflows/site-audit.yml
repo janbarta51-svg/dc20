@@ -60,13 +60,13 @@ jobs:
                       raise SystemExit(f'{filename}: item {i} is missing {required_key}')
               if filename == 'content/postavy.json':
                   for group in items:
-                      members = group.get('characters')
+                      members = group.get('characters') or []
                       if not isinstance(members, list):
                           raise SystemExit('Each character group needs a characters list')
                       for character in members:
                           if not isinstance(character, dict) or not str(character.get('name', '')).strip():
                               raise SystemExit('Character group includes an unnamed/invalid character')
-                  print(f'Character groups OK: {len(items)} groups, {sum(len(g["characters"]) for g in items)} characters')
+                  print(f'Character groups OK: {len(items)} groups, {sum(len(g.get("characters") or []) for g in items)} characters')
               print(f'CMS shape OK: {filename}')
           PY
 
