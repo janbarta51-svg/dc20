@@ -994,8 +994,10 @@
     if(g.hierarchy?.length){ lines.push('## Hierarchie'); g.hierarchy.forEach(x=>lines.push(`- **${x.title}:** ${x.body}`)); }
     return lines.join('\n');
   }
-  function accordionItem({title,meta='',image='',body='',kind='lore',shareType='',shareKey=''}){
-    return `<article class="lore-item" ${shareType&&shareKey?`data-share-type="${esc(shareType)}" data-share-key="${esc(shareKey)}"`:''}><button class="lore-toggle" type="button" aria-expanded="false"><span><strong>${esc(title)}</strong>${meta?`<small>${esc(meta)}</small>`:''}</span><span class="lore-chevron" aria-hidden="true">⌄</span></button><div class="lore-detail"><div class="lore-detail-inner">${image?`<img class="lore-image" src="${esc(image)}" alt="">`:''}<div class="lore-prose">${richText(body)}</div></div></div></article>`;
+  function accordionItem({title,meta='',image='',mark='',body='',kind='lore',shareType='',shareKey=''}){
+    // A gang emblem belongs beside the gang name, not in the expanded description.
+    const label=`<span class="lore-heading">${mark?`<img class="gang-emblem" src="${esc(mark)}" alt="" loading="lazy">`:''}<span class="lore-heading-copy"><strong>${esc(title)}</strong>${meta?`<small>${esc(meta)}</small>`:''}</span></span>`;
+    return `<article class="lore-item" ${shareType&&shareKey?`data-share-type="${esc(shareType)}" data-share-key="${esc(shareKey)}"`:''}><button class="lore-toggle" type="button" aria-expanded="false">${label}<span class="lore-chevron" aria-hidden="true">⌄</span></button><div class="lore-detail"><div class="lore-detail-inner">${image?`<img class="lore-image" src="${esc(image)}" alt="">`:''}<div class="lore-prose">${richText(body)}</div></div></div></article>`;
   }
   function bindLoreAccordions(){
     $$('.lore-toggle',app).forEach(btn=>btn.addEventListener('click',()=>{
@@ -1004,7 +1006,7 @@
   }
 
   function renderGang(){
-    const cards=(gangs||[]).map(g=>{const title=g.title||g.name||'Bez názvu';return accordionItem({title,image:g.icon||'',body:legacyGangInfo(g),shareType:'gang',shareKey:slug(title)});}).join('');
+    const cards=(gangs||[]).map(g=>{const title=g.title||g.name||'Bez názvu';return accordionItem({title,mark:g.logo||g.icon||'',body:legacyGangInfo(g),shareType:'gang',shareKey:slug(title)});}).join('');
     app.innerHTML=`<article class="standard-reference lore-reference">${hero('Gangy z Kostelce','','LORE')}<section class="lore-list">${cards}</section></article>`;
     bindLoreAccordions();
   }
@@ -1027,7 +1029,7 @@
       const countLabel=count===1?'1 postava':count>=2&&count<=4?count+' postavy':count+' postav';
       return `<details class="character-gang">
         <summary class="character-gang-toggle">
-          <span class="character-gang-folder" aria-hidden="true">📁</span>
+          ${group.logo||group.icon?`<img class="gang-emblem" src="${esc(group.logo||group.icon)}" alt="" loading="lazy">`:''}
           <span class="character-gang-title">${esc(gangName)}</span>
           <span class="character-gang-count">${countLabel}</span>
           <span class="character-gang-chevron" aria-hidden="true">⌄</span>
@@ -1140,7 +1142,7 @@
   setTimeout(()=>splash?.remove(),splashDelay+650);
 
   // Keep the loaded build version in sync with version.json on each release.
-  const APP_VERSION='2026.10.31.1';
+  const APP_VERSION='2026.10.31.2';
   let updatePromptShown=false;
   let reloadingForUpdate=false;
 
