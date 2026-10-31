@@ -11,10 +11,13 @@ GANGY
 - Logo / ikonka (volitelné)
 - Popis
 
-ŘEZNÍCI
-- Jméno
-- Popis
-- Obrázek (volitelný)
+POSTAVY
+- Nejprve přidej gang (složku), například Řezníci nebo Vargnótt.
+- U gangu otevři pole „Postavy v tomto gangu“.
+- Přidej postavu: Jméno, Popis a Obrázek (volitelný).
+- Podle potřeby přidávej další postavy do stejného gangu.
+- Po uložení se nový gang i postavy automaticky zobrazí na webu.
+- Gang může existovat i bez postav. Gangcyklopedie je samostatná sekce.
 
 KRONIKA
 - Název
@@ -45,5 +48,5 @@ Běžná změna obsahu v Pages CMS nepotřebuje měnit version.json ani Service 
 Postup zůstává:
 Pages CMS -> Save -> commit do main -> GitHub Pages deploy -> aplikace při dalším online načtení vezme nový obsah.
 
-Gangy, Řezníci a Kronika používají network-first načítání. Když internet není dostupný,
+Gangy, Postavy a Kronika používají network-first načítání. Když internet není dostupný,
 PWA zobrazí poslední uloženou verzi obsahu. Po návratu online se znovu načte aktuální JSON.
