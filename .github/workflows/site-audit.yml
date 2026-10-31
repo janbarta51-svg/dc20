@@ -102,6 +102,10 @@ jobs:
 
             data = JSON.parse(File.read(path, encoding: 'UTF-8'))
             raise "#{path}: root wrapper #{wrapper_key} missing" unless data[wrapper_key].is_a?(Array)
+            if ['gangs', 'characters'].include?(name)
+              logo = list_field.fetch('fields').find { |field| field['name'] == 'logo' }
+              raise "#{name}: optional gang emblem image field is missing" unless logo && logo['type'] == 'image' && !logo['required']
+            end
             if name == 'characters'
               inner = list_field.fetch('fields').find { |field| field['name'] == 'characters' }
               raise 'Character groups must include a nested object list' unless inner && inner['type'] == 'object' && inner.key?('list')
@@ -437,4 +441,5 @@ jobs:
           NODE
           node tools/check_calendar.cjs
           node tools/check_updates.cjs
+          node tools/check_gang_icons.cjs
           node tools/check_mobile.cjs
