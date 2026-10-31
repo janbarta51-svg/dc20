@@ -29,6 +29,7 @@
           ...g,
           title: g.title || g.name || 'Bez názvu',
           icon: g.icon || g.logo || '',
+          logo: g.logo || g.icon || '',
           information: g.information || g.description || ''
         }));
       } else if (isCharacters) {
@@ -48,6 +49,7 @@
         normalized=groups.map(group=>({
           ...group,
           name:group.name || group.title || 'Bez názvu',
+          logo:group.logo || group.icon || '',
           characters:(Array.isArray(group.characters)?group.characters:[]).map(c=>({
             ...c,
             name:c.name || c.title || 'Bez jména',
