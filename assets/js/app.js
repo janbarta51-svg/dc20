@@ -1009,8 +1009,35 @@
     bindLoreAccordions();
   }
   function renderCharacters(){
-    const cards=(postavy||[]).map(p=>{const title=p.name||p.title||'Bez jména';return accordionItem({title,image:p.image||'',body:p.description||p.body||'',shareType:'character',shareKey:slug(title)});}).join('');
-    app.innerHTML=`<article class="standard-reference lore-reference">${hero('Řezníci')}<section class="lore-list">${cards}</section></article>`;
+    const groups=Array.isArray(postavy)?postavy:[];
+    const cards=groups.map(group=>{
+      const gangName=String(group.name||group.title||'Bez názvu');
+      const gangSlug=slug(gangName);
+      const members=Array.isArray(group.characters)?group.characters:[];
+      const characters=members.map(p=>{
+        const title=p.name||p.title||'Bez jména';
+        // Preserve original share links for the founding gang.
+        const key=gangSlug==='reznici'?slug(title):gangSlug+'--'+slug(title);
+        return accordionItem({
+          title,image:p.image||'',body:p.description||p.body||'',
+          shareType:'character',shareKey:key
+        });
+      }).join('');
+      const count=members.length;
+      const countLabel=count===1?'1 postava':count>=2&&count<=4?count+' postavy':count+' postav';
+      return `<details class="character-gang">
+        <summary class="character-gang-toggle">
+          <span class="character-gang-folder" aria-hidden="true">📁</span>
+          <span class="character-gang-title">${esc(gangName)}</span>
+          <span class="character-gang-count">${countLabel}</span>
+          <span class="character-gang-chevron" aria-hidden="true">⌄</span>
+        </summary>
+        <div class="character-gang-content">
+          ${count?`<div class="lore-list">${characters}</div>`:'<p class="character-gang-empty">V tomto gangu zatím nejsou žádné postavy. Přidej je v Pages CMS.</p>'}
+        </div>
+      </details>`;
+    }).join('');
+    app.innerHTML=`<article class="standard-reference lore-reference character-reference">${hero('Postavy','','GANGSTERKA')}<section class="character-groups">${cards||'<p class="character-gang-empty">Zatím žádné gangy. První založ v Pages CMS.</p>'}</section></article>`;
     bindLoreAccordions();
   }
   function renderChronicle(){
@@ -1028,6 +1055,9 @@
     const key=raw.slice(split+1);
     const target=app.querySelector('[data-share-type="'+CSS.escape(type)+'"][data-share-key="'+CSS.escape(key)+'"]');
     if(!target) return;
+    // Deep links to characters must also expand their gang folder.
+    const parentGang=target.closest('.character-gang');
+    if(parentGang) parentGang.open=true;
     if(target.classList.contains('lore-item')){
       target.classList.add('open');
       target.querySelector('.lore-toggle')?.setAttribute('aria-expanded','true');
@@ -1110,7 +1140,7 @@
   setTimeout(()=>splash?.remove(),splashDelay+650);
 
   // Keep the loaded build version in sync with version.json on each release.
-  const APP_VERSION='2026.10.25.1';
+  const APP_VERSION='2026.10.31.1';
   let updatePromptShown=false;
   let reloadingForUpdate=false;
 
