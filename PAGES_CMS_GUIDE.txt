@@ -8,13 +8,14 @@ PAGES CMS — RYCHLÉ POUŽITÍ
 
 GANGY
 - Název gangu
-- Znak gangu (volitelný obrázek, zobrazí se jako malá ikona vedle názvu)
+- Znak gangu (volitelný obrázek, zobrazí se velký téměř na výšku celého řádku, bez oříznutí)
 - Pokud znak nenahraješ, žádná ikona se nezobrazí.
 - Popis
 
 POSTAVY
 - Nejprve přidej gang (složku), například Řezníci nebo Vargnótt.
-- U gangu můžeš nahrát volitelný „Znak gangu“ vedle názvu (místo ikony složky).
+- U gangu můžeš nahrát volitelný „Znak gangu“ téměř na celou výšku řádku (bez oříznutí), místo ikony složky.
+- Otevírání gangů v Postavách funguje na + / − stejně jako v Gangcyklopedii.
 - Když žádný znak nepřiřadíš, nezobrazí se žádný obrázek ani náhradní symbol.
 - U gangu otevři pole „Postavy v tomto gangu“.
 - Přidej postavu: Jméno, Popis a Obrázek (volitelný).
