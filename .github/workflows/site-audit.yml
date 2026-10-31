@@ -315,6 +315,7 @@ jobs:
                 if ((await member.locator('.lore-toggle').getAttribute('aria-expanded')) !== 'true') {
                   throw new Error('Nested character accordion did not open');
                 }
+                await member.locator('.lore-toggle').click();
                 await summary.click();
                 if (await group.evaluate(node => node.open)) throw new Error('Gang folder did not close');
                 await summary.click();
