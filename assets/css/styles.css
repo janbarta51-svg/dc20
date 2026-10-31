@@ -2171,7 +2171,15 @@ html.pwa-standalone body{
 }
 .character-gang-toggle::-webkit-details-marker{display:none}
 .character-gang-toggle:focus-visible{outline:3px solid var(--gold);outline-offset:-4px}
-.character-gang-folder{font-size:24px;line-height:1;flex:none}
+/* One small uploaded gang mark in both Gangcyklopedie and Postavy. */
+.gang-emblem{
+  display:block;flex:0 0 auto;width:40px;height:40px;
+  object-fit:contain;object-position:center;
+  border:0;background:transparent;
+}
+.lore-heading{display:inline-flex;align-items:center;gap:12px;min-width:0;flex:1}
+.lore-heading-copy{display:block;min-width:0}
+.lore-heading-copy strong{overflow-wrap:anywhere}
 .character-gang-title{
   flex:1;min-width:0;
   font-family:var(--serif);font-size:clamp(22px,2.5vw,29px);font-weight:600;
