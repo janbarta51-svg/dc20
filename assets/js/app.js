@@ -1030,9 +1030,11 @@
       return `<details class="character-gang">
         <summary class="character-gang-toggle">
           ${group.logo||group.icon?`<img class="gang-emblem" src="${esc(group.logo||group.icon)}" alt="" loading="lazy">`:''}
-          <span class="character-gang-title">${esc(gangName)}</span>
-          <span class="character-gang-count">${countLabel}</span>
-          <span class="character-gang-chevron" aria-hidden="true">⌄</span>
+          <span class="character-gang-info">
+            <span class="character-gang-title">${esc(gangName)}</span>
+            <span class="character-gang-count">${countLabel}</span>
+          </span>
+          <span class="character-gang-chevron" aria-hidden="true"></span>
         </summary>
         <div class="character-gang-content">
           ${count?`<div class="lore-list">${characters}</div>`:'<p class="character-gang-empty">V tomto gangu zatím nejsou žádné postavy. Přidej je v Pages CMS.</p>'}
@@ -1142,7 +1144,7 @@
   setTimeout(()=>splash?.remove(),splashDelay+650);
 
   // Keep the loaded build version in sync with version.json on each release.
-  const APP_VERSION='2026.10.31.2';
+  const APP_VERSION='2026.10.31.3';
   let updatePromptShown=false;
   let reloadingForUpdate=false;
 
