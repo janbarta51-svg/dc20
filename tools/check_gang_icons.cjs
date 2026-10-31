@@ -43,9 +43,30 @@ delete gangsFixture.gangs[1].icon;
       'Gang without an icon must not display any placeholder image');
     assert.ok(!(await groupItems.nth(1).locator('summary').textContent()).includes('📁'),
       'Default folder emoji must be absent');
-    assert.equal(await groupItems.first().locator('summary img.gang-emblem').evaluate(el => getComputedStyle(el).width),'34px');
+    const groupMark = groupItems.first().locator('summary img.gang-emblem');
+    const dimensions = await groupMark.evaluate(el => {
+      const image=el.getBoundingClientRect(), row=el.closest('summary').getBoundingClientRect();
+      const style=getComputedStyle(el);
+      return {
+        width:image.width, height:image.height, rowHeight:row.height,
+        top:image.top, bottom:image.bottom, rowTop:row.top, rowBottom:row.bottom,
+        objectFit:style.objectFit
+      };
+    });
+    assert.equal(dimensions.width,68,'Mobile gang mark should fill most of row height');
+    assert.equal(dimensions.height,68,'Mobile gang mark should show full artwork');
+    assert.equal(dimensions.objectFit,'contain','Uploaded emblem must never be cropped');
+    assert.ok(dimensions.height >= dimensions.rowHeight*0.75,'Gang icon should be close to row height');
+    assert.ok(dimensions.top >= dimensions.rowTop && dimensions.bottom <= dimensions.rowBottom,'Gang mark must fit inside row');
+    const plus = await groupItems.first().locator('.character-gang-chevron').evaluate(el => getComputedStyle(el,'::before').content);
+    assert.ok(plus.includes('+'),'Closed character gang folder should show plus');
     await groupItems.first().locator('summary').click();
     assert.ok(await groupItems.first().evaluate(el => el.open),'Character group must remain expandable');
+    const minus = await groupItems.first().locator('.character-gang-chevron').evaluate(el => getComputedStyle(el,'::before').content);
+    assert.ok(minus.includes('−'),'Expanded character gang folder should show minus');
+    await groupItems.first().locator('summary').click();
+    assert.ok(!(await groupItems.first().evaluate(el => el.open)),'Click again should collapse the gang');
+    assert.ok((await groupItems.first().locator('.character-gang-chevron').evaluate(el => getComputedStyle(el,'::before').content)).includes('+'));
 
     await page.evaluate(() => location.hash = '#gangcyklopedie');
     await page.waitForFunction(expected =>
@@ -53,14 +74,27 @@ delete gangsFixture.gangs[1].icon;
     const gangItems=page.locator('.lore-item[data-share-type="gang"]');
     assert.equal(await gangItems.first().locator('.lore-toggle img.gang-emblem').count(),1,
       'Encyclopedia should show uploaded gang icon beside its name');
+    const gangMark=gangItems.first().locator('.lore-toggle img.gang-emblem');
+    assert.equal(await gangMark.evaluate(el=>getComputedStyle(el).width),'68px');
+    assert.equal(await gangMark.evaluate(el=>getComputedStyle(el).objectFit),'contain');
+    assert.equal(await gangItems.first().locator('.lore-chevron').evaluate(el=>getComputedStyle(el,'::before').content),'"+"');
     assert.equal(await gangItems.first().locator('.lore-detail img.lore-image').count(),0,
       'Gang emblem should not also take up a large image slot');
     assert.equal(await gangItems.nth(1).locator('img').count(),0,
       'Gang without an uploaded icon must not render any image');
     await gangItems.first().locator('.lore-toggle').click();
     assert.equal(await gangItems.first().locator('.lore-toggle').getAttribute('aria-expanded'),'true');
+    assert.equal(await gangItems.first().locator('.lore-chevron').evaluate(el=>getComputedStyle(el,'::before').content),'"−"');
+
+    // Also check the larger full-row artwork on desktop.
+    await page.setViewportSize({width:1280,height:900});
+    assert.equal(await gangMark.evaluate(el=>getComputedStyle(el).width),'76px');
+    await page.evaluate(() => location.hash = '#postavy');
+    await page.waitForFunction(() => document.querySelectorAll('.character-gang').length>0);
+    assert.equal(await page.locator('.character-gang .gang-emblem').first().evaluate(el=>getComputedStyle(el).height),'76px');
+
     assert.deepEqual(errors,[],'Both gang lists must render without JavaScript errors');
-    console.log('Gang emblems OK: optional icon, no placeholder, compact mobile size, expanded details.');
+    console.log('Gang emblems OK: + / − controls, full uncropped artwork, no placeholder, mobile and desktop.');
   } finally {
     await browser.close();
   }
