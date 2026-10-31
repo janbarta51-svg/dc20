@@ -26,9 +26,9 @@ content:
             description: Název, který se zobrazí v Gangcyklopedii.
 
           - name: logo
-            label: Logo / ikonka
+            label: Znak gangu
             type: image
-            description: Volitelné. Když logo nenahraješ, zobrazí se pouze text.
+            description: Volitelný malý znak vedle názvu gangu v Gangcyklopedii. Bez nahraného obrázku se žádná ikonka nezobrazí.
             options:
               categories: [image]
               extensions: [png, jpg, jpeg, webp, svg]
@@ -64,6 +64,15 @@ content:
             type: string
             required: true
             description: Například Řezníci, Dragny Pogrom nebo Vargnótt.
+
+          - name: logo
+            label: Znak gangu
+            type: image
+            description: Volitelný malý znak gangu vedle jeho názvu v sekci Postavy místo složky. Bez nahraného obrázku se žádná ikonka nezobrazí.
+            options:
+              categories: [image]
+              extensions: [png, jpg, jpeg, webp, svg]
+              rename: safe
 
           - name: characters
             label: Postavy v tomto gangu
