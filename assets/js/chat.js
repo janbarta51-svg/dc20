@@ -310,10 +310,22 @@
       ]);
       const pdata=responses[0].ok?await responses[0].json():[];
       const gdata=responses[1].ok?await responses[1].json():[];
-      characters=(Array.isArray(pdata)?pdata:[]).map(item=>{
-        const title=item.name||item.title||'Postava';
-        const key=slugify(title);
-        return {type:'character',key,title,subtitle:'Postava z Kostelce',body:plainText(item.description||item.body||'').slice(0,360),image:item.image||'',route:shareRoute('character',key,'#postavy'),icon:'🧙'};
+      const characterGroups=Array.isArray(pdata)
+        ? (pdata.some(item=>Array.isArray(item?.characters)) ? pdata : [{name:'Řezníci',characters:pdata}])
+        : (Array.isArray(pdata?.groups) ? pdata.groups : (Array.isArray(pdata?.characters) ? [{name:'Řezníci',characters:pdata.characters}] : []));
+      characters=characterGroups.flatMap(group=>{
+        const gangName=group.name||group.title||'Bez názvu';
+        const gangKey=slugify(gangName);
+        return (Array.isArray(group.characters)?group.characters:[]).map(item=>{
+          const title=item.name||item.title||'Postava';
+          // Keep existing shared links valid for Řezníci.
+          const key=gangKey==='reznici'?slugify(title):gangKey+'--'+slugify(title);
+          return {
+            type:'character',key,title,subtitle:gangName,
+            body:plainText(item.description||item.body||'').slice(0,360),
+            image:item.image||'',route:shareRoute('character',key,'#postavy'),icon:'🧙'
+          };
+        });
       });
       gangs=(Array.isArray(gdata)?gdata:[]).map(item=>{
         const title=item.title||item.name||'Gang';
@@ -349,7 +361,7 @@
     if(!state.session){ setConnection('Pro sdílení se nejdřív přihlas','error'); return; }
     const catalog=await loadShareCatalog();
     sharePicker.hidden=false;
-    sharePicker.innerHTML='<div class="chat-share-picker-head"><strong>Sdílet z Gangsterky</strong><button type="button" class="chat-share-picker-close" aria-label="Zavřít">×</button></div><div class="chat-share-filters"><input type="search" placeholder="Hledat spell, postavu, gang…" aria-label="Hledat obsah"><select aria-label="Typ obsahu"><option value="">Vše</option><option value="spell">Spelly</option><option value="maneuver">Maneuvers</option><option value="character">Řezníci</option><option value="gang">Gangy</option></select></div><div class="chat-share-results"></div>';
+    sharePicker.innerHTML='<div class="chat-share-picker-head"><strong>Sdílet z Gangsterky</strong><button type="button" class="chat-share-picker-close" aria-label="Zavřít">×</button></div><div class="chat-share-filters"><input type="search" placeholder="Hledat spell, postavu, gang…" aria-label="Hledat obsah"><select aria-label="Typ obsahu"><option value="">Vše</option><option value="spell">Spelly</option><option value="maneuver">Maneuvers</option><option value="character">Postavy</option><option value="gang">Gangy</option></select></div><div class="chat-share-results"></div>';
     const input=sharePicker.querySelector('input');
     const select=sharePicker.querySelector('select');
     const results=sharePicker.querySelector('.chat-share-results');
