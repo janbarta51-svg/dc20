@@ -240,14 +240,21 @@
 /* Keep nested character folders usable on narrow screens. */
 @media screen and (max-width:760px){
   .character-groups{gap:10px;margin-top:12px}
-  .character-gang-toggle{gap:10px;min-height:68px;padding:13px 12px;flex-wrap:wrap}
+  .character-gang-toggle{gap:10px;min-height:84px;padding:8px 12px;flex-wrap:nowrap}
   .character-gang .gang-emblem,
-  .lore-heading .gang-emblem{width:34px;height:34px}
+  .lore-item[data-share-type="gang"] .gang-emblem{width:68px;height:68px;flex:0 0 68px}
+  .lore-item[data-share-type="gang"]>.lore-toggle{min-height:84px;padding:8px 8px}
+  .lore-heading{gap:10px}
   .character-gang-title{font-size:22px}
   .character-gang-count{font-size:12px}
-  .character-gang-chevron{font-size:23px}
   .character-gang-content{padding:0 12px 12px}
   .character-gang-content .lore-toggle{padding:14px 4px}
   .character-gang-content .lore-toggle strong{font-size:20px}
   .character-gang-content .lore-detail-inner{padding-inline:4px}
+}
+@media screen and (max-width:350px){
+  .character-gang-toggle{min-height:72px;gap:8px;padding-inline:8px}
+  .character-gang .gang-emblem,
+  .lore-item[data-share-type="gang"] .gang-emblem{width:56px;height:56px;flex-basis:56px}
+  .lore-item[data-share-type="gang"]>.lore-toggle{min-height:72px;padding-inline:6px}
 }
