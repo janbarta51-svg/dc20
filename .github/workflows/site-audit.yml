@@ -43,7 +43,7 @@ jobs:
 
           checks = [
               ('content/gangcyklopedie.json', 'gangs', 'title'),
-              ('content/postavy.json', 'characters', 'name'),
+              ('content/postavy.json', 'groups', 'name'),
               ('content/kronika.json', 'sessions', 'title'),
           ]
           for filename, list_key, required_key in checks:
@@ -58,6 +58,15 @@ jobs:
                       raise SystemExit(f'{filename}: item {i} must be an object')
                   if not str(item.get(required_key, '')).strip():
                       raise SystemExit(f'{filename}: item {i} is missing {required_key}')
+              if filename == 'content/postavy.json':
+                  for group in items:
+                      members = group.get('characters')
+                      if not isinstance(members, list):
+                          raise SystemExit('Each character group needs a characters list')
+                      for character in members:
+                          if not isinstance(character, dict) or not str(character.get('name', '')).strip():
+                              raise SystemExit('Character group includes an unnamed/invalid character')
+                  print(f'Character groups OK: {len(items)} groups, {sum(len(g["characters"]) for g in items)} characters')
               print(f'CMS shape OK: {filename}')
           PY
 
@@ -77,7 +86,7 @@ jobs:
 
           expected = {
             'gangs' => ['content/gangcyklopedie.json', 'gangs'],
-            'characters' => ['content/postavy.json', 'characters'],
+            'characters' => ['content/postavy.json', 'groups'],
             'chronicle' => ['content/kronika.json', 'sessions']
           }
 
@@ -93,6 +102,11 @@ jobs:
 
             data = JSON.parse(File.read(path, encoding: 'UTF-8'))
             raise "#{path}: root wrapper #{wrapper_key} missing" unless data[wrapper_key].is_a?(Array)
+            if name == 'characters'
+              inner = list_field.fetch('fields').find { |field| field['name'] == 'characters' }
+              raise 'Character groups must include a nested object list' unless inner && inner['type'] == 'object' && inner.key?('list')
+              raise 'Character group editor must support names, descriptions and pictures' unless inner['fields'].map { |field| field['name'] }.sort == %w[description image name]
+            end
           end
 
           cms_fix = File.read('assets/js/cms-fix.js', encoding: 'UTF-8')
@@ -222,7 +236,7 @@ jobs:
             const fs = require('fs');
             const cmsExpected = {
               gangcyklopedie: JSON.parse(fs.readFileSync('content/gangcyklopedie.json','utf8')).gangs?.[0]?.title || '',
-              postavy: JSON.parse(fs.readFileSync('content/postavy.json','utf8')).characters?.[0]?.name || '',
+              postavy: JSON.parse(fs.readFileSync('content/postavy.json','utf8')).groups?.[0]?.name || '',
               kronika: JSON.parse(fs.readFileSync('content/kronika.json','utf8')).sessions?.[0]?.title || ''
             };
 
@@ -288,6 +302,23 @@ jobs:
                 throw new Error(`#${route}: Pages CMS content was not normalized/rendered: ${expectedCmsText}`);
               }
               console.log(`Pages CMS runtime OK: #${route} -> ${expectedCmsText || 'empty list'}`);
+
+              if (route === 'postavy') {
+                const group = page.locator('.character-gang').first();
+                if (!(await group.count())) throw new Error('Character gang folder missing');
+                const summary = group.locator('summary');
+                await summary.click();
+                if (!(await group.evaluate(node => node.open))) throw new Error('Character gang folder did not open');
+                const member = group.locator('.lore-item[data-share-type="character"]').first();
+                if (!(await member.count())) throw new Error('Character card missing in gang folder');
+                await member.locator('.lore-toggle').click();
+                if ((await member.locator('.lore-toggle').getAttribute('aria-expanded')) !== 'true') {
+                  throw new Error('Nested character accordion did not open');
+                }
+                await summary.click();
+                if (await group.evaluate(node => node.open)) throw new Error('Gang folder did not close');
+                await summary.click();
+              }
 
               const toggle = page.locator('.lore-toggle').first();
               if (await toggle.count()) {
