@@ -2166,34 +2166,36 @@ html.pwa-standalone body{
 }
 .character-gang-toggle{
   display:flex;align-items:center;gap:13px;
-  list-style:none;min-height:76px;padding:16px 20px;
+  list-style:none;min-height:92px;padding:8px 16px;
   cursor:pointer;user-select:none;
 }
 .character-gang-toggle::-webkit-details-marker{display:none}
 .character-gang-toggle:focus-visible{outline:3px solid var(--gold);outline-offset:-4px}
-/* One small uploaded gang mark in both Gangcyklopedie and Postavy. */
+/* Uploaded gang mark in Gangcyklopedie and Postavy:
+   almost the full row height, while object-fit:contain protects the complete artwork. */
 .gang-emblem{
-  display:block;flex:0 0 auto;width:40px;height:40px;
+  display:block;flex:0 0 76px;width:76px;height:76px;
+  max-width:none;max-height:none;
   object-fit:contain;object-position:center;
-  border:0;background:transparent;
+  border:0;border-radius:0;background:transparent;
 }
-.lore-heading{display:inline-flex;align-items:center;gap:12px;min-width:0;flex:1}
+.lore-item[data-share-type="gang"]>.lore-toggle{
+  min-height:92px;padding:8px 12px;
+}
+.lore-heading{display:inline-flex;align-items:center;gap:14px;min-width:0;flex:1}
 .lore-heading-copy{display:block;min-width:0}
 .lore-heading-copy strong{overflow-wrap:anywhere}
+.character-gang-info{display:flex;flex-direction:column;justify-content:center;gap:4px;flex:1;min-width:0}
 .character-gang-title{
-  flex:1;min-width:0;
+  display:block;min-width:0;
   font-family:var(--serif);font-size:clamp(22px,2.5vw,29px);font-weight:600;
   line-height:1.25;color:var(--purple);overflow-wrap:anywhere;
 }
 .character-gang-count{
-  flex:none;color:var(--muted);
+  display:block;color:var(--muted);
   font:700 12px/1.35 var(--sans);
 }
-.character-gang-chevron{
-  color:var(--gold);font-size:25px;line-height:1;
-  transition:transform .2s ease;
-}
-.character-gang[open] .character-gang-chevron{transform:rotate(180deg)}
+.character-gang-chevron{flex:0 0 auto;color:var(--gold);text-align:center;user-select:none}
 .character-gang-content{padding:0 20px 18px}
 .character-gang-content>.lore-list{margin:0;border-top:1px solid var(--gold)}
 .character-gang-content .lore-toggle{padding-inline:8px}
