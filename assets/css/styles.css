@@ -2155,3 +2155,39 @@ html.pwa-standalone body{
   .calendar-day{min-height:61px}
   .calendar-form-grid{grid-template-columns:1fr}
 }
+
+/* Gang folders in the Postavy section (nested character accordions). */
+.character-groups{display:grid;gap:12px;margin-top:15px}
+.character-gang{
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:color-mix(in srgb,var(--paper2) 70%,transparent);
+  overflow:hidden;
+}
+.character-gang-toggle{
+  display:flex;align-items:center;gap:13px;
+  list-style:none;min-height:76px;padding:16px 20px;
+  cursor:pointer;user-select:none;
+}
+.character-gang-toggle::-webkit-details-marker{display:none}
+.character-gang-toggle:focus-visible{outline:3px solid var(--gold);outline-offset:-4px}
+.character-gang-folder{font-size:24px;line-height:1;flex:none}
+.character-gang-title{
+  flex:1;min-width:0;
+  font-family:var(--serif);font-size:clamp(22px,2.5vw,29px);font-weight:600;
+  line-height:1.25;color:var(--purple);overflow-wrap:anywhere;
+}
+.character-gang-count{
+  flex:none;color:var(--muted);
+  font:700 12px/1.35 var(--sans);
+}
+.character-gang-chevron{
+  color:var(--gold);font-size:25px;line-height:1;
+  transition:transform .2s ease;
+}
+.character-gang[open] .character-gang-chevron{transform:rotate(180deg)}
+.character-gang-content{padding:0 20px 18px}
+.character-gang-content>.lore-list{margin:0;border-top:1px solid var(--gold)}
+.character-gang-content .lore-toggle{padding-inline:8px}
+.character-gang-content .lore-detail-inner{padding-inline:8px}
+.character-gang-empty{margin:0;padding:12px 4px 4px;color:var(--muted);line-height:1.6}
