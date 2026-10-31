@@ -20,7 +20,7 @@
         },
         {
           "name": "Hrast “Rybíz” Stoklásek",
-          "description": "- (vzhled: starý, šlachovitý; pohlaví: muž; věk: 68)\n- Hrast je protivný, tvrdohlavý dědek, který si stále nedokáže přiznat, že jeho čas je pryč.\n- Přísný otec a tyran, který věří v tvrdou disciplínu. Bojí se, že jeho gang “měkne“.\n- Většina rozhodnutí už jde dnes mimo něj, avšak stále se těší velké úctě starších generací, a to obzvlášť u svých starých soupeřů. I mladší Řezníci pak musí uznat, že bez něj by tento gang dost možná před třiceti lety zanikl a bylo by nerozumné i nečestné si ho přímo znepřátelit.\n- Nejvíce času tráví s Brankem.  \n\n",
+          "description": "- (vzhled: starý, šlachovitý; pohlaví: muž; věk: 68)\n- Hrast je protivný, tvrdohlavý dědek, který si stále nedokáže přiznat, že jeho čas je pryč.\n- Přísný otec a tyran, který věří v tvrdou disciplínu. Bojí se, že jeho gang “měkne“.\n- Většina rozhodnutí už jde dnes mimo něj, avšak stále se těší velké úctě starších generací, a to obzvlášť u svých starých soupeřů. I mladší Řezníci pak musí uznat, že bez něj by tento gang dost možná před třiceti lety zanikl a bylo by nerozumné i nečestné si ho přímo znepřátelit.\n- Nejvíce času tráví s Brankem.\n\n",
           "image": "/assets/uploads/1000036870.png"
         },
         {
@@ -30,7 +30,7 @@
         },
         {
           "name": "Chrudoš \"Zlatý\" Zátopek",
-          "description": "- (vzhled: fešný blonďák, hubený; pohlaví: muž; věk: 26)\n- Největší naděje a talent Řezníků. Styl, charisma a hlavně úžasné magické schopnosti ho pasují na největší úlovek gangu za dlouhou dobu. Chrudoš totiž vyrůstal v Dragnym Pogromu, takže jeho přiženění a ochota přejít k Řezníkům byla velkou výhrou.\n- Kdekdo ho nazývá arogantní, nicméně je to arogance, když je to pravda? Chrudoš je mezi mladými Řezníky liga sama o sobě a bere to jako samozřejmost. Až na občasnou debatu o oblecích s Ludovidem s ostatními příliš volného času netráví.\n- S tchánem Bogdanem občas naráží na to, že se Chrudoš už teď ambiciózně cpe do vedení gangu s odkazem na své mimořádné schopnosti. Bogdan se zatím odvolává na nedostatek zkušeností, pokud ale o své eso nechce přijít, bude muset být velice diplomatický a dost možná se brzy podvolit.  \n\n",
+          "description": "- (vzhled: fešný blonďák, hubený; pohlaví: muž; věk: 26)\n- Největší naděje a talent Řezníků. Styl, charisma a hlavně úžasné magické schopnosti ho pasují na největší úlovek gangu za dlouhou dobu. Chrudoš totiž vyrůstal v Dragnym Pogromu, takže jeho přiženění a ochota přejít k Řezníkům byla velkou výhrou.\n- Kdekdo ho nazývá arogantní, nicméně je to arogance, když je to pravda? Chrudoš je mezi mladými Řezníky liga sama o sobě a bere to jako samozřejmost. Až na občasnou debatu o oblecích s Ludovidem s ostatními příliš volného času netráví.\n- S tchánem Bogdanem občas naráží na to, že se Chrudoš už teď ambiciózně cpe do vedení gangu s odkazem na své mimořádné schopnosti. Bogdan se zatím odvolává na nedostatek zkušeností, pokud ale o své eso nechce přijít, bude muset být velice diplomatický a dost možná se brzy podvolit.\n\n",
           "image": "/assets/uploads/1000036872.png"
         },
         {
@@ -64,6 +64,9 @@
           "image": "/assets/uploads/1000036878.png"
         }
       ]
+    },
+    {
+      "name": "Dragny Pogrom"
     }
   ]
 }
