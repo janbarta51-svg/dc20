@@ -262,7 +262,7 @@ jobs:
               sorcerer: Boolean(document.querySelector('a[data-route="sorcerer"]')),
               spellblade: Boolean(document.querySelector('a[data-route="spellblade"]'))
             }));
-            if (Object.values(navState).some(Boolean) || document.querySelector('a[data-route="cleric"]')) {
+            if (Object.values(navState).some(Boolean) || await page.locator('a[data-route="cleric"]').count()) {
               throw new Error(`Archived class links must be absent: ${JSON.stringify(navState)}`);
             }
 
