@@ -76,7 +76,7 @@
       "characters": [
         {
           "name": "Tamika",
-          "description": "Dealerka a drobná zahradnice.  \n  \nZdá se, že je hodně na klid a tak trochu ve svém světě.",
+          "description": "Dealerka a drobná zahradnice.  \n\nZdá se, že je hodně na klid a tak trochu ve svém světě.",
           "image": "/assets/uploads/tamika.jpg"
         }
       ]
@@ -87,7 +87,7 @@
       "characters": [
         {
           "name": "Vladimir",
-          "description": "Nekromancer o pár let starší než vy.  \n\nSnaží se držet na uzdě emoce a prezentovat se jako někdo, kdo má nad sebou absolutní kontrolu.  \nPár piv a hospodských her v Pogromgorodu vám ale rouško poodhalilo.",
+          "description": "vzhled: mladý, svalnatý muž bez vlasů, bledá kůže  \n  \nNekromancer o pár let starší než vy.  \n\nSnaží se držet na uzdě emoce a prezentovat se jako někdo, kdo má nad sebou absolutní kontrolu.  \nPár piv a hospodských her v Pogromgorodu vám ale rouško poodhalilo.",
           "image": "/assets/uploads/vladimir.jpg"
         }
       ]
