@@ -22,7 +22,7 @@ assert.ok(Array.isArray(saved.chapters), 'Střípky must be an editable chapters
     page.on('pageerror', e => errors.push(e.message));
     await page.goto('http://127.0.0.1:4173/#stripky', { waitUntil:'networkidle' });
     assert.equal(await page.locator('#app h1').textContent(), 'Střípky z Kostelce');
-    const navigation = await page.locator('.nav-right a').evaluateAll(links=>links.map(l=>l.dataset.route));
+    const navigation = await page.locator('.site-menu a').evaluateAll(links=>links.map(l=>l.dataset.route));
     assert.deepEqual(navigation.slice(navigation.indexOf('kronika'),navigation.indexOf('combat')+1),
       ['kronika','stripky','combat'], 'Tab must be located between Kronika and Combat');
     if (saved.chapters.length === 0) {
