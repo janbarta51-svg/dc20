@@ -76,7 +76,14 @@
     },
     {
       "name": "Osuar Strigoj",
-      "logo": "/assets/uploads/1000038045.png"
+      "logo": "/assets/uploads/1000038045.png",
+      "characters": [
+        {
+          "name": "Vladimir",
+          "description": "Nekromancer o pár let starší než vy.  \n  \nSnaží se držet na uzdě emoce a prezentovat se jako někdo, kdo má nad sebou absolutní kontrolu.  \nPár piv a hospodských her v Pogromgorodu vám ale rouško poodhalilo.",
+          "image": "/assets/uploads/vladimir.jpg"
+        }
+      ]
     },
     {
       "name": "Městská hlídka ",
