@@ -265,6 +265,15 @@ jobs:
             if (Object.values(navState).some(Boolean) || await page.locator('a[data-route="cleric"]').count()) {
               throw new Error(`Archived class links must be absent: ${JSON.stringify(navState)}`);
             }
+            const navGroups = await page.locator('.nav-cluster').evaluateAll(groups =>
+              groups.map(group => [...group.querySelectorAll('a')].map(a=>a.dataset.route)));
+            const expectedNavGroups = [
+              ['postavy','gangcyklopedie','kronika','stripky'],
+              ['combat','combo','toolkit','calendar']
+            ];
+            if (JSON.stringify(navGroups) !== JSON.stringify(expectedNavGroups)) {
+              throw new Error(`Navigation groups or order mismatch: ${JSON.stringify(navGroups)}`);
+            }
 
             const homeDownloads = await page.locator('.pdf-download-copy strong').allTextContents();
             if (homeDownloads.includes('Commander') || homeDownloads.includes('Sorcerer') || homeDownloads.includes('Spellblade') || !homeDownloads.includes('Champion') || !homeDownloads.includes('Bard') || !homeDownloads.includes('Summoner')) {

@@ -49,6 +49,10 @@ async function layout(page, width, route) {
       assert.equal(await page.locator('#app').evaluate(el => el.inert), true);
       const links = page.locator('.site-menu a');
       assert.equal(await links.count(), routes.length - 1, 'Menu must include every route except home');
+      assert.deepEqual(await page.locator('.nav-left a').evaluateAll(items=>items.map(a=>a.dataset.route)),
+        ['postavy','gangcyklopedie','kronika','stripky'], 'Left navigation and mobile menu must start with campaign pages');
+      assert.deepEqual(await page.locator('.nav-right a').evaluateAll(items=>items.map(a=>a.dataset.route)),
+        ['combat','combo','toolkit','calendar'], 'Right navigation must contain tools and calendar');
       for (const link of await links.all()) {
         const box = await link.boundingBox();
         assert.ok(box.height >= 51.5 && box.width >= viewport.width * .35, 'Menu links must be broad touch targets');
@@ -108,6 +112,15 @@ async function layout(page, width, route) {
         // wait for the desktop spacing as well as the breakpoint.
         await page.waitForFunction(() => matchMedia('(min-width:1440px)').matches && getComputedStyle(document.querySelector('#siteHeader')).paddingRight === '140px' && getComputedStyle(document.querySelector('.header-tools')).right === '16px');
         assert.equal(await page.locator('#menuBackdrop').isVisible(), false);
+        const navBounds = await page.evaluate(() => {
+          const left = [...document.querySelectorAll('.nav-left a')].map(el=>el.getBoundingClientRect());
+          const right = [...document.querySelectorAll('.nav-right a')].map(el=>el.getBoundingClientRect());
+          const logo = document.querySelector('.brand-center').getBoundingClientRect();
+          return { lastLeft:Math.max(...left.map(r=>r.right)),logoLeft:logo.left,
+            logoRight:logo.right,firstRight:Math.min(...right.map(r=>r.left)) };
+        });
+        assert.ok(navBounds.lastLeft <= navBounds.logoLeft + 1 && navBounds.logoRight <= navBounds.firstRight + 1,
+          `Desktop navigation must flank the logo: ${JSON.stringify(navBounds)}`);
         const headerBoxes = await page.locator('.nav-cluster a,.header-tools .tool-button,.brand-center').evaluateAll(elements => elements.map(el => {
           const r = el.getBoundingClientRect(); return { text: el.innerText, x: r.x, y: r.y, right: r.right, bottom: r.bottom };
         }));
