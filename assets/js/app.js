@@ -293,7 +293,8 @@
   function setSelected(key,set){selections[key]=[...set];saveSelections()}
   function classRoute(){
     const h=(location.hash||'#home').slice(1);
-    return ['home','combo','combat','cleric','champion','bard','summoner','toolkit','gangcyklopedie','postavy','calendar','kronika','stripky'].includes(h)?h:'home';
+    // Class routes are archived; see docs/RESTORE_CLASS_PAGES.md.
+    return ['home','combo','combat','toolkit','gangcyklopedie','postavy','calendar','kronika','stripky'].includes(h)?h:'home';
   }
   function groupBy(arr,keyFn){
     return arr.reduce((acc,item)=>{ const key=keyFn(item); (acc[key] ||= []).push(item); return acc; },{});
@@ -1097,7 +1098,7 @@
     if(route==='home') renderHome();
     else if(route==='combo') renderCombo();
     else if(route==='combat') renderCombat();
-    else if(['cleric','champion','bard','summoner'].includes(route)) renderClass(route);
+    // renderClass(route) stays intact for future reactivation.
     else if(route==='toolkit') renderToolkit();
     else if(route==='gangcyklopedie') renderGang();
     else if(route==='postavy') renderCharacters();
@@ -1156,7 +1157,7 @@
   setTimeout(()=>splash?.remove(),splashDelay+650);
 
   // Keep the loaded build version in sync with version.json on each release.
-  const APP_VERSION='2026.11.09.1';
+  const APP_VERSION='2026.11.09.2';
   let updatePromptShown=false;
   let reloadingForUpdate=false;
 

@@ -1,4 +1,4 @@
-const CACHE='gangsterka-dc20-v27';
+const CACHE='gangsterka-dc20-v28';
 
 const CMS_PATHS=[
   './content/gangcyklopedie.json',

@@ -57,3 +57,6 @@ Kliknutí na termín v měsíčním přehledu otevře jeho detail. Tlačítko **
 
 ## Nasazení
 Projekt je připravený pro GitHub Pages a doménu `dc20.honzanacestach.cz` přes soubor `CNAME`.
+
+## Archivované stránky tříd
+Záložky **Cleric, Champion, Bard a Summoner** nejsou aktivní ani dostupné přes původní odkazy, ale skripty, pravidla, obrázky a PDF zůstaly zachované. Jednoduchý postup obnovení: [docs/RESTORE_CLASS_PAGES.md](docs/RESTORE_CLASS_PAGES.md).

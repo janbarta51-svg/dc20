@@ -1,7 +1,7 @@
 const assert = require('node:assert/strict');
 const { chromium } = require('playwright');
 
-const routes = ['home', 'bard', 'champion', 'cleric', 'summoner', 'postavy', 'gangcyklopedie', 'kronika', 'stripky', 'combat', 'combo', 'toolkit', 'calendar'];
+const routes = ['home', 'postavy', 'gangcyklopedie', 'kronika', 'stripky', 'combat', 'combo', 'toolkit', 'calendar'];
 
 async function layout(page, width, route) {
   const state = await page.evaluate(() => ({
@@ -73,16 +73,18 @@ async function layout(page, width, route) {
         await page.waitForFunction(route => document.querySelector(`[data-route="${route}"]`)?.classList.contains('active'), route);
         await layout(page, viewport.width, route);
       }
-      // Both a label tap and a keyboard-operated detail button remain usable.
-      await page.evaluate(() => { location.hash = '#bard'; });
-      await page.locator('.choice-check-target').first().click();
-      assert.equal(await page.locator('.choice-check').first().isChecked(), true);
-      const detail = page.locator('.detail-toggle').first();
+      // Keyboard-operated campaign accordions remain usable.
+      await page.evaluate(() => { location.hash = '#gangcyklopedie'; });
+      await page.waitForFunction(() => document.querySelector('.lore-item .lore-toggle'));
+      const detail = page.locator('.lore-item .lore-toggle').first();
       await detail.focus();
       await page.keyboard.press('Enter');
       assert.equal(await detail.getAttribute('aria-expanded'), 'true');
       await page.keyboard.press('Enter');
       assert.equal(await detail.getAttribute('aria-expanded'), 'false');
+      await page.evaluate(() => { location.hash = '#cleric'; });
+      await page.waitForFunction(() => document.querySelector('#app .home-content'));
+      assert.equal(await page.locator('#app .class-reference').count(), 0);
 
       await page.locator('#accountToggle').click();
       for (const tab of await page.locator('.account-tabs button').all()) assert.ok((await tab.boundingBox()).height >= 47.5);
