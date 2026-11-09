@@ -48,7 +48,7 @@ async function layout(page, width, route) {
       assert.equal(await page.locator('#navToggle').getAttribute('aria-expanded'), 'true');
       assert.equal(await page.locator('#app').evaluate(el => el.inert), true);
       const links = page.locator('.site-menu a');
-      assert.equal(await links.count(), 11);
+      assert.equal(await links.count(), routes.length - 1, 'Menu must include every route except home');
       for (const link of await links.all()) {
         const box = await link.boundingBox();
         assert.ok(box.height >= 51.5 && box.width >= viewport.width * .35, 'Menu links must be broad touch targets');
