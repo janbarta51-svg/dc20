@@ -28,6 +28,13 @@ KRONIKA
 - Den
 - Popis co se stalo
 
+STŘÍPKY Z KOSTELCE
+- Přidej novou položku v seznamu Kapitoly.
+- Pole Kapitola = název rozklikávací kapitoly na webu.
+- Pole Text kapitoly = zápis, stejný rich-text/Markdown editor jako v Kronice.
+- Ulož změny. Střípky se zobrazí v samostatné záložce mezi Kronikou a Combat.
+- Zápisy ve Střípcích nijak nemění Kroniku.
+
 TIP PRO DELŠÍ POPISY
 --------------------
 V editoru můžeš psát normálně jako ve Wordu.
@@ -53,5 +60,5 @@ Běžná změna obsahu v Pages CMS nepotřebuje měnit version.json ani Service 
 Postup zůstává:
 Pages CMS -> Save -> commit do main -> GitHub Pages deploy -> aplikace při dalším online načtení vezme nový obsah.
 
-Gangy, Postavy a Kronika používají network-first načítání. Když internet není dostupný,
+Gangy, Postavy, Kronika a Střípky z Kostelce používají network-first načítání. Když internet není dostupný,
 PWA zobrazí poslední uloženou verzi obsahu. Po návratu online se znovu načte aktuální JSON.

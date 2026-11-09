@@ -1,7 +1,7 @@
 const assert = require('node:assert/strict');
 const { chromium } = require('playwright');
 
-const routes = ['home', 'bard', 'champion', 'cleric', 'summoner', 'postavy', 'gangcyklopedie', 'kronika', 'combat', 'combo', 'toolkit', 'calendar'];
+const routes = ['home', 'bard', 'champion', 'cleric', 'summoner', 'postavy', 'gangcyklopedie', 'kronika', 'stripky', 'combat', 'combo', 'toolkit', 'calendar'];
 
 async function layout(page, width, route) {
   const state = await page.evaluate(() => ({

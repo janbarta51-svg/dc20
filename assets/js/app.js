@@ -15,6 +15,7 @@
   let theme = store.get('dc20-theme','light') || 'light';
   let gangs = R.fallbackGangcyklopedie;
   let kronika = R.fallbackKronika;
+  let stripky = [];
   let postavy = [];
   let selections = {};
   let spellbladeSchools = [];
@@ -292,7 +293,7 @@
   function setSelected(key,set){selections[key]=[...set];saveSelections()}
   function classRoute(){
     const h=(location.hash||'#home').slice(1);
-    return ['home','combo','combat','cleric','champion','bard','summoner','toolkit','gangcyklopedie','postavy','calendar','kronika'].includes(h)?h:'home';
+    return ['home','combo','combat','cleric','champion','bard','summoner','toolkit','gangcyklopedie','postavy','calendar','kronika','stripky'].includes(h)?h:'home';
   }
   function groupBy(arr,keyFn){
     return arr.reduce((acc,item)=>{ const key=keyFn(item); (acc[key] ||= []).push(item); return acc; },{});
@@ -301,15 +302,17 @@
   async function loadCmsContent(){
     if(location.protocol === 'file:') return;
     try{
-      const [g,p,k]=await Promise.all([
-        fetch('content/gangcyklopedie.json',{cache:'no-store'}),
-        fetch('content/postavy.json',{cache:'no-store'}),
-        fetch('content/kronika.json',{cache:'no-store'})
+      const [g,p,k,s]=await Promise.all([
+        fetch('content/gangcyklopedie.json',{cache:'no-store'}).catch(()=>null),
+        fetch('content/postavy.json',{cache:'no-store'}).catch(()=>null),
+        fetch('content/kronika.json',{cache:'no-store'}).catch(()=>null),
+        fetch('content/stripky.json',{cache:'no-store'}).catch(()=>null)
       ]);
-      if(g.ok) gangs=await g.json();
-      if(p.ok) postavy=await p.json();
-      if(k.ok) kronika=await k.json();
-      if(['gangcyklopedie','postavy','kronika'].includes(classRoute())) render();
+      if(g?.ok) gangs=await g.json();
+      if(p?.ok) postavy=await p.json();
+      if(k?.ok) kronika=await k.json();
+      if(s?.ok) stripky=await s.json();
+      if(['gangcyklopedie','postavy','kronika','stripky'].includes(classRoute())) render();
     }catch(e){ console.warn('CMS content fallback active',e); }
   }
 
@@ -1049,6 +1052,14 @@
     app.innerHTML=`<article class="standard-reference lore-reference chronicle-reference">${hero('Kronika')}<section class="lore-list">${cards}</section></article>`;
     bindLoreAccordions();
   }
+  function renderFragments(){
+    const cards=(stripky||[]).map(e=>accordionItem({
+      title:e.title||e.name||'Kapitola',
+      body:e.body||e.description||''
+    })).join('');
+    app.innerHTML=`<article class="standard-reference lore-reference chronicle-reference fragments-reference">${hero('Střípky z Kostelce')}<section class="lore-list">${cards||'<p class="fragments-empty">Zatím žádné kapitoly. První přidáš v Pages CMS.</p>'}</section></article>`;
+    bindLoreAccordions();
+  }
 
   function focusSharedContent(){
     const raw=new URLSearchParams(location.search).get('focus');
@@ -1090,6 +1101,7 @@
     else if(route==='toolkit') renderToolkit();
     else if(route==='gangcyklopedie') renderGang();
     else if(route==='postavy') renderCharacters();
+    else if(route==='stripky') renderFragments();
     else if(route==='calendar'){
       if(window.renderDC20Calendar) window.renderDC20Calendar();
       else app.innerHTML=`<article class="standard-reference calendar-reference"><section class="hero"><div class="eyebrow">DRUŽINA</div><h1>Kalendář</h1><p>Načítám termíny Družiny…</p></section></article>`;
@@ -1144,7 +1156,7 @@
   setTimeout(()=>splash?.remove(),splashDelay+650);
 
   // Keep the loaded build version in sync with version.json on each release.
-  const APP_VERSION='2026.10.31.3';
+  const APP_VERSION='2026.11.09.1';
   let updatePromptShown=false;
   let reloadingForUpdate=false;
 

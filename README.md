@@ -6,7 +6,7 @@ Offline-first herní reference a kampaňový web pro `dc20.honzanacestach.cz`.
 Rozbal složku a otevři `index.html` v prohlížeči.
 
 ## Pages CMS
-Konfigurace je v `.pages.yml` v kořeni projektu a obsahuje tři části:
+Konfigurace je v `.pages.yml` v kořeni projektu a obsahuje čtyři sekce:
 
 ### Gangy
 - **Název gangu**
@@ -27,6 +27,13 @@ Každý gang je v CMS sbalený pod svým názvem. Pro seznamy používej běžn�
 
 Každá session je v CMS sbalená jako `Název — Den`.
 
+### Střípky z Kostelce
+- **Kapitola** — název rozklikávacího zápisu
+- **Text kapitoly** — rich-text/Markdown editor jako v Kronice
+
+Každý střípek se spravuje v samostatném seznamu `content/stripky.json`, nezávisle na Kronice.
+V navigaci je mezi **Kronika** a **Combat**.
+
 ### Obrázky
 Nahraná loga gangů a obrázky postav se ukládají do `assets/uploads/`.
 
@@ -35,7 +42,7 @@ Nahraná loga gangů a obrázky postav se ukládají do `assets/uploads/`.
 2. Povol Pages CMS pro repository `dc20`.
 3. Vyber branch `main`.
 4. Pages CMS načte `.pages.yml` automaticky.
-5. V levém menu uvidíš **Gangy**, **Postavy** a **Kronika**.
+5. V levém menu uvidíš **Gangy**, **Postavy**, **Kronika** a **Střípky z Kostelce**.
 
 Po uložení Pages CMS vytvoří commit do GitHubu. CMS JSON soubory web načítá network-first, takže online vždy preferuje nejnovější obsah a poslední úspěšná verze zůstává dostupná offline.
 

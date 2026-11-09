@@ -1,9 +1,10 @@
-const CACHE='gangsterka-dc20-v26';
+const CACHE='gangsterka-dc20-v27';
 
 const CMS_PATHS=[
   './content/gangcyklopedie.json',
   './content/postavy.json',
-  './content/kronika.json'
+  './content/kronika.json',
+  './content/stripky.json'
 ];
 
 const ASSETS=[
@@ -151,7 +152,8 @@ self.addEventListener('fetch',event=>{
   const isCmsJson=
     url.pathname.endsWith('/content/gangcyklopedie.json') ||
     url.pathname.endsWith('/content/postavy.json') ||
-    url.pathname.endsWith('/content/kronika.json');
+    url.pathname.endsWith('/content/kronika.json') ||
+    url.pathname.endsWith('/content/stripky.json');
 
   const isFreshAppFile=
     request.mode==='navigate' ||

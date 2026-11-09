@@ -36,6 +36,7 @@ jobs:
               Path('content/gangcyklopedie.json'),
               Path('content/postavy.json'),
               Path('content/kronika.json'),
+              Path('content/stripky.json'),
           ]:
               with path.open(encoding='utf-8') as f:
                   json.load(f)
@@ -45,6 +46,7 @@ jobs:
               ('content/gangcyklopedie.json', 'gangs', 'title'),
               ('content/postavy.json', 'groups', 'name'),
               ('content/kronika.json', 'sessions', 'title'),
+              ('content/stripky.json', 'chapters', 'title'),
           ]
           for filename, list_key, required_key in checks:
               data = json.loads(Path(filename).read_text(encoding='utf-8'))
@@ -87,7 +89,8 @@ jobs:
           expected = {
             'gangs' => ['content/gangcyklopedie.json', 'gangs'],
             'characters' => ['content/postavy.json', 'groups'],
-            'chronicle' => ['content/kronika.json', 'sessions']
+            'chronicle' => ['content/kronika.json', 'sessions'],
+            'fragments' => ['content/stripky.json', 'chapters']
           }
 
           entries = cfg.fetch('content').to_h { |entry| [entry.fetch('name'), entry] }
@@ -241,12 +244,13 @@ jobs:
             const cmsExpected = {
               gangcyklopedie: JSON.parse(fs.readFileSync('content/gangcyklopedie.json','utf8')).gangs?.[0]?.title || '',
               postavy: JSON.parse(fs.readFileSync('content/postavy.json','utf8')).groups?.[0]?.name || '',
-              kronika: JSON.parse(fs.readFileSync('content/kronika.json','utf8')).sessions?.[0]?.title || ''
+              kronika: JSON.parse(fs.readFileSync('content/kronika.json','utf8')).sessions?.[0]?.title || '',
+              stripky: JSON.parse(fs.readFileSync('content/stripky.json','utf8')).chapters?.[0]?.title || ''
             };
 
             const routes = [
               'home','combo','combat','cleric','champion','bard',
-              'summoner','toolkit','gangcyklopedie','postavy','calendar','kronika'
+              'summoner','toolkit','gangcyklopedie','postavy','calendar','kronika','stripky'
             ];
 
             await page.goto('http://127.0.0.1:4173/#home', {waitUntil:'networkidle'});
@@ -297,7 +301,7 @@ jobs:
             if (!(await page.locator('h1', {hasText:'Summoner'}).count())) throw new Error('Summoner page missing');
             if (!(await page.locator('[data-selector="summoner"]').count())) throw new Error('Summoner Spell selector missing');
 
-            for (const route of ['gangcyklopedie','postavy','kronika']) {
+            for (const route of ['gangcyklopedie','postavy','kronika','stripky']) {
               await page.evaluate(r => { location.hash = `#${r}`; }, route);
               await page.waitForTimeout(300);
 
@@ -442,4 +446,5 @@ jobs:
           node tools/check_calendar.cjs
           node tools/check_updates.cjs
           node tools/check_gang_icons.cjs
+          node tools/check_stripky.cjs
           node tools/check_mobile.cjs

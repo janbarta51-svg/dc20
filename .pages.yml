@@ -143,3 +143,34 @@ content:
               format: markdown
               switcher: true
               media: false
+
+  - name: fragments
+    label: Střípky z Kostelce
+    type: file
+    path: content/stripky.json
+    format: json
+    fields:
+      - name: chapters
+        label: Kapitoly
+        type: object
+        description: Samostatné příběhové střípky z Kostelce, nezávislé na Kronice.
+        list:
+          collapsible:
+            collapsed: true
+            summary: "{title}"
+        fields:
+          - name: title
+            label: Kapitola
+            type: string
+            required: true
+            description: Nadpis rozklikávací kapitoly.
+
+          - name: description
+            label: Text kapitoly
+            type: rich-text
+            required: true
+            description: Piš jako v Kronice. Můžeš použít odstavce, nadpisy, tučné písmo, odrážky a pododrážky.
+            options:
+              format: markdown
+              switcher: true
+              media: false
