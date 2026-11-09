@@ -1157,7 +1157,7 @@
   setTimeout(()=>splash?.remove(),splashDelay+650);
 
   // Keep the loaded build version in sync with version.json on each release.
-  const APP_VERSION='2026.11.09.3';
+  const APP_VERSION='2026.11.09.4';
   let updatePromptShown=false;
   let reloadingForUpdate=false;
 

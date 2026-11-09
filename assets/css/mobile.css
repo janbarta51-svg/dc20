@@ -25,7 +25,9 @@
 }
 
 @media screen and (min-width:1440px){
-  .site-header{grid-template-columns:minmax(0,1fr) auto auto;padding-right:140px}
+  /* Keep the logo at the true viewport center, with equal space for both tab groups.
+     Settings/account stay pinned to the upper-right and do not displace navigation. */
+  .site-header{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);padding-inline:140px}
   .header-tools{display:grid;grid-template-columns:repeat(2,48px);gap:6px;width:102px;top:12px;right:16px}
   .header-tools .tool-button{width:100%;height:44px;min-width:0;padding-inline:8px}
   .header-tools .account-toggle{grid-column:1/-1;max-width:100%}

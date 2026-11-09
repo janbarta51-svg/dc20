@@ -126,7 +126,30 @@ async function layout(page, width, route) {
         }));
         for (let i = 0; i < headerBoxes.length; i++) for (let j = i + 1; j < headerBoxes.length; j++) {
           const a = headerBoxes[i], b = headerBoxes[j];
-          assert.ok(a.right <= b.x + 1 || b.right <= a.x + 1 || a.bottom <= b.y + 1 || b.bottom <= a.y + 1, `Desktop header overlaps: ${JSON.stringify(a)} / ${JSON.stringify(b)}`);
+          assert.ok(a.right <= b.x + 1 || b.right <= a.x + 1 || a.bottom <= b.y + 1, `Desktop header overlaps: ${JSON.stringify(a)} / ${JSON.stringify(b)}`);
+        }
+
+        // Regression: the screenshot showed the entire tab group shifted right.
+        // Test the logo against the actual viewport midpoint, not the padded grid.
+        for (const desktopWidth of [1440, 1753, 1920]) {
+          await page.setViewportSize({width:desktopWidth,height:900});
+          const geometry=await page.evaluate(()=>{
+            const logo=document.querySelector('.brand-center').getBoundingClientRect();
+            const left=[...document.querySelectorAll('.nav-left a')].map(x=>x.getBoundingClientRect());
+            const right=[...document.querySelectorAll('.nav-right a')].map(x=>x.getBoundingClientRect());
+            const controls=document.querySelector('.header-tools').getBoundingClientRect();
+            return {viewport:innerWidth,logoCenter:logo.left+logo.width/2,
+              leftEnd:Math.max(...left.map(x=>x.right)),rightStart:Math.min(...right.map(x=>x.left)),
+              logoLeft:logo.left,logoRight:logo.right,controlsLeft:controls.left,
+              maxRight:Math.max(...right.map(x=>x.right)),scrollWidth:document.documentElement.scrollWidth};
+          });
+          assert.ok(Math.abs(geometry.logoCenter-desktopWidth/2)<=2,
+            `Desktop logo and navigation should be centered: ${JSON.stringify(geometry)}`);
+          assert.ok(geometry.leftEnd<=geometry.logoLeft+1 &&
+            geometry.rightStart>=geometry.logoRight-1 && geometry.maxRight<=geometry.controlsLeft+1,
+            `Tabs and account controls must not overlap: ${JSON.stringify(geometry)}`);
+          assert.ok(geometry.scrollWidth<=desktopWidth+1,
+            `Desktop header must not create overflow: ${JSON.stringify(geometry)}`);
         }
       }
       assert.deepEqual(errors, []);
