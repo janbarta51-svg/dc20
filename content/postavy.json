@@ -72,8 +72,13 @@
       "characters": [
         {
           "name": "Voron",
-          "description": "vzhled: muž středního věku se zlatou ještěří kůží po těle  \n  \nNejmocnější a nejbohatší muž v Kostelci. I tak ale musí platit kancléřce jako všichni ostatní, ta má totiž podporu armád mimo město.  \n  \nI tak je ale možné, že ho jeho hrdost a ambice nenechají v klidu a kancléřku zneškodní. Bude schopen vymyslet plán, který by odvrátil ničivé následky takového převratu oficiálního zastupitele vlády? Bude ochoten vsadit existenci svého gangu?",
+          "description": "vzhled: muž středního věku se zlatou ještěří kůží po těle  \n\nNejmocnější a nejbohatší muž v Kostelci. I tak ale musí platit kancléřce jako všichni ostatní, ta má totiž podporu armád mimo město.  \n\nI tak je ale možné, že ho jeho hrdost a ambice nenechají v klidu a kancléřku zneškodní. Bude schopen vymyslet plán, který by odvrátil ničivé následky takového převratu oficiálního zastupitele vlády? Bude ochoten vsadit existenci svého gangu?",
           "image": "/assets/uploads/voron.jpg"
+        },
+        {
+          "name": "Groza",
+          "description": "vzhled: vysoký muž středního věku  \n  \nDruhý nejmocnější a nejbohatší muž v Kostelci. U Draků řídí hlavně ty podniky s největšími příjmy v čele s Pogromgorodem. ",
+          "image": "/assets/uploads/groza.jpg"
         }
       ]
     },
