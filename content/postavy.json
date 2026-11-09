@@ -72,7 +72,14 @@
     },
     {
       "name": "Mancharisqapa Inkakuna",
-      "logo": "/assets/uploads/1000038043.png"
+      "logo": "/assets/uploads/1000038043.png",
+      "characters": [
+        {
+          "name": "Tamika",
+          "description": "Dealerka a drobná zahradnice.  \n  \nZdá se, že je hodně na klid a tak trochu ve svém světě.",
+          "image": "/assets/uploads/tamika.jpg"
+        }
+      ]
     },
     {
       "name": "Osuar Strigoj",
@@ -80,7 +87,7 @@
       "characters": [
         {
           "name": "Vladimir",
-          "description": "Nekromancer o pár let starší než vy.  \n  \nSnaží se držet na uzdě emoce a prezentovat se jako někdo, kdo má nad sebou absolutní kontrolu.  \nPár piv a hospodských her v Pogromgorodu vám ale rouško poodhalilo.",
+          "description": "Nekromancer o pár let starší než vy.  \n\nSnaží se držet na uzdě emoce a prezentovat se jako někdo, kdo má nad sebou absolutní kontrolu.  \nPár piv a hospodských her v Pogromgorodu vám ale rouško poodhalilo.",
           "image": "/assets/uploads/vladimir.jpg"
         }
       ]
