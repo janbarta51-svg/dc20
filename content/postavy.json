@@ -77,7 +77,7 @@
         },
         {
           "name": "Groza",
-          "description": "vzhled: vysoký muž středního věku  \n  \nDruhý nejmocnější a nejbohatší muž v Kostelci. U Draků řídí hlavně ty podniky s největšími příjmy v čele s Pogromgorodem. ",
+          "description": "vzhled: vysoký muž středního věku  \n\nDruhý nejmocnější a nejbohatší muž v Kostelci. U Draků řídí hlavně ty podniky s největšími příjmy v čele s Pogromgorodem. ",
           "image": "/assets/uploads/groza.jpg"
         }
       ]
@@ -88,7 +88,7 @@
       "characters": [
         {
           "name": "Tamika",
-          "description": "Dealerka a drobná zahradnice.  \n\nZdá se, že je hodně na klid a tak trochu ve svém světě.",
+          "description": "Dealerka a drobná zahradnice.  \n\n- Zdá se, že je hodně na klid a tak trochu ve svém světě.\n\n",
           "image": "/assets/uploads/tamika.jpg"
         }
       ]
