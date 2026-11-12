@@ -1,7 +1,7 @@
 const assert = require('node:assert/strict');
 const { chromium } = require('playwright');
 
-const routes = ['home', 'postavy', 'gangcyklopedie', 'kronika', 'stripky', 'combat', 'combo', 'toolkit', 'calendar'];
+const routes = ['home', 'postavy', 'gangcyklopedie', 'kronika', 'stripky', 'bestiar', 'combat', 'combo', 'toolkit', 'calendar'];
 
 async function layout(page, width, route) {
   const state = await page.evaluate(() => ({
@@ -52,7 +52,7 @@ async function layout(page, width, route) {
       assert.deepEqual(await page.locator('.nav-left a').evaluateAll(items=>items.map(a=>a.dataset.route)),
         ['postavy','gangcyklopedie','kronika','stripky'], 'Left navigation and mobile menu must start with campaign pages');
       assert.deepEqual(await page.locator('.nav-right a').evaluateAll(items=>items.map(a=>a.dataset.route)),
-        ['combat','combo','toolkit','calendar'], 'Right navigation must contain tools and calendar');
+        ['bestiar','combat','combo','toolkit','calendar'], 'Right navigation must show Bestiář before Combat, tools and calendar');
       for (const link of await links.all()) {
         const box = await link.boundingBox();
         assert.ok(box.height >= 51.5 && box.width >= viewport.width * .35, 'Menu links must be broad touch targets');

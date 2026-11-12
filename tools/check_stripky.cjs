@@ -24,7 +24,7 @@ assert.ok(Array.isArray(saved.chapters), 'Střípky must be an editable chapters
     assert.equal(await page.locator('#app h1').textContent(), 'Střípky z Kostelce');
     const navigation = await page.locator('.site-menu a').evaluateAll(links=>links.map(l=>l.dataset.route));
     assert.deepEqual(navigation.slice(navigation.indexOf('kronika'),navigation.indexOf('combat')+1),
-      ['kronika','stripky','combat'], 'Tab must be located between Kronika and Combat');
+      ['kronika','stripky','bestiar','combat'], 'Bestiář must follow Střípky and precede Combat across logo');
     if (saved.chapters.length === 0) {
       assert.match(await page.locator('#app').textContent(), /Zatím žádné kapitoly/);
     }

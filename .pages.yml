@@ -174,3 +174,43 @@ content:
               format: markdown
               switcher: true
               media: false
+
+  - name: bestiary
+    label: Bestiář
+    type: file
+    path: content/bestiar.json
+    format: json
+    fields:
+      - name: creatures
+        label: Potvory
+        type: object
+        description: Přidávej nové potvory a jejich popisy. Každá se zobrazí jako rozklikávací položka.
+        list:
+          collapsible:
+            collapsed: true
+            summary: "{name}"
+        fields:
+          - name: name
+            label: Jméno potvory
+            type: string
+            required: true
+            description: Název potvory zobrazený na webu.
+
+          - name: description
+            label: Popis potvory
+            type: rich-text
+            required: true
+            description: Stejný editor jako Střípky. Můžeš psát odstavce, nadpisy, seznamy a pododrážky.
+            options:
+              format: markdown
+              switcher: true
+              media: false
+
+          - name: image
+            label: Fotka potvory
+            type: image
+            description: Volitelný obrázek. Pokud jej nenahraješ, zobrazí se pouze jméno a popis.
+            options:
+              categories: [image]
+              extensions: [png, jpg, jpeg, webp, svg]
+              rename: safe

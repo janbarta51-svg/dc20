@@ -37,6 +37,7 @@ jobs:
               Path('content/postavy.json'),
               Path('content/kronika.json'),
               Path('content/stripky.json'),
+              Path('content/bestiar.json'),
           ]:
               with path.open(encoding='utf-8') as f:
                   json.load(f)
@@ -47,6 +48,7 @@ jobs:
               ('content/postavy.json', 'groups', 'name'),
               ('content/kronika.json', 'sessions', 'title'),
               ('content/stripky.json', 'chapters', 'title'),
+              ('content/bestiar.json', 'creatures', 'name'),
           ]
           for filename, list_key, required_key in checks:
               data = json.loads(Path(filename).read_text(encoding='utf-8'))
@@ -90,7 +92,8 @@ jobs:
             'gangs' => ['content/gangcyklopedie.json', 'gangs'],
             'characters' => ['content/postavy.json', 'groups'],
             'chronicle' => ['content/kronika.json', 'sessions'],
-            'fragments' => ['content/stripky.json', 'chapters']
+            'fragments' => ['content/stripky.json', 'chapters'],
+            'bestiary' => ['content/bestiar.json', 'creatures']
           }
 
           entries = cfg.fetch('content').to_h { |entry| [entry.fetch('name'), entry] }
@@ -108,6 +111,11 @@ jobs:
             if ['gangs', 'characters'].include?(name)
               logo = list_field.fetch('fields').find { |field| field['name'] == 'logo' }
               raise "#{name}: optional gang emblem image field is missing" unless logo && logo['type'] == 'image' && !logo['required']
+            end
+            if name == 'bestiary'
+              image_field = list_field.fetch('fields').find { |field| field['name'] == 'image' }
+              raise 'Bestiary CMS needs a photo upload field' unless image_field && image_field['type'] == 'image' && !image_field['required']
+              raise 'Bestiary CMS needs name and description fields' unless %w[name description].all? { |key| list_field['fields'].any? { |field| field['name'] == key } }
             end
             if name == 'characters'
               inner = list_field.fetch('fields').find { |field| field['name'] == 'characters' }
@@ -245,11 +253,12 @@ jobs:
               gangcyklopedie: JSON.parse(fs.readFileSync('content/gangcyklopedie.json','utf8')).gangs?.[0]?.title || '',
               postavy: JSON.parse(fs.readFileSync('content/postavy.json','utf8')).groups?.[0]?.name || '',
               kronika: JSON.parse(fs.readFileSync('content/kronika.json','utf8')).sessions?.[0]?.title || '',
-              stripky: JSON.parse(fs.readFileSync('content/stripky.json','utf8')).chapters?.[0]?.title || ''
+              stripky: JSON.parse(fs.readFileSync('content/stripky.json','utf8')).chapters?.[0]?.title || '',
+              bestiar: JSON.parse(fs.readFileSync('content/bestiar.json','utf8')).creatures?.[0]?.name || ''
             };
 
             const routes = [
-              'home','combo','combat','toolkit','gangcyklopedie','postavy','calendar','kronika','stripky'
+              'home','combo','combat','toolkit','gangcyklopedie','postavy','calendar','kronika','stripky','bestiar'
             ];
 
             await page.goto('http://127.0.0.1:4173/#home', {waitUntil:'networkidle'});
@@ -269,7 +278,7 @@ jobs:
               groups.map(group => [...group.querySelectorAll('a')].map(a=>a.dataset.route)));
             const expectedNavGroups = [
               ['postavy','gangcyklopedie','kronika','stripky'],
-              ['combat','combo','toolkit','calendar']
+              ['bestiar','combat','combo','toolkit','calendar']
             ];
             if (JSON.stringify(navGroups) !== JSON.stringify(expectedNavGroups)) {
               throw new Error(`Navigation groups or order mismatch: ${JSON.stringify(navGroups)}`);
@@ -303,7 +312,7 @@ jobs:
             }
             console.log('Archived class pages not accessible through old hash routes.');
 
-            for (const route of ['gangcyklopedie','postavy','kronika','stripky']) {
+            for (const route of ['gangcyklopedie','postavy','kronika','stripky','bestiar']) {
               await page.evaluate(r => { location.hash = `#${r}`; }, route);
               await page.waitForTimeout(300);
 
@@ -449,4 +458,5 @@ jobs:
           node tools/check_updates.cjs
           node tools/check_gang_icons.cjs
           node tools/check_stripky.cjs
+          node tools/check_bestiar.cjs
           node tools/check_mobile.cjs

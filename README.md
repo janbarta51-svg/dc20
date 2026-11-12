@@ -34,6 +34,14 @@ Každá session je v CMS sbalená jako `Název — Den`.
 Každý střípek se spravuje v samostatném seznamu `content/stripky.json`, nezávisle na Kronice.
 V navigaci je mezi **Kronika** a **Combat**.
 
+### Bestiář
+- **Jméno potvory** — název rozklikávací položky
+- **Popis potvory** — rich-text/Markdown editor jako ve Střípcích
+- **Fotka potvory** — volitelný obrázek nahraný přes Pages CMS
+
+Záznamy jsou samostatně v `content/bestiar.json` a neovlivňují Kroniku ani Střípky.
+V navigaci je Bestiář první záložkou vpravo od loga, před **Combat**.
+
 ### Obrázky
 Nahraná loga gangů a obrázky postav se ukládají do `assets/uploads/`.
 
@@ -42,7 +50,7 @@ Nahraná loga gangů a obrázky postav se ukládají do `assets/uploads/`.
 2. Povol Pages CMS pro repository `dc20`.
 3. Vyber branch `main`.
 4. Pages CMS načte `.pages.yml` automaticky.
-5. V levém menu uvidíš **Gangy**, **Postavy**, **Kronika** a **Střípky z Kostelce**.
+5. V levém menu uvidíš **Gangy**, **Postavy**, **Kronika**, **Střípky z Kostelce** a **Bestiář**.
 
 Po uložení Pages CMS vytvoří commit do GitHubu. CMS JSON soubory web načítá network-first, takže online vždy preferuje nejnovější obsah a poslední úspěšná verze zůstává dostupná offline.
 

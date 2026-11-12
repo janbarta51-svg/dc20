@@ -35,6 +35,13 @@ STŘÍPKY Z KOSTELCE
 - Ulož změny. Střípky se zobrazí v samostatné záložce mezi Kronikou a Combat.
 - Zápisy ve Střípcích nijak nemění Kroniku.
 
+BESTIÁŘ
+- V sekci Bestiář přidej novou položku v seznamu Potvory.
+- Vyplň Jméno potvory a Popis potvory.
+- Do pole Fotka potvory můžeš nahrát obrázek (není povinný).
+- Potvory jsou samostatné rozklikávací záznamy, stejně jako kapitoly ve Střípcích.
+- Bestiář je první záložka vpravo od loga DC20, před Combat.
+
 TIP PRO DELŠÍ POPISY
 --------------------
 V editoru můžeš psát normálně jako ve Wordu.
@@ -49,7 +56,7 @@ Když používáš Source/Markdown mód, funguje například:
 - První tradice
 - Druhá tradice
 
-Znaky gangů (v Gangcyklopedii i v Postavách) a obrázky postav se automaticky ukládají do assets/uploads/.
+Znaky gangů (v Gangcyklopedii i v Postavách), obrázky postav a fotografie potvor se automaticky ukládají do assets/uploads/.
 Znak se nastavuje samostatně v každé z těchto dvou sekcí; mezi nimi se automaticky nekopíruje.
 Po uložení změn vytvoří Pages CMS commit do GitHubu a GitHub Pages nasadí novou verzi webu.
 
@@ -60,5 +67,5 @@ Běžná změna obsahu v Pages CMS nepotřebuje měnit version.json ani Service 
 Postup zůstává:
 Pages CMS -> Save -> commit do main -> GitHub Pages deploy -> aplikace při dalším online načtení vezme nový obsah.
 
-Gangy, Postavy, Kronika a Střípky z Kostelce používají network-first načítání. Když internet není dostupný,
+Gangy, Postavy, Kronika, Střípky z Kostelce a Bestiář používají network-first načítání. Když internet není dostupný,
 PWA zobrazí poslední uloženou verzi obsahu. Po návratu online se znovu načte aktuální JSON.

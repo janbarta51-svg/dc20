@@ -1,8 +1,9 @@
 (() => {
   // Pages CMS stores campaign content in wrapper objects:
-  // { gangs: [...] }, { groups: [...] }, { sessions: [...] }, { chapters: [...] }.
+  // { gangs: [...] }, { groups: [...] }, { sessions: [...] },
+  // { chapters: [...] }, { creatures: [...] }.
   // app.js expects plain arrays with its existing field names, so normalize
-  // all four CMS JSON responses before app.js reads them.
+  // all five CMS JSON responses before app.js reads them.
   const nativeFetch = window.fetch.bind(window);
 
   window.fetch = async (...args) => {
@@ -19,7 +20,8 @@
       const isCharacters = pathname.endsWith('/content/postavy.json');
       const isChronicle = pathname.endsWith('/content/kronika.json');
       const isFragments = pathname.endsWith('/content/stripky.json');
-      if (!isGangs && !isCharacters && !isChronicle && !isFragments) return response;
+      const isBestiary = pathname.endsWith('/content/bestiar.json');
+      if (!isGangs && !isCharacters && !isChronicle && !isFragments && !isBestiary) return response;
 
       const data = await response.clone().json();
       let normalized;
@@ -66,12 +68,20 @@
           date: s.date || s.day || '',
           body: s.body || s.chronicle || s.description || ''
         }));
-      } else {
+      } else if (isFragments) {
         const items = Array.isArray(data) ? data : (Array.isArray(data?.chapters) ? data.chapters : []);
         normalized = items.map(chapter => ({
           ...chapter,
           title: chapter.title || chapter.name || 'Kapitola',
           body: chapter.body || chapter.description || ''
+        }));
+      } else {
+        const items = Array.isArray(data) ? data : (Array.isArray(data?.creatures) ? data.creatures : []);
+        normalized = items.map(creature => ({
+          ...creature,
+          name: creature.name || creature.title || 'Bezejmenná potvora',
+          description: creature.description || creature.body || '',
+          image: creature.image || ''
         }));
       }
 
