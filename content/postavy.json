@@ -90,6 +90,11 @@
           "name": "Tamika",
           "description": "Dealerka a drobná zahradnice.  \n\n- Zdá se, že je hodně na klid a tak trochu ve svém světě.\n\n",
           "image": "/assets/uploads/tamika.jpg"
+        },
+        {
+          "name": "Kikín \"Špaček\" Uhor",
+          "description": "Postarší muž s intenzivním pohledem.  \nČlen vrchního šamanského kruhu zaměřený spíše na spiritualitu než peníze. Nepotkáte ho bez rozpáleného kuřiva.",
+          "image": "/assets/uploads/d88b3d7e-08df-44c0-9e42-df7c257f5a95.png"
         }
       ]
     },
