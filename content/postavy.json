@@ -83,6 +83,10 @@
         {
           "name": "León",
           "description": "Mladý, stylově oblečený člen Draků s knírem.  \nHrdý na svůj gang, společenský, soutěživý."
+        },
+        {
+          "name": "Soňa",
+          "description": "Mladá, malá extrovertní a agresivní členka Draků"
         }
       ]
     },
