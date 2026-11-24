@@ -87,7 +87,8 @@
         },
         {
           "name": "Soňa",
-          "description": "Mladá, malá extrovertní a agresivní členka Draků"
+          "description": "Mladá, malá, extrovertní a agresivní členka Draků",
+          "image": "/assets/uploads/sona.jpg"
         }
       ]
     },
